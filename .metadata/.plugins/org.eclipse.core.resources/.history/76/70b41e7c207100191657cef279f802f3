@@ -1,0 +1,539 @@
+package hr.fer.zemris.java.raytracer;
+
+import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import hr.fer.zemris.java.raytracer.model.GraphicalObject;
+import hr.fer.zemris.java.raytracer.model.IRayTracerAnimator;
+import hr.fer.zemris.java.raytracer.model.IRayTracerProducer;
+import hr.fer.zemris.java.raytracer.model.IRayTracerResultObserver;
+import hr.fer.zemris.java.raytracer.model.LightSource;
+import hr.fer.zemris.java.raytracer.model.Point3D;
+import hr.fer.zemris.java.raytracer.model.Ray;
+import hr.fer.zemris.java.raytracer.model.RayIntersection;
+import hr.fer.zemris.java.raytracer.model.Scene;
+import hr.fer.zemris.java.raytracer.viewer.RayTracerViewer;
+
+/**
+ * Program that renders an image of spheres using Ray-casting algorithm. It
+ * rotates around the spheres.
+ * 
+ * @author david
+ *
+ */
+public class RayCasterParallel2 {
+	/**
+	 * Method invoked when running the program. This method renders an image of
+	 * spheres.
+	 * 
+	 * @param args Arguments provided via command line. In this program they are not
+	 *             used.
+	 */
+	public static void main(String[] args) {
+		RayTracerViewer.show(getIRayTracerProducer(), getIRayTracerAnimator(), 30, 30);
+	}
+
+	/**
+	 * Returns IRayTracerAnimator.
+	 * 
+	 * @return IRayTracerAnimator.
+	 */
+	private static IRayTracerAnimator getIRayTracerAnimator() {
+		return new IRayTracerAnimator() {
+			/**
+			 * Time.
+			 */
+			long time;
+
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public void update(long deltaTime) {
+				time += deltaTime;
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public Point3D getViewUp() { // fixed in time
+				return new Point3D(0, 0, 10);
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public Point3D getView() { // fixed in time
+				return new Point3D(-2, 0, -0.5);
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public long getTargetTimeFrameDuration() {
+				return 150; // redraw scene each 150 milliseconds
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public Point3D getEye() { // changes in time
+				double t = (double) time / 10000 * 2 * Math.PI;
+				double t2 = (double) time / 5000 * 2 * Math.PI;
+				double x = 50 * Math.cos(t);
+				double y = 50 * Math.sin(t);
+				double z = 30 * Math.sin(t2);
+				return new Point3D(x, y, z);
+			}
+		};
+	}
+
+	/**
+	 * Return ray tracer producer.
+	 * 
+	 * @return Ray tracer producer.
+	 */
+	private static IRayTracerProducer getIRayTracerProducer() {
+
+		return new IRayTracerProducer() {
+
+			@Override
+			public void produce(Point3D eye, Point3D view, Point3D viewUp, double horizontal, double vertical,
+					int width, int height, long requestNo, IRayTracerResultObserver observer, AtomicBoolean cancel) {
+
+				System.out.println("Započinjem izračune...");
+
+				short[] red = new short[width * height];
+				short[] green = new short[width * height];
+				short[] blue = new short[width * height];
+
+				Point3D OG = getOGVector(view, eye);
+				// Point3D zAxis = new Point3D(-1, 0, 0);
+				Point3D yAxis = getYAxis(viewUp.normalize(), OG);
+				Point3D xAxis = getXAxis(OG, yAxis);
+
+				Point3D screenCorner = getScreenCorner(view, xAxis, yAxis, horizontal, vertical);
+				Scene scene = RayTracerViewer.createPredefinedScene2();
+
+				ForkJoinPool pool = new ForkJoinPool();
+				int offset = 0;
+				pool.invoke(new Worker(width, height, horizontal, vertical, screenCorner, eye, yAxis, xAxis, scene, red,
+						green, blue, offset, 0, height - 1));
+				pool.shutdown();
+
+				System.out.println("Izračuni gotovi...");
+				observer.acceptResult(red, green, blue, requestNo);
+				System.out.println("Dojava gotova...");
+			}
+		};
+	}
+
+	/**
+	 * Method returns OG vector. This vector connects view point and eye position.
+	 * 
+	 * @param G View point.
+	 * @param O Eye position.
+	 * @return OG vector.
+	 */
+	private static Point3D getOGVector(Point3D G, Point3D O) {
+		Point3D OG = G.sub(O).normalize();
+		return OG;
+	}
+
+	/**
+	 * Returns coordinate of the y-axis.
+	 * 
+	 * @param VUV Normalized view up vector.
+	 * @param OG  Vector that connects view point and eye position.
+	 * @return Coordinate of the y-axis.
+	 */
+	private static Point3D getYAxis(Point3D VUV, Point3D OG) {
+		double scalar = OG.scalarProduct(VUV);
+		Point3D yAxis = VUV.sub(OG.scalarMultiply(scalar));
+
+		return yAxis;
+	}
+
+	/**
+	 * Returns coordinate of the x-axis.
+	 * 
+	 * @param OG     Vector that connects view point and eye position.
+	 * @param yAxsis y-axis.
+	 * @return Coordinate of the x-axis.
+	 */
+	private static Point3D getXAxis(Point3D OG, Point3D yAxsis) {
+		return OG.vectorProduct(yAxsis).normalize();
+	}
+
+	/**
+	 * Returns coordinate of the screen corner.
+	 * 
+	 * @param G          View point.
+	 * @param xAxis      x-axis.
+	 * @param yAxis      y-axis.
+	 * @param horizontal Horizontal.
+	 * @param vertical   Vertical.
+	 * @return Coordinate of the screen corner.
+	 */
+	private static Point3D getScreenCorner(Point3D G, Point3D xAxis, Point3D yAxis, double horizontal,
+			double vertical) {
+		Point3D scaledXAxis = xAxis.scalarMultiply(horizontal / 2);
+		Point3D scalexYAxis = yAxis.scalarMultiply(vertical / 2);
+		Point3D corner = G.sub(scaledXAxis).add(scalexYAxis);
+
+		return corner;
+	}
+
+	/**
+	 * Returns coordinate of current pixel.
+	 * 
+	 * @param corner     Screen corner.
+	 * @param x          X coordinate of the pixel.
+	 * @param width      Width of the window.
+	 * @param horizontal Horizontal.
+	 * @param xAxis      x-axis.
+	 * @param y          y-axis.
+	 * @param height     Height of the window.
+	 * @param vertical   Vertical.
+	 * @param yAxis      y-axis.
+	 * @return Coordinate of current pixel.
+	 */
+	private static Point3D getPointXY(Point3D corner, double x, double width, double horizontal, Point3D xAxis,
+			double y, double height, double vertical, Point3D yAxis) {
+		double scale1 = x / (width - 1) * horizontal;
+		Point3D scaledXAxis = xAxis.scalarMultiply(scale1);
+
+		double scale2 = y / (height - 1) * vertical;
+		Point3D scaledYAxis = yAxis.scalarMultiply(scale2);
+
+		return corner.add(scaledXAxis).sub(scaledYAxis);
+	}
+
+	/**
+	 * 
+	 * @param scene Instance of class that represents scene. This object hold
+	 *              information about the Graphical objects (spheres) presented in
+	 *              scene.
+	 * @param ray   Light ray.
+	 * @param rgb   Array representing rgb color. Index zero represents red color.
+	 *              Index 1 represents green color. Index 2 represents blue color.
+	 * @param eye   Point of view.
+	 */
+	protected static void tracer(Scene scene, Ray ray, short[] rgb, Point3D eye) {
+		rgb[0] = 0;
+		rgb[1] = 0;
+		rgb[2] = 0;
+		RayIntersection closest = findClosestIntersection(scene, ray);
+
+		if (closest == null) {
+			return;
+		}
+
+		determineColorFor(closest, scene.getLights(), scene, rgb, eye);
+	}
+
+	/**
+	 * Method used to determine the color one pixel based on LightSources and
+	 * intersections of rays and spheres.
+	 * 
+	 * @param S       Instance of class that represents intersection between sphere
+	 *                and ray. It contains information about the point of
+	 *                intersection.
+	 * @param sources List of all light sources.
+	 * @param scene   Instance of class that represents scene. This object hold
+	 *                information about the Graphical objects (spheres) presented in
+	 *                scene.
+	 * @param rgb     Array representing rgb color. Index zero represents red color.
+	 *                Index 1 represents green color. Index 2 represents blue color.
+	 * @param eye     Point of view.
+	 */
+	private static void determineColorFor(RayIntersection S, List<LightSource> sources, Scene scene, short[] rgb,
+			Point3D eye) {
+		rgb[0] = 15;
+		rgb[1] = 15;
+		rgb[2] = 15;
+
+		for (LightSource source : sources) {
+			Ray newRay = Ray.fromPoints(source.getPoint(), S.getPoint());
+			RayIntersection newS = findClosestIntersection(scene, newRay);
+
+			double distance1 = S.getPoint().sub(source.getPoint()).norm();
+
+			if (newS != null) {
+				double distance2 = newS.getPoint().sub(source.getPoint()).norm();
+
+				if (distance2 < distance1) {
+					continue;
+				}
+			}
+
+			updateRgb(source, S, eye, rgb);
+		}
+	}
+
+	/**
+	 * Method used to update rgb array based on intersections.
+	 * 
+	 * @param source Light source.
+	 * @param S      Instance of class that represents intersection between sphere
+	 *               and ray. It contains information about the point of
+	 *               intersection.
+	 * @param eye    Point of view.
+	 * @param rgb    Array representing rgb color. Index zero represents red color.
+	 *               Index 1 represents green color. Index 2 represents blue color.
+	 */
+	private static void updateRgb(LightSource source, RayIntersection S, Point3D eye, short[] rgb) {
+		rgb[0] += getDiffuseComponent(source.getR(), S.getKdr(), S.getNormal(), S.getPoint(), source.getPoint())
+				+ getReflectiveComponent(source.getR(), S.getKrr(), S.getKrn(), source.getPoint(), S.getPoint(),
+						S.getNormal(), eye);
+		rgb[1] += getDiffuseComponent(source.getG(), S.getKdg(), S.getNormal(), S.getPoint(), source.getPoint())
+				+ getReflectiveComponent(source.getG(), S.getKrg(), S.getKrn(), source.getPoint(), S.getPoint(),
+						S.getNormal(), eye);
+		rgb[2] += getDiffuseComponent(source.getB(), S.getKdb(), S.getNormal(), S.getPoint(), source.getPoint())
+				+ getReflectiveComponent(source.getB(), S.getKrb(), S.getKrn(), source.getPoint(), S.getPoint(),
+						S.getNormal(), eye);
+	}
+
+	/**
+	 * Method that returns diffuse component of color. It is calculated by formula:
+	 * I * K * cos(angle), where I is intensity, K is diffuse coefficient and angle
+	 * is angle between normal to the sphere in intersection point and vector that
+	 * connects source of the light and observed point. Observed point in this
+	 * example is intersection point.
+	 * 
+	 * @param intensity      Intensity of the color.
+	 * @param diffuseCoeff   Diffuse coefficient.
+	 * @param normal         Normal to the sphere in intersection point.
+	 * @param observingPoint Observing point. In this example this is intersection
+	 *                       point.
+	 * @param source         Light source.
+	 * @return Diffuse component.
+	 */
+	private static double getDiffuseComponent(double intensity, double diffuseCoeff, Point3D normal,
+			Point3D observingPoint, Point3D source) {
+		Point3D fromObservingPointToSource = new Point3D(source.x - observingPoint.x, source.y - observingPoint.y,
+				source.z - observingPoint.z);
+		double cosAngle = normal.scalarProduct(fromObservingPointToSource.normalize());
+
+		if (intensity * diffuseCoeff * cosAngle < 0) {
+			return 0;
+		}
+
+		return intensity * diffuseCoeff * cosAngle;
+	}
+
+	/**
+	 * Method that returns diffuse component of color. It is calculated by formula:
+	 * I * K * cos(angle) ^ n, where I is intensity, K is diffuse coefficient and
+	 * angle is angle between reflected ray and ray that goes to observer. Reflected
+	 * ray can easily be calculate when normal and original rays are known. It can
+	 * be calculate by the formula: l - 2 * (l*n)*n, where l is original ray, n is
+	 * normal vector and l*n is scalar product.
+	 * 
+	 * @param intensity       Intensity of the color.
+	 * @param reflectionCoeff Reflection coefficient.
+	 * @param n               Shininess factor.
+	 * @param source          Light source.
+	 * @param intersection    Intersection point.
+	 * @param normal          Normal to the sphere in intersection point.
+	 * @param eye             Point of view.
+	 * @return
+	 */
+	private static double getReflectiveComponent(double intensity, double reflectionCoeff, double n, Point3D source,
+			Point3D intersection, Point3D normal, Point3D eye) {
+
+		Point3D l = new Point3D(source.x - intersection.x, source.y - intersection.y, source.z - intersection.z);
+		double scalarProduct = l.scalarProduct(normal);
+		Point3D r = l.sub(normal.scalarMultiply(2 * scalarProduct));
+		Point3D v = new Point3D(eye.x - intersection.x, eye.y - intersection.y, eye.z - intersection.z);
+
+		double cosAngle = r.normalize().scalarProduct(v.normalize());
+
+		if (intensity * reflectionCoeff * Math.pow(cosAngle, n) < 0) {
+			return 0;
+		}
+
+		return intensity * reflectionCoeff * Math.pow(cosAngle, n);
+	}
+
+	/**
+	 * Method finds closest intersection between sphere and ray. If there are no
+	 * intersections, or intersections are behind the observer this method will
+	 * return null.
+	 * 
+	 * @param scene Instance of class that represents scene. This object hold
+	 *              information about the Graphical objects (spheres) presented in
+	 *              scene.
+	 * @param ray   Ray.
+	 * @return Closest intersection between sphere and ray. If intersection does not
+	 *         exists null will be returned.
+	 */
+	private static RayIntersection findClosestIntersection(Scene scene, Ray ray) {
+		List<GraphicalObject> graphicalObjects = scene.getObjects();
+
+		double distance = Double.MAX_VALUE;
+		RayIntersection closestRayIntersection = null;
+
+		for (GraphicalObject object : graphicalObjects) {
+			RayIntersection intersection = object.findClosestRayIntersection(ray);
+
+			if (intersection == null) {
+				continue;
+			}
+
+			double d = intersection.getDistance();
+
+			if (d < distance) {
+				distance = d;
+				closestRayIntersection = intersection;
+			}
+		}
+
+		return closestRayIntersection;
+	}
+
+	/**
+	 * Represents one task.
+	 * 
+	 * @author david
+	 *
+	 */
+	public static class Worker extends RecursiveAction {
+		/**
+		 * Default serial version uid.
+		 */
+		private static final long serialVersionUID = 1L;
+		/**
+		 * Width and height of the window.
+		 */
+		private int width;
+		private int height;
+
+		/**
+		 * Horizontal and vertical.
+		 */
+		private double horizontal;
+		private double vertical;
+
+		/**
+		 * Corner of the screen.
+		 */
+		private Point3D screenCorner;
+
+		/**
+		 * Point of view.
+		 */
+		private Point3D eye;
+
+		/**
+		 * Y-axis and x-axis coordinates.
+		 */
+		private Point3D yAxis;
+		private Point3D xAxis;
+
+		/**
+		 * Instance of class that represents scene. This object hold information about
+		 * the Graphical objects (spheres) presented in scene.
+		 */
+		private Scene scene;
+
+		/**
+		 * Red, green and blue colors.
+		 */
+		private short[] red;
+		private short[] green;
+		private short[] blue;
+
+		/**
+		 * Current index in red, green and blue arrays.
+		 */
+		private int offset;
+
+		/**
+		 * Y range.
+		 */
+		private int yMin;
+		private int yMax;
+
+		/**
+		 * Constructor to initialize private field.
+		 * @param width Width of the window. 
+		 * @param height Height of the window. 
+		 * @param horizontal Horizontal. 
+		 * @param vertical Vertical. 
+		 * @param screenCorner The corner of the screen. 
+		 * @param eye Point of view.
+		 * @param yAxis
+		 * @param xAxis
+		 * @param scene
+		 * @param red
+		 * @param green
+		 * @param blue
+		 * @param offset
+		 * @param yMin
+		 * @param yMax
+		 */
+		public Worker(int width, int height, double horizontal, double vertical, Point3D screenCorner, Point3D eye,
+				Point3D yAxis, Point3D xAxis, Scene scene, short[] red, short[] green, short[] blue, int offset,
+				int yMin, int yMax) {
+			this.width = width;
+			this.height = height;
+			this.horizontal = horizontal;
+			this.vertical = vertical;
+			this.screenCorner = screenCorner;
+			this.eye = eye;
+			this.yAxis = yAxis;
+			this.xAxis = xAxis;
+			this.scene = scene;
+			this.offset = offset;
+			this.yMin = yMin;
+			this.yMax = yMax;
+			this.red = red;
+			this.green = green;
+			this.blue = blue;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected void compute() {
+			if (yMax - yMin + 1 <= 16) {
+				computeDirect();
+				return;
+			}
+
+			int newOffset = (yMin + (yMax - yMin) / 2 + 1) * width;
+
+			invokeAll(
+					new Worker(width, height, horizontal, vertical, screenCorner, eye, yAxis, xAxis, scene, red, green,
+							blue, offset, yMin, yMin + (yMax - yMin) / 2),
+					new Worker(width, height, horizontal, vertical, screenCorner, eye, yAxis, xAxis, scene, red, green,
+							blue, newOffset, yMin + (yMax - yMin) / 2 + 1, yMax));
+		}
+
+		public void computeDirect() {
+			short[] rgb = new short[3];
+			for (int y = yMin; y <= yMax; y++) {
+				for (int x = 0; x < width; x++) {
+					Point3D screenPoint = getPointXY(screenCorner, x, width, horizontal, xAxis, y, height, vertical,
+							yAxis);
+					Ray ray = Ray.fromPoints(eye, screenPoint);
+
+					tracer(scene, ray, rgb, eye);
+					red[offset] = rgb[0] > 255 ? 255 : rgb[0];
+					green[offset] = rgb[1] > 255 ? 255 : rgb[1];
+					blue[offset] = rgb[2] > 255 ? 255 : rgb[2];
+					offset++;
+				}
+			}
+		}
+
+	}
+}
