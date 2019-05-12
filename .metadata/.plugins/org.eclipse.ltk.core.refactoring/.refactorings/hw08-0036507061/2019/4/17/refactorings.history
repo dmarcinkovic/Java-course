@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename type &apos;hr.fer.zemris.java.hw06.shell.commands.DopdShellCommand&apos; to &apos;DropdShellCommand&apos;&#x0A;- Original project: &apos;hw08-0036507061&apos;&#x0A;- Original element: &apos;hr.fer.zemris.java.hw06.shell.commands.DopdShellCommand&apos;&#x0A;- Renamed element: &apos;hr.fer.zemris.java.hw06.shell.commands.DropdShellCommand&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;DopdShellCommand&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src\/main\/java&lt;hr.fer.zemris.java.hw06.shell.commands{DopdShellCommand.java[DopdShellCommand" matchStrategy="1" name="DropdShellCommand" qualified="false" references="true" similarDeclarations="false" stamp="1556464237565" textual="false" version="1.0"/>
-</session>

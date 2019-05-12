@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Move element &apos;RayCasterParallel.java&apos; to &apos;hw09-0036507061/src/main/java/hr.fer.zemris.java.raytracer&apos;&#x0A;- Original project: &apos;hw09-0036507061&apos;&#x0A;- Destination element: &apos;hw09-0036507061/src/main/java/hr.fer.zemris.java.raytracer&apos;&#x0A;- Original element: &apos;hr.fer.zemris.math.demo.RayCasterParallel.java&apos;&#x0A;- Update references to refactored element" description="Move compilation unit" destination="/src\/main\/java&lt;hr.fer.zemris.java.raytracer" element1="/src\/main\/java&lt;hr.fer.zemris.math.demo{RayCasterParallel.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" patterns="*" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1557259778666" units="1" version="1.0"/>
-</session>

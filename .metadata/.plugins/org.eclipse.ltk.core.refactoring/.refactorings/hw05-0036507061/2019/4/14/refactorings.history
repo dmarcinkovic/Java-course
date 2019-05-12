@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring accessors="true" comment="Delete element from project &apos;hw05-0036507061&apos;&#x0A;- Original project: &apos;hw05-0036507061&apos;&#x0A;- Original element: &apos;hr.fer.zemris.java.hw05.db.IFieldValueGetter.java&apos;" description="Delete element" element1="/src\/main\/java&lt;hr.fer.zemris.java.hw05.db{IFieldValueGetter.java" elements="1" flags="589830" id="org.eclipse.jdt.ui.delete" resources="0" stamp="1554680452485" subPackages="false" version="1.0"/>
-</session>
