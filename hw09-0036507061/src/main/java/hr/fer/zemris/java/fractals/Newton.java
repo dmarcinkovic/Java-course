@@ -321,6 +321,11 @@ public class Newton {
 		private int offset;
 
 		/**
+		 * Boolean to cancel if could not draw an image.
+		 */
+		private AtomicBoolean cancel;
+		
+		/**
 		 * Initialize private fields.
 		 * 
 		 * @param reMin      Minimum real part.
@@ -335,9 +340,10 @@ public class Newton {
 		 * @param data       Data.
 		 * @param m          Max number of iteration.
 		 * @param offset     Offset of piece of image.
+		 * @param cancel     Boolean to cancel if could not draw image.
 		 */
 		public Worker(double reMin, double reMax, double imMin, double imMax, int width, int height, int minY, int maxY,
-				ComplexRootedPolynomial polynomial, short[] data, int m, int offset) {
+				ComplexRootedPolynomial polynomial, short[] data, int m, int offset, AtomicBoolean cancel) {
 			this.reMin = reMin;
 			this.reMax = reMax;
 			this.imMin = imMin;
@@ -362,7 +368,7 @@ public class Newton {
 
 			double rootTreshold = 2e-3;
 			double convergenceTreshold = 1e-3;
-			for (int y = minY; y <= maxY; y++) {
+			for (int y = minY; y <= maxY && !cancel.get(); y++) {
 				for (int x = 0; x < width; x++) {
 					double module = 0;
 
@@ -438,7 +444,8 @@ public class Newton {
 			int numberOfYByTape = height / numberOfTapes;
 
 			int numberOfCores = Runtime.getRuntime().availableProcessors();
-			ExecutorService pool = Executors.newFixedThreadPool(numberOfCores, new DaemonicThreadFactory());
+			ExecutorService pool = Executors.newFixedThreadPool(numberOfTapes * numberOfCores,
+					new DaemonicThreadFactory());
 			List<Future<Void>> results = new ArrayList<>();
 
 			for (int i = 0; i < numberOfTapes; i++) {
@@ -454,7 +461,7 @@ public class Newton {
 
 				int offset = yMin * width;
 				Worker task = new Worker(reMin, reMax, imMin, imMax, width, height, yMin, yMax, polynomial, data, m,
-						offset);
+						offset, cancel);
 				results.add(pool.submit(task));
 			}
 

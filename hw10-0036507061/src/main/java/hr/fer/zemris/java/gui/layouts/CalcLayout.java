@@ -222,7 +222,12 @@ public class CalcLayout implements LayoutManager2 {
 	 * {@inheritDoc}
 	 * 
 	 * @throws UnsupportedOperationException if constraints is not RCPosition.
-	 * @throws CalcLayoutException
+	 * @throws CalcLayoutException           If row and column are not in required
+	 *                                       range. I.e. row must be less than or
+	 *                                       equal to 5, column must be less than or
+	 *                                       equal to 7 and Components with row
+	 *                                       equal to one and column equal to 2, 3,
+	 *                                       4, 5 should not be used.
 	 * @throws NullPointerException          if comp is null.
 	 */
 	@Override
@@ -230,7 +235,6 @@ public class CalcLayout implements LayoutManager2 {
 		if (!(constraints instanceof RCPosition) && !(constraints instanceof String)) {
 			throw new UnsupportedOperationException();
 		}
-
 		Objects.requireNonNull(comp);
 
 		RCPosition position = null;
