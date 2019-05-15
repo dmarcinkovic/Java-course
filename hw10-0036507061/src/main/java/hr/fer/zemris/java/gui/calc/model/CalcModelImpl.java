@@ -136,6 +136,9 @@ public class CalcModelImpl implements CalcModel {
 		}
 
 		if (isNegative) {
+			if (digits.isEmpty()) {
+				digits = "0";
+			}
 			digits = digits.substring(1);
 			isNegative = false;
 		} else {
@@ -243,6 +246,8 @@ public class CalcModelImpl implements CalcModel {
 	@Override
 	public void setActiveOperand(double activeOperand) {
 		this.activeOperand = activeOperand;
+		digits = "";
+		value = 0;
 	}
 
 	/**
@@ -288,7 +293,13 @@ public class CalcModelImpl implements CalcModel {
 		}
 		return getCorrectStringValue();
 	}
-	
+
+	/**
+	 * Returns correct String value of number presented in calculator. For example,
+	 * if number does not fit in double, its String value must be +Infinity.
+	 * 
+	 * @return Correct String value of number presented in calculator.
+	 */
 	private String getCorrectStringValue() {
 		if (value == Double.POSITIVE_INFINITY) {
 			return "Infinity";
@@ -300,6 +311,11 @@ public class CalcModelImpl implements CalcModel {
 		return digits;
 	}
 
+	/**
+	 * Prints error message to calculator display.
+	 * 
+	 * @param message Error message.
+	 */
 	public void printErrorMessage(String message) {
 		digits = message;
 		informListeners();

@@ -12,18 +12,55 @@ import hr.fer.zemris.java.gui.calc.model.CalcModelImpl;
 import hr.fer.zemris.java.gui.calc.model.MyButton;
 import hr.fer.zemris.java.gui.layouts.RCPosition;
 
+/**
+ * Represents all function available in calculator. Those are: "1/x" , "sin",
+ * "cos" , "log", "ln", "tan", "ctg", "x^n", "arcsin", "arccos", "arctan",
+ * "arcctg", "e^x", "10^x", x^(1/n).
+ * 
+ * @author david
+ *
+ */
 public class Functions implements ICalculator {
+	/**
+	 * Calculator model. Used to communicate with calculator display.
+	 */
 	private CalcModelImpl model;
 
+	/**
+	 * Container in which function buttons are added.
+	 */
 	private Container container;
+
+	/**
+	 * List of all buttons.
+	 */
 	private List<JButton> buttons;
+
+	/**
+	 * Names of functions.
+	 */
 	private List<String> text;
+
+	/**
+	 * Names of inverse functions.
+	 */
 	private List<String> inverseText;
-	
+
+	/**
+	 * Boolean flag that is equal to true if we have to display inverse functions.
+	 */
 	private boolean inverse;
 
+	/**
+	 * Constructor to initialize model and container in which function buttons are
+	 * added.
+	 * 
+	 * @param model     Calculator model. Used to communicate with calculator
+	 *                  display.
+	 * @param container Container in which function buttons are added.
+	 */
 	public Functions(CalcModel model, Container container) {
-		this.model = (CalcModelImpl)model;
+		this.model = (CalcModelImpl) model;
 		this.container = container;
 
 		buttons = new ArrayList<>();
@@ -33,6 +70,9 @@ public class Functions implements ICalculator {
 		inverseText = new ArrayList<>(Arrays.asList("1/x", "arcsin", "10^x", "arccos", "e^x", "arctan", "arcctg"));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void addButtons() {
 		addButton("1/x", 2, 1);
@@ -44,30 +84,50 @@ public class Functions implements ICalculator {
 		addButton("ctg", 5, 2);
 	}
 
+	/**
+	 * Swap function from normal to inverse and vice versa.
+	 */
 	public void swap() {
 		toggle();
-		
+
 		if (inverse) {
 			setText(inverseText);
-		}else {
+		} else {
 			setText(text);
 		}
 	}
-	
+
+	/**
+	 * Set text to all buttons. Used in swapping between normal and inverse function
+	 * and vice versa.
+	 * 
+	 * @param text List of new names of buttons.
+	 */
 	private void setText(List<String> text) {
-		for (int i = 0; i<buttons.size(); i++) {
+		for (int i = 0; i < buttons.size(); i++) {
 			buttons.get(i).setText(text.get(i));
 		}
 	}
-	
+
+	/**
+	 * Toggle inverse flag. If it was false now it will be true and if it was true
+	 * now it will be false.
+	 */
 	private void toggle() {
 		if (inverse) {
 			inverse = false;
-		}else {
+		} else {
 			inverse = true;
 		}
 	}
-	
+
+	/**
+	 * Add button with specified text to layout to specified row and column.
+	 * 
+	 * @param text Text that will appear on button.
+	 * @param row  Row in which button is placed within Container.
+	 * @param col  Column in which button is placed within Container.
+	 */
 	private void addButton(String text, int row, int col) {
 		RCPosition constraint = new RCPosition(row, col);
 
@@ -85,6 +145,13 @@ public class Functions implements ICalculator {
 		});
 	}
 
+	/**
+	 * Perform specified operation with given name as method parameter. Available
+	 * functions are: "1/x" , "sin", "cos" , "log", "ln", "tan", "ctg", "x^n",
+	 * "arcsin", "arccos", "arctan", "arcctg", "e^x", "10^x", x^(1/n).
+	 * 
+	 * @param name Name of specified function.
+	 */
 	private void doOperation(String name) {
 		double number = model.getValue();
 

@@ -16,6 +16,14 @@ import hr.fer.zemris.java.gui.calc.model.MyLabel;
 import hr.fer.zemris.java.gui.layouts.CalcLayout;
 import hr.fer.zemris.java.gui.layouts.RCPosition;
 
+/**
+ * Basic calculator with functions : "1/x" , "sin", "cos" , "log", "ln", "tan",
+ * "ctg", "x^n", "arcsin", "arccos", "arctan", "arcctg", "e^x", "10^x", x^(1/n)
+ * and operations : push , pop, +, -, / and *.
+ * 
+ * @author david
+ *
+ */
 public class Calculator extends JFrame {
 
 	/**
@@ -51,6 +59,15 @@ public class Calculator extends JFrame {
 		addButtons(cp, model);
 	}
 
+	/**
+	 * Add buttons with number and functions and operators. Available functions are:
+	 * "1/x" , "sin", "cos" , "log", "ln", "tan", "ctg", "x^n", "arcsin", "arccos",
+	 * "arctan", "arcctg", "e^x", "10^x", x^(1/n). Also it adds all operation
+	 * buttons. Available operations are : +, -, /, *.
+	 * 
+	 * @param cp    Content pain in which buttons are added.
+	 * @param model Calculator model.
+	 */
 	private void addButtons(Container cp, CalcModel model) {
 		new Numbers(model, cp).addButtons();
 
