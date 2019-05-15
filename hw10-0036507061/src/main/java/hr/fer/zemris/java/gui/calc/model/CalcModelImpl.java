@@ -102,10 +102,18 @@ public class CalcModelImpl implements CalcModel {
 	 */
 	@Override
 	public void clear() {
+		clearWithoutInforming();
+		informListeners();
+	}
+
+	/**
+	 * Set value equal to 0 without informing listener about that.
+	 */
+	public void clearWithoutInforming() {
 		isEditable = true;
 		value = 0;
 		digits = "";
-		informListeners();
+		isNegative = false;
 	}
 
 	/**
@@ -131,9 +139,7 @@ public class CalcModelImpl implements CalcModel {
 			digits = digits.substring(1);
 			isNegative = false;
 		} else {
-			if (digits.isEmpty()) {
-				digits = "-0";
-			} else {
+			if (!digits.isEmpty()) {
 				digits = "-" + digits;
 			}
 			isNegative = true;
@@ -148,7 +154,8 @@ public class CalcModelImpl implements CalcModel {
 	 */
 	@Override
 	public void insertDecimalPoint() throws CalculatorInputException {
-		if (!isEditable || digits.contains(".") || !digits.matches("\\d+")) {
+		if (!isEditable || digits.contains(".") || !digits.matches("-?\\d+\\.?\\d*") || digits.trim().isEmpty()
+				|| digits.equals("-")) {
 			throw new CalculatorInputException();
 		}
 		digits += ".";
@@ -164,18 +171,18 @@ public class CalcModelImpl implements CalcModel {
 		} else if (digit < 0 || digit > 9) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		try {
 			value = Double.parseDouble(digits + String.valueOf(digit));
-			
+
 			if (value > Double.MAX_VALUE) {
 				throw new CalculatorInputException();
 			}
-			
+
 			digits += String.valueOf(digit);
-			
-			digits = removeLeadingZeros();
-			
+
+			removeLeadingZeros();
+
 			informListeners();
 		} catch (NumberFormatException e) {
 			throw new CalculatorInputException();
@@ -185,22 +192,30 @@ public class CalcModelImpl implements CalcModel {
 	/**
 	 * Method that removes reading zeros from String representation of number.
 	 * 
-	 * @return String without leading zeros.
 	 */
-	private String removeLeadingZeros() {
+	private void removeLeadingZeros() {
 		int index = 0;
 
+		if (digits.startsWith("-")) {
+			index++;
+		}
+
 		while (index < digits.length() && digits.charAt(index) == '0' && digits.charAt(index) != '.') {
-			if (index + 1 < digits.length() && digits.charAt(index+1) == '.') {
+			if (index + 1 < digits.length() && digits.charAt(index + 1) == '.') {
 				break;
-			}else if (index + 1 == digits.length()) {
+			} else if (index + 1 == digits.length()) {
 				break;
 			}
 			index++;
 		}
 
-		digits = digits.substring(index);
-		return digits;
+		if (index < digits.length()) {
+			digits = digits.substring(index);
+		}
+
+		if (isNegative) {
+			digits = "-" + digits;
+		}
 	}
 
 	/**
@@ -273,7 +288,7 @@ public class CalcModelImpl implements CalcModel {
 		}
 		return getCorrectStringValue();
 	}
-
+	
 	private String getCorrectStringValue() {
 		if (value == Double.POSITIVE_INFINITY) {
 			return "Infinity";
@@ -285,4 +300,8 @@ public class CalcModelImpl implements CalcModel {
 		return digits;
 	}
 
+	public void printErrorMessage(String message) {
+		digits = message;
+		informListeners();
+	}
 }

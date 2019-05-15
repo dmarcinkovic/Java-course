@@ -68,7 +68,6 @@ public class CalcModelTest {
 	@Test
 	public void pointWhenNoNumberAndNegativeSignThrows() {
 		model.swapSign();
-
 		assertThrows(CalculatorInputException.class, () -> {
 			model.insertDecimalPoint();
 		});

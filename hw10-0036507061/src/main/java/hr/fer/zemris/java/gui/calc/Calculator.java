@@ -3,6 +3,7 @@ package hr.fer.zemris.java.gui.calc;
 import java.awt.Container;
 import java.lang.reflect.InvocationTargetException;
 
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -28,8 +29,8 @@ public class Calculator extends JFrame {
 	public Calculator() {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle("Java Calculator v1.0");
+		setSize(600, 300);
 		initGUI();
-		setSize(500, 500);
 	}
 
 	/**
@@ -47,10 +48,30 @@ public class Calculator extends JFrame {
 
 		cp.add(label, new RCPosition(1, 1));
 
-		Numbers numbers = new Numbers(model, cp);
-		numbers.addNumbers();
+		addButtons(cp, model);
 	}
 
+	private void addButtons(Container cp, CalcModel model) {
+		new Numbers(model, cp).addButtons();
+
+		Functions functions = new Functions(model, cp);
+		functions.addButtons();
+
+		Operators operators = new Operators(model, cp);
+
+		operators.addButtons();
+
+		JCheckBox checkBox = new JCheckBox("Inv");
+
+		cp.add(checkBox, new RCPosition(5, 7));
+
+		checkBox.addActionListener(e -> {
+			functions.swap();
+			operators.swap();
+		});
+
+		new Operations(model, cp).addButtons();
+	}
 
 	/**
 	 * Method invoked when running the program. This method creates new window in
