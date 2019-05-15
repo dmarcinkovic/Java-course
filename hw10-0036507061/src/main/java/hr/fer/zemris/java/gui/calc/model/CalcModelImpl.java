@@ -164,7 +164,7 @@ public class CalcModelImpl implements CalcModel {
 		} else if (digit < 0 || digit > 9) {
 			throw new IllegalArgumentException();
 		}
-
+		
 		try {
 			value = Double.parseDouble(digits + String.valueOf(digit));
 			
@@ -173,12 +173,13 @@ public class CalcModelImpl implements CalcModel {
 			}
 			
 			digits += String.valueOf(digit);
+			
+			digits = removeLeadingZeros();
+			
 			informListeners();
 		} catch (NumberFormatException e) {
 			throw new CalculatorInputException();
 		}
-
-		digits = removeLeadingZeros();
 	}
 
 	/**

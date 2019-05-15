@@ -20,7 +20,6 @@ public class MyButton extends JButton{
 		
 		setOpaque(true);
 		setBackground(new Color(220, 220, 220));
-		setFont(getFont().deriveFont(30f));
 	}
 	
 }
