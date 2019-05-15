@@ -40,8 +40,9 @@ public class DemoFrame1 extends JFrame {
 	 * public DemoFrame1() {
 	 * setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE); initGUI();
 	 * pack(); }
+	 * 
 	 */
-
+	
 	/**
 	 * Method to initialize gui components. This method is used to add components to
 	 * this layout.

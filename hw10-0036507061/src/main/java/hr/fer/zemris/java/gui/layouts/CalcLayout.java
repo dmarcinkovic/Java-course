@@ -91,7 +91,9 @@ public class CalcLayout implements LayoutManager2 {
 	 */
 	@Override
 	public void removeLayoutComponent(Component comp) {
+		RCPosition postion = map.get(comp);
 		map.remove(comp);
+		map2.remove(postion);
 	}
 
 	/**
@@ -182,16 +184,20 @@ public class CalcLayout implements LayoutManager2 {
 			int row = map.get(components[i]).getRow();
 			int col = map.get(components[i]).getCol();
 
-			double h = (double) maxHeight / ROWS;
-			double w = (double) maxWidth / COLS;
+			int[] h = getH(maxHeight);
+			int[] w = getW(maxWidth);
 
 			int x = getX(w, col);
 			int y = getY(h, row);
 
 			if (row == 1 && col == 1) {
-				components[i].setBounds(x, y, (int) (5 * w + 4 * gap), (int) h);
+				components[i].setBounds(x, y, w[4] + 4 * gap, h[0]);
+			} else if (row == 1) {
+				components[i].setBounds(x, y, w[col - 1] - w[col - 2], h[0]);
+			} else if (col == 1) {
+				components[i].setBounds(x, y, w[0], h[row - 1] - h[row - 2]);
 			} else {
-				components[i].setBounds(x, y, (int) w, (int) h);
+				components[i].setBounds(x, y, w[col - 1] - w[col - 2], h[row - 1] - h[row - 2]);
 			}
 		}
 	}
@@ -203,8 +209,12 @@ public class CalcLayout implements LayoutManager2 {
 	 * @param row Row in which component will be placed.
 	 * @return Y coordinate of left up corner of component.
 	 */
-	private int getY(double h, int row) {
-		return (int) ((row - 1) * h + (row - 1) * gap);
+	private int getY(int[] h, int row) {
+		if (row == 1) {
+			return 0;
+		}
+
+		return h[row - 2] + (row - 1) * gap;
 	}
 
 	/**
@@ -214,8 +224,92 @@ public class CalcLayout implements LayoutManager2 {
 	 * @param col Column in which component will be placed.
 	 * @return X coordinate of left up corner of component.
 	 */
-	private int getX(double w, int col) {
-		return (int) ((col - 1) * w + (col - 1) * gap);
+	private int getX(int[] w, int col) {
+		if (col == 1) {
+			return 0;
+		}
+		return w[col - 2] + (col - 1) * gap;
+	}
+
+	/**
+	 * Returns an array that contains height for every row.
+	 * 
+	 * @param maxHeight Height of the container without insets. This is the height
+	 *                  of the available space of container.
+	 * @return An array that contains height for every row.
+	 */
+	private int[] getH(int maxHeight) {
+		int reminder = maxHeight % ROWS;
+		int h = maxHeight / ROWS;
+
+		int[] array = new int[ROWS];
+		Arrays.fill(array, h);
+
+		switch (reminder) {
+		case 3:
+			array[0]++;
+			array[4]++;
+		case 1:
+			array[2]++;
+			break;
+		case 4:
+			array[0]++;
+			array[4]++;
+		case 2:
+			array[1]++;
+			array[3]++;
+			break;
+		}
+
+		for (int i = 1; i < array.length; i++) {
+			array[i] += array[i - 1];
+		}
+
+		return array;
+	}
+
+	/**
+	 * Returns an array that contains width for every column.
+	 * 
+	 * @param maxWidth Width of the container without insets. This is the width of
+	 *                 the available space of container.
+	 * @return An array that contains width for every column.
+	 */
+	private int[] getW(int maxWidth) {
+		int reminder = maxWidth % COLS;
+		int w = maxWidth / COLS;
+
+		int[] array = new int[COLS];
+		Arrays.fill(array, w);
+
+		switch (reminder) {
+		case 5:
+			array[0]++;
+			array[6]++;
+		case 3:
+			array[1]++;
+			array[5]++;
+		case 1:
+			array[3]++;
+			break;
+
+		case 6:
+			array[1]++;
+			array[5]++;
+		case 4:
+			array[0]++;
+			array[6]++;
+		case 2:
+			array[2]++;
+			array[4]++;
+			break;
+		}
+
+		for (int i = 1; i < array.length; i++) {
+			array[i] += array[i - 1];
+		}
+
+		return array;
 	}
 
 	/**

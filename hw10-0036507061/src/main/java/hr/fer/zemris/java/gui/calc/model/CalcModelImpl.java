@@ -1,9 +1,16 @@
 package hr.fer.zemris.java.gui.calc.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 
+/**
+ * Implementation of one calculator model.
+ * 
+ * @author david
+ *
+ */
 public class CalcModelImpl implements CalcModel {
 
 	/**
@@ -40,7 +47,7 @@ public class CalcModelImpl implements CalcModel {
 	/**
 	 * Listeners.
 	 */
-	private List<CalcValueListener> listeners;
+	private List<CalcValueListener> listeners = new ArrayList<>();
 
 	/**
 	 * {@inheritDoc}
@@ -121,13 +128,18 @@ public class CalcModelImpl implements CalcModel {
 		}
 
 		if (isNegative) {
+			digits = digits.substring(1);
 			isNegative = false;
 		} else {
+			if (digits.isEmpty()) {
+				digits = "-0";
+			} else {
+				digits = "-" + digits;
+			}
 			isNegative = true;
 		}
 
 		value *= -1;
-		digits = String.valueOf(value);
 		informListeners();
 	}
 
@@ -155,11 +167,39 @@ public class CalcModelImpl implements CalcModel {
 
 		try {
 			value = Double.parseDouble(digits + String.valueOf(digit));
+			
+			if (value > Double.MAX_VALUE) {
+				throw new CalculatorInputException();
+			}
+			
 			digits += String.valueOf(digit);
 			informListeners();
 		} catch (NumberFormatException e) {
 			throw new CalculatorInputException();
 		}
+
+		digits = removeLeadingZeros();
+	}
+
+	/**
+	 * Method that removes reading zeros from String representation of number.
+	 * 
+	 * @return String without leading zeros.
+	 */
+	private String removeLeadingZeros() {
+		int index = 0;
+
+		while (index < digits.length() && digits.charAt(index) == '0' && digits.charAt(index) != '.') {
+			if (index + 1 < digits.length() && digits.charAt(index+1) == '.') {
+				break;
+			}else if (index + 1 == digits.length()) {
+				break;
+			}
+			index++;
+		}
+
+		digits = digits.substring(index);
+		return digits;
 	}
 
 	/**
