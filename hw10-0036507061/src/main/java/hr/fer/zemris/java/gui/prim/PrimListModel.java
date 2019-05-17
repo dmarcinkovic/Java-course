@@ -2,6 +2,7 @@ package hr.fer.zemris.java.gui.prim;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
@@ -89,9 +90,13 @@ public class PrimListModel implements ListModel<Long> {
 
 	/**
 	 * {@inheritDoc}
+	 * @throws IndexOutOfBoundsException if index is out of range.
 	 */
 	@Override
 	public Long getElementAt(int index) {
+		if (index < 0 || index >= data.size()) {
+			throw new IndexOutOfBoundsException();
+		}
 		return data.get(index);
 	}
 
@@ -100,6 +105,7 @@ public class PrimListModel implements ListModel<Long> {
 	 */
 	@Override
 	public void addListDataListener(ListDataListener l) {
+		Objects.requireNonNull(l);
 		listeners = new ArrayList<>(listeners);
 		listeners.add(l);
 	}
@@ -109,6 +115,7 @@ public class PrimListModel implements ListModel<Long> {
 	 */
 	@Override
 	public void removeListDataListener(ListDataListener l) {
+		Objects.requireNonNull(l);
 		listeners = new ArrayList<>(listeners);
 		listeners.remove(l);
 	}

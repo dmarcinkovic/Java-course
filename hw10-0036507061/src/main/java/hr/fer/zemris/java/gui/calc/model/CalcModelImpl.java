@@ -102,18 +102,11 @@ public class CalcModelImpl implements CalcModel {
 	 */
 	@Override
 	public void clear() {
-		clearWithoutInforming();
-		informListeners();
-	}
-
-	/**
-	 * Set value equal to 0 without informing listener about that.
-	 */
-	public void clearWithoutInforming() {
 		isEditable = true;
 		value = 0;
 		digits = "";
 		isNegative = false;
+		informListeners();
 	}
 
 	/**
@@ -149,6 +142,17 @@ public class CalcModelImpl implements CalcModel {
 		}
 
 		value *= -1;
+		informListeners();
+	}
+
+	/**
+	 * Used to show result in display and keep that value stored.
+	 * 
+	 * @param value Result value.
+	 */
+	public void setResult(double value) {
+		this.value = value;
+		digits = String.valueOf(value);
 		informListeners();
 	}
 
@@ -309,6 +313,18 @@ public class CalcModelImpl implements CalcModel {
 			return "-Infinity";
 		}
 		return digits;
+	}
+
+	/**
+	 * Set value equal to 0 without informing listener about that.
+	 */
+	public void clearWithoutInforming() {
+		isEditable = true;
+		value = 0;
+		digits = "";
+		isNegative = false;
+		clearActiveOperand();
+		pendingOperation = null;
 	}
 
 	/**

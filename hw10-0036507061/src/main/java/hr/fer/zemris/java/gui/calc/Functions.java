@@ -154,48 +154,49 @@ public class Functions implements ICalculator {
 	 */
 	private void doOperation(String name) {
 		double number = model.getValue();
-
+		
+		double result = 0;
 		switch (name) {
 		case "1/x":
-			model.setValue(1. / number);
+			result = 1./number;
 			break;
 		case "sin":
-			model.setValue(Math.sin(number));
+			result = Math.sin(number);
 			break;
 		case "log":
-			model.setValue(Math.log10(number));
+			result = Math.log10(number);
 			break;
 		case "cos":
-			model.setValue(Math.cos(number));
+			result = Math.cos(number);
 			break;
 		case "ln":
-			model.setValue(Math.log(number));
+			result = Math.log(number);
 			break;
 		case "tan":
-			model.setValue(Math.tan(number));
+			result = Math.tan(number);
 			break;
 		case "ctg":
-			model.setValue(1. / Math.tan(number));
+			result = 1. / Math.tan(number);
 			break;
 		case "arcsin":
-			model.setValue(Math.asin(number));
+			result = Math.asin(number);
 			break;
 		case "10^x":
-			model.setValue(Math.pow(10, number));
+			result = Math.pow(10, number);
 			break;
 		case "arccos":
-			model.setValue(Math.acos(number));
+			result = Math.acos(number);
 			break;
 		case "e^x":
-			model.setValue(Math.pow(Math.E, number));
+			result = Math.pow(Math.E, number);
 			break;
 		case "arctan":
-			model.setValue(Math.atan(number));
+			result = Math.atan(number);
 			break;
 		case "arcctg":
-			model.setValue(Math.atan(1. / number));
+			result = Math.atan(1. / number);
 			break;
 		}
-		model.clearWithoutInforming();
+		model.setValue(result);
 	}
 }

@@ -110,6 +110,11 @@ public class Numbers implements ICalculator {
 
 		Integer digit = Integer.parseInt(text);
 
-		model.insertDigit(digit);
+		if (model.isEditable()) {
+			model.insertDigit(digit);
+		}else {
+			model.clearAll();
+			model.insertDigit(digit);
+		}
 	}
 }

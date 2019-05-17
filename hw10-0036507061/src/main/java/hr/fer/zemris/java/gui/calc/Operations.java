@@ -118,6 +118,7 @@ public class Operations implements ICalculator {
 			model.clearWithoutInforming();
 			return;
 		}
+		
 		model.setValue(stack.pop());
 	}
 }

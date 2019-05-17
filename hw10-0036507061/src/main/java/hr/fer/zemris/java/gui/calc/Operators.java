@@ -126,6 +126,7 @@ public class Operators implements ICalculator {
 	 * @param text Name of the operator.
 	 */
 	private void doAction(String text) {
+		
 		switch (text) {
 		case "=":
 			equal();
@@ -157,19 +158,27 @@ public class Operators implements ICalculator {
 	 */
 	private void equal() {
 		if (model.isActiveOperandSet()) {
-			double first = model.getActiveOperand();
-			double second = model.getValue();
-
-			DoubleBinaryOperator operator = model.getPendingBinaryOperation();
-
-			model.setValue(operator.applyAsDouble(first, second));
-			model.clearWithoutInforming();
-
-			model.clearActiveOperand();
+			double result = calc();
+			model.setActiveOperand(0);
+			model.setValue(result);
 		} else {
 			model.printErrorMessage("Error");
 			model.clearWithoutInforming();
 		}
+	}
+
+	/**
+	 * Calculates result of given operation.
+	 * 
+	 * @return Result calculated.
+	 */
+	private double calc() {
+		double first = model.getActiveOperand();
+		double second = model.getValue();
+		DoubleBinaryOperator operator = model.getPendingBinaryOperation();
+
+		double result = operator.applyAsDouble(first, second);
+		return result;
 	}
 
 	/**
@@ -178,6 +187,11 @@ public class Operators implements ICalculator {
 	 * second number in order to be able to perform operation.
 	 */
 	private void divide() {
+		if (model.isActiveOperandSet()) {
+			double result = calc();
+			model.setResult(result);
+		}
+
 		model.setActiveOperand(model.getValue());
 		model.setPendingBinaryOperation((t1, t2) -> t1 / t2);
 	}
@@ -188,6 +202,11 @@ public class Operators implements ICalculator {
 	 * perform operation.
 	 */
 	private void multiply() {
+		if (model.isActiveOperandSet()) {
+			double result = calc();
+			model.setResult(result);
+		}
+
 		model.setActiveOperand(model.getValue());
 		model.setPendingBinaryOperation((t1, t2) -> t1 * t2);
 	}
@@ -198,6 +217,11 @@ public class Operators implements ICalculator {
 	 * perform operation.
 	 */
 	private void minus() {
+		if (model.isActiveOperandSet()) {
+			double result = calc();
+			model.setResult(result);
+		}
+
 		model.setActiveOperand(model.getValue());
 		model.setPendingBinaryOperation((t1, t2) -> t1 - t2);
 	}
@@ -208,6 +232,11 @@ public class Operators implements ICalculator {
 	 * perform operation.
 	 */
 	private void plus() {
+		if (model.isActiveOperandSet()) {
+			double result = calc();
+			model.setResult(result);
+		}
+
 		model.setActiveOperand(model.getValue());
 		model.setPendingBinaryOperation((t1, t2) -> t1 + t2);
 	}
@@ -218,6 +247,11 @@ public class Operators implements ICalculator {
 	 * the second number in order to be able to perform operation.
 	 */
 	private void exponent() {
+		if (model.isActiveOperandSet()) {
+			double result = calc();
+			model.setResult(result);
+		}
+
 		model.setActiveOperand(model.getValue());
 		model.setPendingBinaryOperation((t1, t2) -> Math.pow(t1, t2));
 	}
@@ -228,6 +262,11 @@ public class Operators implements ICalculator {
 	 * the second number in order to be able to perform operation.
 	 */
 	private void exponentInverse() {
+		if (model.isActiveOperandSet()) {
+			double result = calc();
+			model.setResult(result);
+		}
+
 		model.setActiveOperand(model.getValue());
 		model.setPendingBinaryOperation((t1, t2) -> Math.pow(t1, 1. / t2));
 	}
