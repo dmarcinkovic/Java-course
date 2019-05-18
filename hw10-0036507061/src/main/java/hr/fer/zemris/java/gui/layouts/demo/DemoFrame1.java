@@ -49,6 +49,7 @@ public class DemoFrame1 extends JFrame {
 	 */
 	private void initGUI() {
 		Container cp = getContentPane();
+		
 		CalcLayout layout = new CalcLayout(3);
 		cp.setLayout(layout);
 

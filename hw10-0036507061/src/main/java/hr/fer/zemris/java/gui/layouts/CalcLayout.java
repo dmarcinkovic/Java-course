@@ -167,7 +167,7 @@ public class CalcLayout implements LayoutManager2 {
 		int maxWidth = parent.getWidth() - insets.left - insets.right;
 		int maxHeight = parent.getHeight() - insets.bottom - insets.top;
 
-		setComponents(parent.getComponents(), maxWidth - (COLS - 1) * gap, maxHeight - (ROWS - 1) * gap);
+		setComponents(parent.getComponents(), maxWidth - (COLS - 1) * gap, maxHeight - (ROWS - 1) * gap, insets);
 	}
 
 	/**
@@ -179,7 +179,7 @@ public class CalcLayout implements LayoutManager2 {
 	 * @param h          Height of the each component.
 	 * @param maxWidth   Width of the container excluding insets.
 	 */
-	private void setComponents(Component[] components, int maxWidth, int maxHeight) { // TODO take care of 200/7
+	private void setComponents(Component[] components, int maxWidth, int maxHeight, Insets insets) { 
 		for (int i = 0; i < components.length; i++) {
 			int row = map.get(components[i]).getRow();
 			int col = map.get(components[i]).getCol();
@@ -187,8 +187,8 @@ public class CalcLayout implements LayoutManager2 {
 			int[] h = getH(maxHeight);
 			int[] w = getW(maxWidth);
 
-			int x = getX(w, col);
-			int y = getY(h, row);
+			int x = getX(w, col, insets.left);
+			int y = getY(h, row, insets.top);
 
 			if (row == 1 && col == 1) {
 				components[i].setBounds(x, y, w[4] + 4 * gap, h[0]);
@@ -209,12 +209,12 @@ public class CalcLayout implements LayoutManager2 {
 	 * @param row Row in which component will be placed.
 	 * @return Y coordinate of left up corner of component.
 	 */
-	private int getY(int[] h, int row) {
+	private int getY(int[] h, int row, int insetY) {
 		if (row == 1) {
-			return 0;
+			return insetY;
 		}
 
-		return h[row - 2] + (row - 1) * gap;
+		return h[row - 2] + (row - 1) * gap + insetY;
 	}
 
 	/**
@@ -224,11 +224,11 @@ public class CalcLayout implements LayoutManager2 {
 	 * @param col Column in which component will be placed.
 	 * @return X coordinate of left up corner of component.
 	 */
-	private int getX(int[] w, int col) {
+	private int getX(int[] w, int col, int insetX) {
 		if (col == 1) {
-			return 0;
+			return insetX;
 		}
-		return w[col - 2] + (col - 1) * gap;
+		return w[col - 2] + (col - 1) * gap + insetX;
 	}
 
 	/**
