@@ -3,6 +3,7 @@ package hr.fer.zemris.java.hw11.jnotepadpp;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.JTextArea;
 import javax.swing.event.DocumentEvent;
@@ -72,6 +73,7 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 	 */
 	@Override
 	public void setFilePath(Path path) {
+		Objects.requireNonNull(path);
 		this.file = path;
 	}
 
@@ -105,6 +107,14 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 	@Override
 	public void removeSingleDocumentListener(SingleDocumentListener l) {
 		listeners.remove(l);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override 
+	public String toString() {
+		return textArea.getText();
 	}
 
 	/**

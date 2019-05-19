@@ -14,9 +14,12 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * Implementation of {@link MultipleDocumentModel}.
@@ -62,6 +65,29 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	 */
 	public DefaultMultipleDocumentModel() {
 		listeners = new ArrayList<>();
+		list = new ArrayList<>();
+		
+		current = addNewDocument(null);
+		
+		ChangeListener changeListener = new ChangeListener() {
+			public void stateChanged(ChangeEvent changeEvent) {
+				JTabbedPane sourceTabbedPane = (JTabbedPane) changeEvent.getSource();
+				int index = sourceTabbedPane.getSelectedIndex();
+				current = list.get(index);
+			}
+		};
+
+		this.addChangeListener(changeListener);
+	}
+
+	private SingleDocumentModel addNewDocument(Path path) {
+		SingleDocumentModel tab = new DefaultSingleDocumentModel(path, null);
+		String tip = tab.getFilePath() == null ? "(unnamed)" : tab.getFilePath().toAbsolutePath().normalize().toString();
+		this.insertTab(tip, null, new JScrollPane(tab.getTextComponent()), tip, list.size()); // TODO insert
+
+		list.add(tab);
+
+		return tab;
 	}
 
 	/**
@@ -77,9 +103,12 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	 */
 	@Override
 	public SingleDocumentModel createNewDocument() {
-		SingleDocumentModel model = new DefaultSingleDocumentModel(null, "unnamed");
+		SingleDocumentModel model = addNewDocument(null);
 
-		list.add(model);
+		// Suppose that we have to switch to newly opened document.
+		current = model;
+
+		//// TODO dodaju slušatelja za ikonu ( kada nije spremljeno ili kada je)
 
 		return model;
 	}
@@ -101,10 +130,25 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	public SingleDocumentModel loadDocument(Path path) { // TODO change this.
 		Objects.requireNonNull(path);
 
-		SingleDocumentModel model = new DefaultSingleDocumentModel(path, "unnamed");
+		String text = null;
+		try {
+			text = Files.readString(path);
+		} catch (IOException e) { /// TODO print to user that you cannot read from file and return null.
+		}
 
-		list.add(model);
+		SingleDocumentModel model = alreadyExistsModel(path);
 
+		if (model == null) {
+			model = new DefaultSingleDocumentModel(path, text);
+		}
+
+		/// TODO dodaju slušatelja za ikonu ( kada nije spremljeno ili kada je)
+
+		current = model;
+
+		String tip = model.getFilePath() == null ? "(unnamed)" : model.getFilePath().toString();
+		this.insertTab(model.toString(), null, new JScrollPane(model.getTextComponent()), tip, list.size()); // TODO add
+																												// icon
 		return model;
 	}
 
@@ -116,24 +160,29 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	@Override
 	public void saveDocument(SingleDocumentModel model, Path newPath) {
 		Objects.requireNonNull(model);
-
+		
 		if (newPath == null) {
 			openedFilePath = model.getFilePath();
 		} else {
 			openedFilePath = newPath;
 		}
+		
+		SingleDocumentModel newModel = alreadyExistsModel(openedFilePath);
 
-		if (alreadyExistsModel(openedFilePath)) { // TODO print error to user.
-
+		if (newModel != null && !Objects.equals(newModel.getFilePath(), model.getFilePath())) {
+			/// TODO print error message to the user.
 		}
-
+		
 		editor = model.getTextComponent();
 
 		saveDocument.putValue(Action.NAME, "Save");
 		saveDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
 		saveDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 		saveDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
+		
+		saveDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Save"));
 	}
+	
 
 	/**
 	 * Checks if specified file is already opened.
@@ -141,13 +190,13 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	 * @param path File to check if is already opened.
 	 * @return True if specified file is already opened.
 	 */
-	private boolean alreadyExistsModel(Path path) {
+	private SingleDocumentModel alreadyExistsModel(Path path) {
 		for (SingleDocumentModel model : list) {
-			if (model.getFilePath().normalize().toString().equals(path.normalize().toString())) {
-				return true;
+			if (Objects.equals(path, model.getFilePath())) {
+				return model;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	/**
@@ -273,8 +322,8 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 				jfc.setDialogTitle("Save file");
 
 				if (jfc.showSaveDialog(DefaultMultipleDocumentModel.this) != JFileChooser.APPROVE_OPTION) {
-					JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, "Ništa nije snimljeno",
-							"Infomacija", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, "Nothing is saved.",
+							"Information", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 
@@ -285,12 +334,12 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 				Files.writeString(openedFilePath, editor.getText());
 			} catch (IOException e1) {
 				JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this,
-						"Dogodila se pogreška pri snimanju datoteke", "Greška", JOptionPane.ERROR_MESSAGE);
+						"An error occured while saving document.", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
-			JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, "Dokument je uredno spremljen.",
-					"Informacija", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, "Document is saved successfully.",
+					"Information", JOptionPane.INFORMATION_MESSAGE);
 		}
 	};
 }
