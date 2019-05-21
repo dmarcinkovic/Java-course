@@ -36,6 +36,21 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
 
+/**
+ * Program that creates program similar to Notepad++ on Window operating system.
+ * User can add one or more tabs in which he can work in parallel. Also, user
+ * can save those modified documents at whatever directory he wants. This
+ * program has very nice GUI. At the start of the page there is toolbar with all
+ * supported actions. Supported actions are : copy, paste, cut, close tab, exit
+ * application, save document, save document as, show statistical info, create
+ * new document, open existing document. All those actions are also available
+ * via menu buttons presented at page start. Information about changes are
+ * printed to status bar which is placed at bottom of window. Also, user can
+ * access actions via keyboard shortcuts.  
+ * 
+ * @author david
+ *
+ */
 public class JNotepadPP extends JFrame {
 
 	/**
@@ -43,10 +58,19 @@ public class JNotepadPP extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Window title. This changes dependently on tab that is selected.
+	 */
 	private String windowTitle = "unnamed";
 
+	/**
+	 * JTabbePane model.
+	 */
 	private DefaultMultipleDocumentModel model;
 
+	/**
+	 * Constructor that initializes GUI and creates all necessary listeners.
+	 */
 	public JNotepadPP() {
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		setSize(600, 500);
@@ -63,6 +87,9 @@ public class JNotepadPP extends JFrame {
 		model.addMultipleDocumentListener(new MyMultipleDocumentListener());
 	}
 
+	/**
+	 * Initialize gui. This method add menus, toolbar and status bar to this window.
+	 */
 	private void initGUI() {
 		Container cp = getContentPane();
 
@@ -75,12 +102,22 @@ public class JNotepadPP extends JFrame {
 		createStatusBar();
 	}
 
+	/**
+	 * Creates status bar. Status bar is just JLabel. This status bar is updated
+	 * when some changes in GUI occurs. For example when document is saved.
+	 */
 	private void createStatusBar() {
 		JLabel statusBar = new JLabel("Status bar");
 
 		getContentPane().add(statusBar, BorderLayout.PAGE_END);
 	}
 
+	/**
+	 * Creates toolbar with this actions: copy, cut, paste, exit application, close
+	 * tab, show statistical info, save document, save document as, create new
+	 * document, open existing document. This toolbar is floatable, which means that
+	 * user can drag that toolbar outside the main window.
+	 */
 	private void createToolbar() {
 		JToolBar tb = new JToolBar();
 		tb.setFloatable(true);
@@ -99,6 +136,12 @@ public class JNotepadPP extends JFrame {
 		getContentPane().add(tb, BorderLayout.PAGE_START);
 	}
 
+	/**
+	 * Method used to configure actions. This method sets name to each action, also
+	 * it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureActions() {
 		configureSaveDocumentAction();
 		configureCreateNewDocument();
@@ -112,6 +155,13 @@ public class JNotepadPP extends JFrame {
 		configureClose();
 	}
 
+	/**
+	 * Method used to configure exit application action. This method sets name for
+	 * this action, also it sets accelerator key and mnemonic key. It sets one
+	 * additional thing: description of the action. This description is shown when
+	 * user holds the mouse for some time under the action menu of button on
+	 * toolbar.
+	 */
 	private void configureExitApplication() {
 		exitApplication.putValue(Action.NAME, "Exit");
 		exitApplication.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control W"));
@@ -119,6 +169,12 @@ public class JNotepadPP extends JFrame {
 		exitApplication.putValue(Action.SHORT_DESCRIPTION, "Exit application");
 	}
 
+	/**
+	 * Method used to configure save document action. This method sets name for this
+	 * action, also it sets accelerator key and mnemonic key. It sets one additional
+	 * thing: description of the action. This description is shown when user holds
+	 * the mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureSaveDocumentAction() {
 		saveDocument.putValue(Action.NAME, "Save");
 		saveDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
@@ -126,6 +182,13 @@ public class JNotepadPP extends JFrame {
 		saveDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
 	}
 
+	/**
+	 * Method used to configure create new document action. This method sets name
+	 * for this action, also it sets accelerator key and mnemonic key. It sets one
+	 * additional thing: description of the action. This description is shown when
+	 * user holds the mouse for some time under the action menu of button on
+	 * toolbar.
+	 */
 	private void configureCreateNewDocument() {
 		createNewDocument.putValue(Action.NAME, "New");
 		createNewDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control N"));
@@ -133,6 +196,12 @@ public class JNotepadPP extends JFrame {
 		createNewDocument.putValue(Action.SHORT_DESCRIPTION, "Create new document");
 	}
 
+	/**
+	 * Method used to create save as document action. This method sets name for this
+	 * action, also it sets accelerator key and mnemonic key. It sets one additional
+	 * thing: description of the action. This description is shown when user holds
+	 * the mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureSaveAsDocument() {
 		saveAsDocument.putValue(Action.NAME, "Save as...");
 		saveAsDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift A"));
@@ -140,6 +209,12 @@ public class JNotepadPP extends JFrame {
 		saveAsDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
 	}
 
+	/**
+	 * Method used to configure paste action. This method sets name for this action,
+	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configurePaste() {
 		paste.putValue(Action.NAME, "Paste");
 		paste.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift V"));
@@ -147,6 +222,12 @@ public class JNotepadPP extends JFrame {
 		paste.putValue(Action.SHORT_DESCRIPTION, "Paste text");
 	}
 
+	/**
+	 * Method used to configure copy action. This method sets name for this action,
+	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureCopy() {
 		copy.putValue(Action.NAME, "Copy");
 		copy.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift C"));
@@ -154,6 +235,12 @@ public class JNotepadPP extends JFrame {
 		copy.putValue(Action.SHORT_DESCRIPTION, "Copy text");
 	}
 
+	/**
+	 * Method used to configure cut action. This method sets name for this action,
+	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureCut() {
 		cut.putValue(Action.NAME, "Cut");
 		cut.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift X"));
@@ -161,6 +248,12 @@ public class JNotepadPP extends JFrame {
 		cut.putValue(Action.SHORT_DESCRIPTION, "Cut text. Delete and save to clipboard.");
 	}
 
+	/**
+	 * Configure statistical info action. This method sets name for this action,
+	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureStatisticalInfo() {
 		statisticalInfo.putValue(Action.NAME, "Info");
 		statisticalInfo.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control I"));
@@ -168,6 +261,12 @@ public class JNotepadPP extends JFrame {
 		statisticalInfo.putValue(Action.SHORT_DESCRIPTION, "Show statistical info.");
 	}
 
+	/**
+	 * Configure open existing document action. This method sets name for this
+	 * action, also it sets accelerator key and mnemonic key. It sets one additional
+	 * thing: description of the action. This description is shown when user holds
+	 * the mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureOpen() {
 		openExistingDocument.putValue(Action.NAME, "Open");
 		openExistingDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control O"));
@@ -175,6 +274,12 @@ public class JNotepadPP extends JFrame {
 		openExistingDocument.putValue(Action.SHORT_DESCRIPTION, "Open existing document.");
 	}
 
+	/**
+	 * Configure close tab action. This method sets name for this action, also it
+	 * sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureClose() {
 		close.putValue(Action.NAME, "Close");
 		close.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control Q"));
@@ -182,6 +287,9 @@ public class JNotepadPP extends JFrame {
 		close.putValue(Action.SHORT_DESCRIPTION, "Close current tab.");
 	}
 
+	/**
+	 * Method that creates menu for each action.
+	 */
 	private void createMenus() {
 		JMenuBar menuBar = new JMenuBar();
 
@@ -215,6 +323,11 @@ public class JNotepadPP extends JFrame {
 		setJMenuBar(menuBar);
 	}
 
+	/**
+	 * Action that saves documents. If document is not saved yet, this action ask
+	 * user to choose the filename and directory in which he wants to save the
+	 * document. If is saved already, this method will just save all changes made.
+	 */
 	private final Action saveDocument = new AbstractAction() {
 
 		/**
@@ -222,12 +335,21 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * {@inheritDoc}. Saves the document. If document is not saved yet, this action
+		 * ask user to choose the filename and directory in which he wants to save the
+		 * document. If is saved already, this method will just save all changes made.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			model.saveDocument(model.getCurrentDocument(), null);
 		}
 	};
 
+	/**
+	 * Action to save document. It always asks user to choose the filename and
+	 * directory in which he wants to save the document.
+	 */
 	private final Action saveAsDocument = new AbstractAction() {
 
 		/**
@@ -235,12 +357,21 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * {@inheritDoc}. t always asks user to choose the filename and directory in
+		 * which he wants to save the document.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			model.saveAsDocument(model.getCurrentDocument());
 		}
 	};
 
+	/**
+	 * Action that creates new document. This action sets default name to "unnamed".
+	 * Also, this action , after it creates new document, switches to that newly
+	 * created document.
+	 */
 	private final Action createNewDocument = new AbstractAction() {
 
 		/**
@@ -248,12 +379,20 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * {@inheritDoc}.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			model.createNewDocument();
 		}
 	};
 
+	/**
+	 * Exits application. This action asks user if he wants to save all unsaved
+	 * documents. If user at any moment clicks the cancel button, application will
+	 * not be quit, but tabs that he closed will stay closed.
+	 */
 	private final Action exitApplication = new AbstractAction() {
 
 		/**
@@ -261,12 +400,22 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * This method performs action that asks user if he wants to save all unsaved
+		 * documents. If user at any moment clicks the cancel button, application will
+		 * not be quit, but tabs that he closed will stay closed.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			new MyWindowListener().windowClosing(new WindowEvent(JNotepadPP.this, WindowEvent.WINDOW_CLOSING));
 		}
 	};
 
+	/**
+	 * Action that is used to close one selected tab. If that tab is modified, this
+	 * action will ask the user to confirm that he wants to saves changes he made,
+	 * or he wants to quit without saving.
+	 */
 	private final Action close = new AbstractAction() {
 
 		/**
@@ -274,6 +423,11 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * Performs closing action. If that tab is modified, this action will ask the
+		 * user to confirm that he wants to saves changes he made, or he wants to quit
+		 * without saving.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			SingleDocumentModel tab = model.getCurrentDocument();
@@ -286,6 +440,15 @@ public class JNotepadPP extends JFrame {
 		}
 	};
 
+	/**
+	 * Asks user if he wants to close the tab without saving. If he clicks yes, then
+	 * the tab will be closed and last made change will not be saved. If user clicks
+	 * no, then new window will appear, that will ask the user to choose the
+	 * filename and directory.
+	 * 
+	 * @param tab  Tab to be closed.
+	 * @param name Text to be presented in option pane.
+	 */
 	private void askUser(SingleDocumentModel tab, String name) {
 		int result = JOptionPane.showConfirmDialog(JNotepadPP.this, "Do you want to close " + name + " without saving?",
 				"Question", JOptionPane.YES_NO_CANCEL_OPTION);
@@ -297,6 +460,11 @@ public class JNotepadPP extends JFrame {
 		}
 	}
 
+	/**
+	 * Returns the text from clipboard.
+	 * 
+	 * @return The text from clipboard.
+	 */
 	private String getTextFromClipboard() {
 		String data = null;
 		try {
@@ -306,6 +474,10 @@ public class JNotepadPP extends JFrame {
 		return data;
 	}
 
+	/**
+	 * Action used to paste the text from clipboard to current document. This action
+	 * is not enabled until the document is created.
+	 */
 	private final Action paste = new AbstractAction() {
 
 		/**
@@ -313,6 +485,10 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * {@inheritDoc}. Method that performs an action that pastes text from clipboard
+		 * to current document.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String data = getTextFromClipboard();
@@ -340,6 +516,11 @@ public class JNotepadPP extends JFrame {
 		}
 	};
 
+	/**
+	 * Action that is used to cut the text from document and save that text to
+	 * clipboard. This action is not enabled until the document is created and the
+	 * text is marked.
+	 */
 	private Action cut = new AbstractAction() {
 
 		/**
@@ -347,6 +528,10 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * Method that performs an action that cuts the marked text and saves that text
+		 * to clipboard.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JTextArea editor = model.getCurrentDocument().getTextComponent();
@@ -369,6 +554,10 @@ public class JNotepadPP extends JFrame {
 		}
 	};
 
+	/**
+	 * Action used to copy the text from document to clipboard. This action is
+	 * disabled until there is no marked text.
+	 */
 	private final Action copy = new AbstractAction() {
 
 		/**
@@ -376,6 +565,9 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * Performs copy action. This action is disabled until there is no marked text.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JTextArea editor = model.getCurrentDocument().getTextComponent();
@@ -395,12 +587,23 @@ public class JNotepadPP extends JFrame {
 		}
 	};
 
+	/**
+	 * Method that saves the specified String to clipboard. This method is used in
+	 * cut and copy actions.
+	 * 
+	 * @param theString Specified String.
+	 */
 	private void setTextToClipboard(String theString) {
 		StringSelection selection = new StringSelection(theString);
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents(selection, selection);
 	}
 
+	/**
+	 * Action used to open existing document. If document user choose already exists
+	 * as tab in this notepad than this action will just switch to that tab. If does
+	 * not exists, then new tab will be created with content of chosen file.
+	 */
 	private final Action openExistingDocument = new AbstractAction() {
 
 		/**
@@ -408,6 +611,12 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * {@inheritDoc}. Method that performs action that opens existing document. If
+		 * document user choose already exists as tab in this notepad than this action
+		 * will just switch to that tab. If does not exists, then new tab will be
+		 * created with content of chosen file.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JFileChooser jfc = new JFileChooser();
@@ -429,6 +638,11 @@ public class JNotepadPP extends JFrame {
 		}
 	};
 
+	/**
+	 * Action used to show to user statistical info. This action prints information
+	 * about the total number of characters, non-space characters and number of
+	 * lines in current tab.
+	 */
 	private Action statisticalInfo = new AbstractAction() {
 
 		/**
@@ -436,6 +650,11 @@ public class JNotepadPP extends JFrame {
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * Method that performs action that shows to user statistical info.This action
+		 * prints information about the total number of characters, non-space characters
+		 * and number of lines in current tab.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JTextArea editor = model.getCurrentDocument().getTextComponent();
@@ -451,6 +670,14 @@ public class JNotepadPP extends JFrame {
 			JOptionPane.showMessageDialog(JNotepadPP.this, sb.toString(), "Info", JOptionPane.INFORMATION_MESSAGE);
 		}
 
+		/**
+		 * Returns the number of new line symbols. This method is used to find out the
+		 * number of lines in document. Simply, the number of lines is equal : number of
+		 * new line character + 1.
+		 * 
+		 * @param text Document text.
+		 * @return Number of new line symbols.
+		 */
 		private int getNumberOfNewLineSymbols(String text) {
 			int number = 0;
 			char[] data = text.toCharArray();
@@ -464,6 +691,13 @@ public class JNotepadPP extends JFrame {
 			return number;
 		}
 
+		/**
+		 * Counts all non-whitespace characters. White space characters are : tab, new
+		 * line and space.
+		 * 
+		 * @param text Document text.
+		 * @return Number of non-whitespace characters.
+		 */
 		private int getNumberOfNonSpaces(String text) {
 			int number = 0;
 			char[] data = text.toCharArray();
@@ -478,8 +712,19 @@ public class JNotepadPP extends JFrame {
 		}
 	};
 
+	/**
+	 * Implementation of WindowListener. This class is used to listen the closing
+	 * event. If user attempts to close the program, this method will be called and
+	 * appropriate action will be executed.
+	 * 
+	 * @author david
+	 *
+	 */
 	private class MyWindowListener extends WindowAdapter {
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void windowClosing(WindowEvent e) {
 			Iterator<SingleDocumentModel> itr = model.iterator();
@@ -501,6 +746,13 @@ public class JNotepadPP extends JFrame {
 		}
 	}
 
+	/**
+	 * Method that asks user to close the tab.
+	 * 
+	 * @param itr  Iterator user to iterate through all modified tabs.
+	 * @param text Information text that appears to user.
+	 * @return False if user click on cancel button, otherwise returns true.
+	 */
 	private boolean askUserToCloseTheTab(Iterator<SingleDocumentModel> itr, String text) {
 		int result = JOptionPane.showConfirmDialog(JNotepadPP.this, text, "Question", JOptionPane.YES_NO_CANCEL_OPTION);
 
@@ -514,8 +766,18 @@ public class JNotepadPP extends JFrame {
 		return true;
 	}
 
+	/**
+	 * Implementation of MultipleDocumentListener. This class is used to inform this
+	 * window when some document has changed, or document has been added or removed.
+	 * 
+	 * @author david
+	 *
+	 */
 	private class MyMultipleDocumentListener implements MultipleDocumentListener {
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
 			if (previousModel == null && currentModel == null) {
@@ -536,6 +798,9 @@ public class JNotepadPP extends JFrame {
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void documentAdded(SingleDocumentModel model) {
 			if (JNotepadPP.this.model.getNumberOfDocuments() != 0) {
@@ -547,6 +812,9 @@ public class JNotepadPP extends JFrame {
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void documentRemoved(SingleDocumentModel model) {
 			if (JNotepadPP.this.model.getNumberOfDocuments() == 0) {
@@ -559,6 +827,12 @@ public class JNotepadPP extends JFrame {
 		}
 	}
 
+	/**
+	 * Method invoked when running the program. This method creates new window.
+	 * 
+	 * @param args Arguments provided via command line. In this program they are not
+	 *             used.
+	 */
 	public static void main(String[] args) {
 		try {
 			SwingUtilities.invokeAndWait(() -> {
@@ -568,5 +842,4 @@ public class JNotepadPP extends JFrame {
 			System.out.println("Error");
 		}
 	}
-
 }

@@ -101,6 +101,16 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		this.addChangeListener(changeListener);
 	}
 
+	/**
+	 * Method to load icons from specified path. Those icons are used to show user
+	 * modified status. If red cuboid is presented that means that current document
+	 * (i.e. current tab presented to user) is modified. On the other hand, if
+	 * current document is not modified, green cuboid will be presented in left
+	 * corner of tab.
+	 * 
+	 * @param path Path from which the icons are loaded.
+	 * @return Image icon that is loaded from given path.
+	 */
 	private ImageIcon loadImageIcon(String path) {
 		try (InputStream is = this.getClass().getResourceAsStream(path)) {
 
@@ -124,30 +134,55 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		return null;
 	}
 
+	/**
+	 * This method informs all registered listeners that documents has changed.
+	 * 
+	 * @param previous Previous tab.
+	 * @param current  Current tab.
+	 */
 	private void informListenersDocumentChanged(SingleDocumentModel previous, SingleDocumentModel current) {
 		for (MultipleDocumentListener l : listeners) {
 			l.currentDocumentChanged(previous, current);
 		}
 	}
 
+	/**
+	 * This method informs all registered listeners that new document has been added
+	 * to this model.
+	 * 
+	 * @param model New document that is added to this model.
+	 */
 	private void informListenersAddedDocument(SingleDocumentModel model) {
 		for (MultipleDocumentListener l : listeners) {
 			l.documentAdded(model);
 		}
 	}
 
+	/**
+	 * This method informs all registered listeners that one document has been
+	 * removed from this model.
+	 * 
+	 * @param model Removed document.
+	 */
 	private void informListenersRemovedDocument(SingleDocumentModel model) {
 		for (MultipleDocumentListener l : listeners) {
 			l.documentRemoved(model);
 		}
 	}
 
+	/**
+	 * Method to add new document to this model and registers itself to
+	 * SingeDocumentListener.
+	 * 
+	 * @param path Path from which the document is added.
+	 * @return Newly added document.
+	 */
 	private SingleDocumentModel addNewDocument(Path path) {
 		SingleDocumentModel tab = new DefaultSingleDocumentModel(path, null);
 
 		addCaretListener(tab);
 
-		String tip = ((DefaultSingleDocumentModel)tab).getPathName();
+		String tip = ((DefaultSingleDocumentModel) tab).getPathName();
 		this.insertTab(tab.toString(), unsaved, new JScrollPane(tab.getTextComponent()), tip, list.size());
 
 		list.add(tab);
@@ -166,6 +201,15 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		return new MyIterator(list);
 	}
 
+	/**
+	 * Create new caret listener for every document presented in this model. This
+	 * method is used to keep track when cut and copy actions have to be enabled or
+	 * disabled. If there is no selected area (i.e. dot and mark are at same
+	 * position) copy and cut actions have to be disable, otherwise they have to be
+	 * enabled.
+	 * 
+	 * @param model Model to register caret listener.
+	 */
 	private void addCaretListener(SingleDocumentModel model) {
 		model.getTextComponent().getCaret().addChangeListener(new ChangeListener() {
 
@@ -191,6 +235,11 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		return model;
 	}
 
+	/**
+	 * Sets opened file path.
+	 * 
+	 * @param openedFilePath New openedFilePath.
+	 */
 	public void setOpenedFilePath(Path openedFilePath) {
 		this.openedFilePath = openedFilePath;
 	}
@@ -203,6 +252,12 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		return current;
 	}
 
+	/**
+	 * Method that returns text from file.
+	 * 
+	 * @param path Path of the file.
+	 * @return Text from file.
+	 */
 	private String getText(Path path) {
 		String text = null;
 		try {
@@ -235,7 +290,6 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		if (model != null) {
 			switchTab(model);
 
-			informListenersAddedDocument(current);
 			informListenersDocumentChanged(previous, current);
 
 			return model;
@@ -262,6 +316,11 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		return model;
 	}
 
+	/**
+	 * Method that switches tabs.
+	 * 
+	 * @param model Model of new tab.
+	 */
 	private void switchTab(SingleDocumentModel model) {
 		int index = list.indexOf(model);
 		this.setSelectedIndex(index);
@@ -297,6 +356,13 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		}
 	}
 
+	/**
+	 * Method used to save document. The difference from save document method is
+	 * that this method allows the user to choose the filename whether this file
+	 * already have name or not.
+	 * 
+	 * @param model Model of document.
+	 */
 	public void saveAsDocument(SingleDocumentModel model) {
 		Objects.requireNonNull(model);
 
@@ -486,6 +552,11 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		}
 	};
 
+	/**
+	 * Action to save document. The difference from save document action is that
+	 * this action allows the user to choose the filename whether this file already
+	 * have name or not.
+	 */
 	private final Action saveAsDocument = new AbstractAction() {
 
 		/**
@@ -493,6 +564,12 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * {@inheritDoc}. Open file chooser and allow user to choose the file name. If
+		 * file already exists, warn user. If file is already presented as tab in this
+		 * DefaultMultipleDocumentModel do not save that document, but abort this
+		 * action.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JFileChooser jfc = new JFileChooser();
@@ -518,8 +595,19 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		}
 	};
 
+	/**
+	 * This class is implementation of SingleDocumentListener. It is used to get
+	 * information about changes occured in each document that this model constis
+	 * of.
+	 * 
+	 * @author david
+	 *
+	 */
 	private class MySingleDocumentListener implements SingleDocumentListener {
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void documentModifyStatusUpdated(SingleDocumentModel model) {
 			int index = list.indexOf(model);
@@ -531,6 +619,9 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 			}
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void documentFilePathUpdated(SingleDocumentModel model) {
 			int index = list.indexOf(current);
