@@ -1,6 +1,8 @@
 package hr.fer.zemris.java.hw11.jnotepadpp;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -181,6 +183,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		SingleDocumentModel tab = new DefaultSingleDocumentModel(path, null);
 
 		addCaretListener(tab);
+		addFocusListener(tab);
 
 		String tip = ((DefaultSingleDocumentModel) tab).getPathName();
 		this.insertTab(tab.toString(), unsaved, new JScrollPane(tab.getTextComponent()), tip, list.size());
@@ -191,6 +194,32 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		tab.addSingleDocumentListener(new MySingleDocumentListener());
 
 		return tab;
+	}
+
+	/**
+	 * Method that adds focus listener to given {@link SingleDocumentModel}.
+	 * 
+	 * @param model Given {@link SingleDocumentModel}.
+	 */
+	private void addFocusListener(SingleDocumentModel model) {
+		model.getTextComponent().addFocusListener(new FocusListener() {
+
+			/**
+			 * Inform registered listeners that textArea from given model has lost focus.
+			 */
+			@Override
+			public void focusLost(FocusEvent e) {
+				informListenersDocumentChanged(model, model);
+			}
+
+			/**
+			 * Inform registered listeners that textArea from given model is focus owner.
+			 */
+			@Override
+			public void focusGained(FocusEvent e) {
+				informListenersDocumentChanged(model, model);
+			}
+		});
 	}
 
 	/**
@@ -310,6 +339,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 		informListenersAddedDocument(current);
 		informListenersDocumentChanged(previous, current);
+		addFocusListener(model);
 
 		switchTab(current);
 
@@ -404,7 +434,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	@Override
 	public void closeDocument(SingleDocumentModel model) {
 		int index = list.indexOf(model);
-
+		
 		this.remove(index);
 		boolean removed = list.remove(model);
 

@@ -1,7 +1,9 @@
 package hr.fer.zemris.java.hw11.jnotepadpp;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
+import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -16,10 +18,14 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -28,9 +34,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
@@ -46,7 +54,7 @@ import javax.swing.text.Document;
  * new document, open existing document. All those actions are also available
  * via menu buttons presented at page start. Information about changes are
  * printed to status bar which is placed at bottom of window. Also, user can
- * access actions via keyboard shortcuts.  
+ * access actions via keyboard shortcuts.
  * 
  * @author david
  *
@@ -67,6 +75,37 @@ public class JNotepadPP extends JFrame {
 	 * JTabbePane model.
 	 */
 	private DefaultMultipleDocumentModel model;
+
+	/**
+	 * Status bar placed at the bottom of the window.
+	 */
+	private JLabel statusBarLeft;
+
+	/**
+	 * Status bar placed at the bottom of the window.
+	 */
+	private JLabel statusBarRight;
+
+	/**
+	 * Stores information about the current date and time.
+	 */
+	private String date;
+
+	/**
+	 * Menu item for converting selected part of text to upper case.
+	 */
+	private JMenuItem toUppercase;
+
+	/**
+	 * Menu item for converting selected part of text to lower case.
+	 */
+	private JMenuItem toLowercase;
+
+	/**
+	 * Menu item for inverting case of every character. For example, if current text
+	 * is AbCd then after this menu is clicked, text will be aBcD.
+	 */
+	private JMenuItem invertCase;
 
 	/**
 	 * Constructor that initializes GUI and creates all necessary listeners.
@@ -107,9 +146,19 @@ public class JNotepadPP extends JFrame {
 	 * when some changes in GUI occurs. For example when document is saved.
 	 */
 	private void createStatusBar() {
-		JLabel statusBar = new JLabel("Status bar");
+		JPanel panel = new JPanel();
+		panel.setLayout(new GridLayout(1, 0));
 
-		getContentPane().add(statusBar, BorderLayout.PAGE_END);
+		statusBarLeft = new JLabel();
+		statusBarRight = new JLabel();
+		statusBarRight.setHorizontalAlignment(SwingConstants.RIGHT);
+
+		statusBarLeft.setBorder(BorderFactory.createLineBorder(Color.black));
+		statusBarRight.setBorder(BorderFactory.createLineBorder(Color.black));
+		panel.add(statusBarLeft);
+		panel.add(statusBarRight);
+
+		getContentPane().add(panel, BorderLayout.PAGE_END);
 	}
 
 	/**
@@ -153,6 +202,9 @@ public class JNotepadPP extends JFrame {
 		configureStatisticalInfo();
 		configureOpen();
 		configureClose();
+		configureInverCase();
+		configureToLowercase();
+		configureToUppercase();
 	}
 
 	/**
@@ -288,11 +340,76 @@ public class JNotepadPP extends JFrame {
 	}
 
 	/**
+	 * Configure toUppercase action.This method sets name for this action, also it
+	 * sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
+	private void configureToUppercase() {
+		toUpperCase.putValue(Action.NAME, "To UpperCase");
+		toUpperCase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control U"));
+		toUpperCase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_U);
+		toUpperCase.putValue(Action.SHORT_DESCRIPTION, "Convert selected part to uppercase.");
+	}
+
+	/**
+	 * Configure toLowercase action. This method sets name for this action, also it
+	 * sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
+	private void configureToLowercase() {
+		toLowerCase.putValue(Action.NAME, "To LowerCase");
+		toLowerCase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control L"));
+		toLowerCase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
+		toLowerCase.putValue(Action.SHORT_DESCRIPTION, "Convert selected part to lowercase.");
+	}
+
+	/**
+	 * Configure inverCase action. This method sets name for this action, also it
+	 * sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
+	private void configureInverCase() {
+		invertCaseAction.putValue(Action.NAME, "Invert case");
+		invertCaseAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control G"));
+		invertCaseAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_G);
+		invertCaseAction.putValue(Action.SHORT_DESCRIPTION, "Invert casing of selected part.");
+	}
+
+	/**
 	 * Method that creates menu for each action.
 	 */
 	private void createMenus() {
 		JMenuBar menuBar = new JMenuBar();
 
+		disableActions();
+
+		JMenu file = new JMenu("File");
+		menuBar.add(file);
+
+		addFileMenuItems(file);
+
+		JMenu edit = new JMenu("Edit");
+		menuBar.add(edit);
+
+		addEditFileMenuItems(edit);
+
+		JMenu tools = new JMenu("Tools");
+		JMenu changeCase = new JMenu("Change case");
+		tools.add(changeCase);
+		menuBar.add(tools);
+
+		addChangeCaseMenuItems(changeCase);
+
+		setJMenuBar(menuBar);
+	}
+
+	/**
+	 * Disables all actions.
+	 */
+	private void disableActions() {
 		paste.setEnabled(false);
 		copy.setEnabled(false);
 		cut.setEnabled(false);
@@ -302,25 +419,50 @@ public class JNotepadPP extends JFrame {
 		saveAsDocument.setEnabled(false);
 		close.setEnabled(false);
 
-		JMenu file = new JMenu("File");
-		menuBar.add(file);
-		file.add(new JMenuItem(createNewDocument));
-		file.add(new JMenuItem(exitApplication));
-		file.add(new JMenuItem(openExistingDocument));
+		invertCaseAction.setEnabled(false);
+		toLowerCase.setEnabled(false);
+		toUpperCase.setEnabled(false);
+	}
 
-		JMenu edit = new JMenu("Edit");
-		menuBar.add(edit);
+	/**
+	 * Method to add items to changeCase menu.
+	 * 
+	 * @param changeCase changeCase menu.
+	 */
+	private void addChangeCaseMenuItems(JMenu changeCase) {
+		toUppercase = new JMenuItem(toUpperCase);
+		toLowercase = new JMenuItem(toLowerCase);
+		invertCase = new JMenuItem(invertCaseAction);
 
+		changeCase.add(toUppercase);
+		changeCase.add(toLowercase);
+		changeCase.add(invertCase);
+	}
+
+	/**
+	 * Method to add items to edit menu.
+	 * 
+	 * @param edit edit menu.
+	 */
+	private void addEditFileMenuItems(JMenu edit) {
 		edit.add(new JMenuItem(paste));
 		edit.add(new JMenuItem(copy));
 		edit.add(new JMenuItem(cut));
+	}
 
+	/**
+	 * Method to add items to file menu.
+	 * 
+	 * @param file file menu.
+	 */
+	private void addFileMenuItems(JMenu file) {
 		file.add(new JMenuItem(statisticalInfo));
 		file.add(new JMenuItem(saveDocument));
 		file.add(new JMenuItem(saveAsDocument));
 		file.add(new JMenuItem(close));
-
-		setJMenuBar(menuBar);
+		file.add(new JMenuItem(createNewDocument));
+		file.add(new JMenuItem(exitApplication));
+		file.add(new JMenuItem(openExistingDocument));
 	}
 
 	/**
@@ -669,48 +811,170 @@ public class JNotepadPP extends JFrame {
 
 			JOptionPane.showMessageDialog(JNotepadPP.this, sb.toString(), "Info", JOptionPane.INFORMATION_MESSAGE);
 		}
+	};
+
+	/**
+	 * Action used to convert selected part of the text to upper case. For example,
+	 * if selected String is abCD then after this action is executed this part will
+	 * be ABCD.
+	 */
+	private final Action toUpperCase = new AbstractAction() {
 
 		/**
-		 * Returns the number of new line symbols. This method is used to find out the
-		 * number of lines in document. Simply, the number of lines is equal : number of
-		 * new line character + 1.
-		 * 
-		 * @param text Document text.
-		 * @return Number of new line symbols.
+		 * Default serial vesion UID.
 		 */
-		private int getNumberOfNewLineSymbols(String text) {
-			int number = 0;
-			char[] data = text.toCharArray();
-
-			for (Character c : data) {
-				if (c == '\n') {
-					number++;
-				}
-			}
-
-			return number;
-		}
+		private static final long serialVersionUID = 1L;
 
 		/**
-		 * Counts all non-whitespace characters. White space characters are : tab, new
-		 * line and space.
-		 * 
-		 * @param text Document text.
-		 * @return Number of non-whitespace characters.
+		 * {@inheritDoc}. Method that performs action that converts selected part of
+		 * text to upper case. For example, if selected String is abCD then after this
+		 * action is executed this part will be ABCD.
 		 */
-		private int getNumberOfNonSpaces(String text) {
-			int number = 0;
-			char[] data = text.toCharArray();
-
-			for (Character c : data) {
-				if (!Character.isWhitespace(c)) {
-					number++;
-				}
-			}
-
-			return number;
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			getChangeCase(0);
 		}
 	};
+
+	/**
+	 * Action used to convert selected part of the text to lower case. For example,
+	 * if String is abCD then after this action is executes this String will be
+	 * abcd.
+	 */
+	private final Action toLowerCase = new AbstractAction() {
+
+		/**
+		 * Default serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * {@inheritDoc}. Method that performs action that converts selected part of
+		 * text to lower case. For example, if String is abCD then after this action is
+		 * executes this String will be abcd.
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			getChangeCase(1);
+		}
+	};
+
+	/**
+	 * Action used to invert casing of all character selected. For example, if
+	 * String is abCD then after this action is executed this String will be ABcd.
+	 */
+	private final Action invertCaseAction = new AbstractAction() {
+
+		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Action used to invert casing of all character selected. For example, if
+		 * String is abCD then after this action is executed this String will be ABcd.
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			getChangeCase(2);
+		}
+	};
+
+	/**
+	 * Change casing depending on action number. If action number is 0 then change
+	 * all characters to upper case. If action is 1 then change all characters to
+	 * lower case. If action is 2 then invert all character casing.
+	 * 
+	 * @param action Action.
+	 */
+	private void getChangeCase(int action) {
+		JTextArea editor = model.getCurrentDocument().getTextComponent();
+		Document doc = editor.getDocument();
+		Caret caret = editor.getCaret();
+
+		int start = Math.min(caret.getDot(), caret.getMark());
+		int len = Math.abs(caret.getDot() - caret.getMark());
+
+		if (len == 0) {
+			return;
+		}
+
+		String text = null;
+		try {
+			text = doc.getText(start, len);
+			text = toggleCase(text, action);
+			doc.remove(start, len);
+			doc.insertString(start, text, null);
+		} catch (BadLocationException e1) {
+		}
+	}
+
+	/**
+	 * Toggles case. If action number is 0 then change all characters to upper case.
+	 * If action is 1 then change all characters to lower case. If action is 2 then
+	 * invert all character casing.
+	 */
+	private String toggleCase(String text, int action) { /// TODO must do locale casing.
+		switch (action) {
+		case 0:
+			return text.toUpperCase();
+		case 1:
+			return text.toLowerCase();
+		}
+
+		char[] data = text.toCharArray();
+
+		for (int i = 0; i<data.length; i++) {
+			if (Character.isUpperCase(data[i])) {
+				data[i] = Character.toLowerCase(data[i]);
+			} else if (Character.isLowerCase(data[i])) {
+				data[i] = Character.toUpperCase(data[i]);
+			}
+		}
+
+		return new String(data);
+	}
+
+	/**
+	 * Returns the number of new line symbols. This method is used to find out the
+	 * number of lines in document. Simply, the number of lines is equal : number of
+	 * new line character + 1.
+	 * 
+	 * @param text Document text.
+	 * @return Number of new line symbols.
+	 */
+	private int getNumberOfNewLineSymbols(String text) {
+		int number = 0;
+		char[] data = text.toCharArray();
+
+		for (Character c : data) {
+			if (c == '\n') {
+				number++;
+			}
+		}
+
+		return number;
+	}
+
+	/**
+	 * Counts all non-whitespace characters. White space characters are : tab, new
+	 * line and space.
+	 * 
+	 * @param text Document text.
+	 * @return Number of non-whitespace characters.
+	 */
+	private int getNumberOfNonSpaces(String text) {
+		int number = 0;
+		char[] data = text.toCharArray();
+
+		for (Character c : data) {
+			if (!Character.isWhitespace(c)) {
+				number++;
+			}
+		}
+
+		return number;
+	}
 
 	/**
 	 * Implementation of WindowListener. This class is used to listen the closing
@@ -767,6 +1031,34 @@ public class JNotepadPP extends JFrame {
 	}
 
 	/**
+	 * Returns the line number of current position of dot.
+	 * 
+	 * @param text     Text presented in current tab.
+	 * @param dotIndex Current position of dot.
+	 * @return The column number of current position of dot.
+	 */
+	private int getLineNumber(String text, int dotIndex) {
+		return getNumberOfNewLineSymbols(text.substring(0, dotIndex));
+	}
+
+	/**
+	 * Returns the column number of current position of dot.
+	 * 
+	 * @param text     Text presented in current tab.
+	 * @param dotIndex Current position of dot.
+	 * @return The column number of current position of dot.
+	 */
+	private int getColumnNumber(String text, int dotIndex) {
+		int index = dotIndex - 1;
+		char[] data = text.toCharArray();
+
+		while (index >= 0 && data[index] != '\n') {
+			index--;
+		}
+		return dotIndex - index;
+	}
+
+	/**
 	 * Implementation of MultipleDocumentListener. This class is used to inform this
 	 * window when some document has changed, or document has been added or removed.
 	 * 
@@ -792,10 +1084,64 @@ public class JNotepadPP extends JFrame {
 			if (caret.getDot() != caret.getMark()) {
 				copy.setEnabled(true);
 				cut.setEnabled(true);
+				toUpperCase.setEnabled(true);
+				toLowerCase.setEnabled(true);
+				invertCaseAction.setEnabled(true);
 			} else {
 				copy.setEnabled(false);
 				cut.setEnabled(false);
+				toUpperCase.setEnabled(false);
+				toLowerCase.setEnabled(false);
+				invertCaseAction.setEnabled(false);
 			}
+
+			if (currentModel.getTextComponent().isFocusOwner()) {
+				paste.setEnabled(true);
+			} else {
+				paste.setEnabled(false);
+			}
+
+			if (currentModel != previousModel) {
+				date = getDate();
+			}
+
+			updateStatusBar(currentModel, caret);
+		}
+
+		/**
+		 * Returns the current date and time in format : yyyy/MM/dd HH:mm:ss. For
+		 * example: 2019/05/19 13:24:23
+		 * 
+		 * @return Current date as String.
+		 */
+		private String getDate() {
+			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			Date date = new Date();
+
+			return dateFormat.format(date);
+		}
+
+		/**
+		 * Method to update status bar. On status bar is presented total length of text,
+		 * current dot line, current selection and current dot column.
+		 * 
+		 * @param currentModel Current tab.
+		 * @param caret        Used to get the mark and dot position.
+		 */
+		private void updateStatusBar(SingleDocumentModel currentModel, Caret caret) {
+			String text = currentModel.getTextComponent().getText();
+
+			int length = text.length();
+			int line = getLineNumber(text, caret.getDot());
+			int column = getColumnNumber(text, caret.getDot());
+			int selection = Math.abs(caret.getDot() - caret.getMark());
+
+			StringBuilder sb = new StringBuilder();
+			sb.append("<html><pre>").append("length:").append(length).append("\t").append("Ln:").append(line + 1)
+					.append(" Col:").append(column).append(" Sel:").append(selection).append("</pre></html>");
+
+			statusBarLeft.setText(sb.toString());
+			statusBarRight.setText(date + " ");
 		}
 
 		/**
@@ -809,6 +1155,7 @@ public class JNotepadPP extends JFrame {
 				saveDocument.setEnabled(true);
 				saveAsDocument.setEnabled(true);
 				close.setEnabled(true);
+				date = getDate();
 			}
 		}
 
