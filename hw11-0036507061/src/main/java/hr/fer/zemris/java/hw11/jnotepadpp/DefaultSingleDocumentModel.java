@@ -49,6 +49,7 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 		textArea = new JTextArea(text);
 		listeners = new ArrayList<>();
 
+		modified = true;
 		textArea.getDocument().addDocumentListener(new MyDocumentListener());
 	}
 
@@ -75,6 +76,16 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 	public void setFilePath(Path path) {
 		Objects.requireNonNull(path);
 		this.file = path;
+		informListenerFilePathChanged();
+	}
+
+	/**
+	 * Method to inform all registered listener than path has changed.
+	 */
+	private void informListenerFilePathChanged() {
+		for (SingleDocumentListener l : listeners) {
+			l.documentFilePathUpdated(this);
+		}
 	}
 
 	/**
@@ -91,6 +102,17 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 	@Override
 	public void setModified(boolean modified) {
 		this.modified = modified;
+		informListenersModifyStatus();
+	}
+
+	/**
+	 * Method that informs all registered listeners that this document model is
+	 * modified.
+	 */
+	private void informListenersModifyStatus() {
+		for (SingleDocumentListener l : listeners) {
+			l.documentModifyStatusUpdated(this);
+		}
 	}
 
 	/**
@@ -108,13 +130,22 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 	public void removeSingleDocumentListener(SingleDocumentListener l) {
 		listeners.remove(l);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override 
+	@Override
 	public String toString() {
-		return textArea.getText();
+		return getFilePath() == null ? "(unname)" : getFilePath().getFileName().toString();
+	}
+
+	/**
+	 * Returns full path name or "(unnamed)" if path is not specified yet.
+	 * 
+	 * @return Full path name or "(unnamed)" if path is not specified yet.
+	 */
+	public String getPathName() {
+		return getFilePath() == null ? "(unnamed)" : getFilePath().toAbsolutePath().toString();
 	}
 
 	/**
@@ -131,7 +162,7 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 		 */
 		@Override
 		public void insertUpdate(DocumentEvent e) {
-			modified = true;
+			setModified(true);
 		}
 
 		/**
@@ -139,7 +170,7 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel {
 		 */
 		@Override
 		public void removeUpdate(DocumentEvent e) {
-			modified = true;
+			setModified(true);
 		}
 
 		/**
