@@ -43,6 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
+import javax.swing.text.Element;
 
 import hr.fer.zemris.java.hw11.jnotepadpp.local.FormLocalizationProvider;
 import hr.fer.zemris.java.hw11.jnotepadpp.local.ILocalizationListener;
@@ -205,6 +206,8 @@ public class JNotepadPP extends JFrame {
 		configureEnglishLanguage();
 		configureGermanyLanguage();
 		configureCroatiaLanguage();
+		configureAscending();
+		configureDescending();
 	}
 
 	/**
@@ -498,6 +501,42 @@ public class JNotepadPP extends JFrame {
 	}
 
 	/**
+	 * Configure ascending sort action. This method sets name for this action,
+	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
+	private void configureAscending() {
+		String translation = flp.getString("Ascending");
+		ascending.putValue(Action.NAME, translation);
+		ascending.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift B"));
+		ascending.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_J);
+
+		String descriptionTranslation = flp.getString("Sort_ascending");
+		ascending.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(ascending, "Ascending", "Sort_ascending");
+	}
+
+	/**
+	 * Configure descending sort action. This method sets name for this action,
+	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
+	private void configureDescending() {
+		String translation = flp.getString("Descending");
+		descending.putValue(Action.NAME, translation);
+		descending.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift M"));
+		descending.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
+
+		String descriptionTranslation = flp.getString("Sort_descending");
+		descending.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(descending, "Descending", "Sort_descending");
+	}
+	
+	/**
 	 * Adds localization listener, so that when user changes language in menu, GUI
 	 * updates instantly.
 	 * 
@@ -711,7 +750,16 @@ public class JNotepadPP extends JFrame {
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
+			JTextArea editor = model.getCurrentDocument().getTextComponent();
+			Caret caret = editor.getCaret();
+			
+			int pos = caret.getDot();
+			
+			Document doc = editor.getDocument(); // we assume it is instanceof PlainDocument
+			Element root = doc.getDefaultRootElement();
+			
+			int row = root.getElementIndex(pos); // zero-based line index...
+			System.out.println(row);
 		}
 	};
 
@@ -1053,11 +1101,14 @@ public class JNotepadPP extends JFrame {
 
 			int length = editor.getText().length();
 			int nonSpaceLength = getNumberOfNonSpaces(editor.getText());
-			int numberOfLines = getNumberOfNewLineSymbols(editor.getText()) + 1;
+			
+			Document doc = editor.getDocument();
+			Element root = doc.getDefaultRootElement();
+			int row = root.getElementIndex(length-1); 
 
 			StringBuilder sb = new StringBuilder();
 			sb.append("Your document has ").append(length).append(" characters, ").append(nonSpaceLength)
-					.append(" non-blank characters and ").append(numberOfLines).append(" lines.");
+					.append(" non-blank characters and ").append(row+1).append(" lines.");
 
 			JOptionPane.showMessageDialog(JNotepadPP.this, sb.toString(), "Info", JOptionPane.INFORMATION_MESSAGE);
 		}
@@ -1243,26 +1294,7 @@ public class JNotepadPP extends JFrame {
 		return new String(data);
 	}
 
-	/**
-	 * Returns the number of new line symbols. This method is used to find out the
-	 * number of lines in document. Simply, the number of lines is equal : number of
-	 * new line character + 1.
-	 * 
-	 * @param text Document text.
-	 * @return Number of new line symbols.
-	 */
-	private int getNumberOfNewLineSymbols(String text) {
-		int number = 0;
-		char[] data = text.toCharArray();
-
-		for (Character c : data) {
-			if (c == '\n') {
-				number++;
-			}
-		}
-
-		return number;
-	}
+	
 
 	/**
 	 * Counts all non-whitespace characters. White space characters are : tab, new
@@ -1336,34 +1368,6 @@ public class JNotepadPP extends JFrame {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Returns the line number of current position of dot.
-	 * 
-	 * @param text     Text presented in current tab.
-	 * @param dotIndex Current position of dot.
-	 * @return The column number of current position of dot.
-	 */
-	private int getLineNumber(String text, int dotIndex) {
-		return getNumberOfNewLineSymbols(text.substring(0, dotIndex));
-	}
-
-	/**
-	 * Returns the column number of current position of dot.
-	 * 
-	 * @param text     Text presented in current tab.
-	 * @param dotIndex Current position of dot.
-	 * @return The column number of current position of dot.
-	 */
-	private int getColumnNumber(String text, int dotIndex) {
-		int index = dotIndex - 1;
-		char[] data = text.toCharArray();
-
-		while (index >= 0 && data[index] != '\n') {
-			index--;
-		}
-		return dotIndex - index;
 	}
 
 	/**
@@ -1441,16 +1445,23 @@ public class JNotepadPP extends JFrame {
 		 * @param caret        Used to get the mark and dot position.
 		 */
 		private void updateStatusBar(SingleDocumentModel currentModel, Caret caret) {
+			JTextArea editor = currentModel.getTextComponent();
 			String text = currentModel.getTextComponent().getText();
-
+			
 			int length = text.length();
-			int line = getLineNumber(text, caret.getDot());
-			int column = getColumnNumber(text, caret.getDot());
+			
+			int pos = editor.getCaret().getDot();
+			Document doc = editor.getDocument(); 
+			Element root = doc.getDefaultRootElement();
+			
+			int row = root.getElementIndex(pos); 
+			int col = pos - root.getElement(row).getStartOffset(); 
+			
 			int selection = Math.abs(caret.getDot() - caret.getMark());
 
 			StringBuilder sb = new StringBuilder();
-			sb.append("<html><pre>").append("length:").append(length).append("\t").append("Ln:").append(line + 1)
-					.append(" Col:").append(column).append(" Sel:").append(selection).append("</pre></html>");
+			sb.append("<html><pre>").append("length:").append(length).append("\t").append("Ln:").append(row + 1)
+					.append(" Col:").append(col).append(" Sel:").append(selection).append("</pre></html>");
 
 			statusBarLeft.setText(sb.toString());
 			statusBarRight.setText(date + " ");
