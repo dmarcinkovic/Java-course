@@ -259,7 +259,7 @@ public class JNotepadPP extends JFrame {
 		String descriptionTranslation = flp.getString("Save_file_to_disk");
 		saveDocument.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
 
-		addLocalizationListener(saveDocument, "New", "Save_file_to_disk");
+		addLocalizationListener(saveDocument, "Save", "Save_file_to_disk");
 	}
 
 	/**
