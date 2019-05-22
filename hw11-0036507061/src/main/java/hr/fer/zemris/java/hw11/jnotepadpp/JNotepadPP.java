@@ -587,7 +587,8 @@ public class JNotepadPP extends JFrame {
 
 	/**
 	 * Adds items to Language Menu.
-	 * @param language reference to language menu. 
+	 * 
+	 * @param language reference to language menu.
 	 */
 	private void addLanguageMenuItem(JMenu language) {
 		language.add(new JMenuItem(croatiaLanguage));
@@ -596,7 +597,8 @@ public class JNotepadPP extends JFrame {
 	}
 
 	/**
-	 * Adds item to sort menu. 
+	 * Adds item to sort menu.
+	 * 
 	 * @param sort reference to sort menu.
 	 */
 	private void addSortMenuItems(JMenu sort) {
@@ -607,7 +609,7 @@ public class JNotepadPP extends JFrame {
 	/**
 	 * Disables all actions.
 	 */
-	private void disableActions() { 
+	private void disableActions() {
 		paste.setEnabled(false);
 		copy.setEnabled(false);
 		cut.setEnabled(false);
@@ -620,7 +622,7 @@ public class JNotepadPP extends JFrame {
 		invertCaseAction.setEnabled(false);
 		toLowerCase.setEnabled(false);
 		toUpperCase.setEnabled(false);
-		
+
 		ascending.setEnabled(false);
 		descending.setEnabled(false);
 	}
@@ -1393,12 +1395,16 @@ public class JNotepadPP extends JFrame {
 				toUpperCase.setEnabled(true);
 				toLowerCase.setEnabled(true);
 				invertCaseAction.setEnabled(true);
+				ascending.setEnabled(true);
+				descending.setEnabled(true);
 			} else {
 				copy.setEnabled(false);
 				cut.setEnabled(false);
 				toUpperCase.setEnabled(false);
 				toLowerCase.setEnabled(false);
 				invertCaseAction.setEnabled(false);
+				ascending.setEnabled(false);
+				descending.setEnabled(false);
 			}
 
 			if (currentModel.getTextComponent().isFocusOwner()) {
