@@ -18,10 +18,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -104,11 +107,19 @@ public class JNotepadPP extends JFrame {
 	private FormLocalizationProvider flp;
 
 	/**
+	 * Comparator for sorting.
+	 */
+	private Collator collator;
+
+	/**
 	 * Constructor that initializes GUI and creates all necessary listeners.
 	 */
 	public JNotepadPP() throws HeadlessException {
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		setSize(800, 600);
+
+		Locale locale = new Locale("en");
+		collator = Collator.getInstance(locale);
 
 		flp = new FormLocalizationProvider(LocalizationProvider.getInstance(), this);
 
@@ -501,8 +512,8 @@ public class JNotepadPP extends JFrame {
 	}
 
 	/**
-	 * Configure ascending sort action. This method sets name for this action,
-	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * Configure ascending sort action. This method sets name for this action, also
+	 * it sets accelerator key and mnemonic key. It sets one additional thing:
 	 * description of the action. This description is shown when user holds the
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
@@ -519,8 +530,8 @@ public class JNotepadPP extends JFrame {
 	}
 
 	/**
-	 * Configure descending sort action. This method sets name for this action,
-	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * Configure descending sort action. This method sets name for this action, also
+	 * it sets accelerator key and mnemonic key. It sets one additional thing:
 	 * description of the action. This description is shown when user holds the
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
@@ -535,7 +546,7 @@ public class JNotepadPP extends JFrame {
 
 		addLocalizationListener(descending, "Descending", "Sort_descending");
 	}
-	
+
 	/**
 	 * Adds localization listener, so that when user changes language in menu, GUI
 	 * updates instantly.
@@ -725,9 +736,94 @@ public class JNotepadPP extends JFrame {
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			JTextArea editor = model.getCurrentDocument().getTextComponent();
 
+			editor.setText(newString(0));
 		}
 	};
+
+	/**
+	 * Return string after sorting text. It accepts only one argument. When argument
+	 * is 0 then selected part of the text is sorted ascending, otherwise it is
+	 * sorted descending.
+	 * 
+	 * @param action Argument explained in text.
+	 * @return String after sorting text.
+	 */
+	private String newString(int action) {
+		JTextArea editor = model.getCurrentDocument().getTextComponent();
+
+		Caret caret = editor.getCaret();
+		int start = Math.min(caret.getDot(), caret.getMark());
+		int end = Math.max(caret.getDot(), caret.getMark());
+
+		String text = editor.getText();
+		int endIndex = getEndIndex(end, text);
+		int startIndex = getStartIndex(start, text);
+
+		String[] lines = getLines(text, startIndex, endIndex);
+
+		if (action == 0) {
+			Arrays.sort(lines, collator);
+		} else {
+			Arrays.sort(lines, collator.reversed());
+		}
+
+		String joined = String.join("\n", lines);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(text.substring(0, startIndex)).append(joined).append(text.substring(endIndex));
+		return sb.toString();
+	}
+
+	/**
+	 * Returns index of start of current line.
+	 * 
+	 * @param index Index of dot or mark, depends which one is smaller.
+	 * @param text  Editor text.
+	 * @return Index of start of current line.
+	 */
+	private int getStartIndex(int index, String text) {
+		char[] data = text.toCharArray();
+
+		while (index >= 0 && data[index] != '\n') {
+			index--;
+		}
+
+		return index + 1;
+	}
+
+	/**
+	 * Returns all lines that are selected.
+	 * 
+	 * @param text       Editor text.
+	 * @param startIndex Start index of selected text.
+	 * @param endIndex   End index of selected text.
+	 * @return All lines that are selected.
+	 */
+	private String[] getLines(String text, int startIndex, int endIndex) {
+		String[] lines = text.substring(startIndex, endIndex).split("\n");
+
+		return lines;
+	}
+
+	/**
+	 * Returns index of end of this line.
+	 * 
+	 * @param index Index of dot or caret. Depends which one is greater.
+	 * @param text  Editor text.
+	 * @return Index of end of this line.
+	 */
+	private int getEndIndex(int index, String text) {
+		char[] data = text.toCharArray();
+		int len = data.length;
+
+		while (index < len && data[index] != '\n') {
+			index++;
+		}
+
+		return index;
+	}
 
 	/**
 	 * Action that sorts selected lines in descending order. If there is no selected
@@ -751,15 +847,8 @@ public class JNotepadPP extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JTextArea editor = model.getCurrentDocument().getTextComponent();
-			Caret caret = editor.getCaret();
-			
-			int pos = caret.getDot();
-			
-			Document doc = editor.getDocument(); // we assume it is instanceof PlainDocument
-			Element root = doc.getDefaultRootElement();
-			
-			int row = root.getElementIndex(pos); // zero-based line index...
-			System.out.println(row);
+
+			editor.setText(newString(1));
 		}
 	};
 
@@ -1101,14 +1190,14 @@ public class JNotepadPP extends JFrame {
 
 			int length = editor.getText().length();
 			int nonSpaceLength = getNumberOfNonSpaces(editor.getText());
-			
+
 			Document doc = editor.getDocument();
 			Element root = doc.getDefaultRootElement();
-			int row = root.getElementIndex(length-1); 
+			int row = root.getElementIndex(length - 1);
 
 			StringBuilder sb = new StringBuilder();
 			sb.append("Your document has ").append(length).append(" characters, ").append(nonSpaceLength)
-					.append(" non-blank characters and ").append(row+1).append(" lines.");
+					.append(" non-blank characters and ").append(row + 1).append(" lines.");
 
 			JOptionPane.showMessageDialog(JNotepadPP.this, sb.toString(), "Info", JOptionPane.INFORMATION_MESSAGE);
 		}
@@ -1130,6 +1219,8 @@ public class JNotepadPP extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			LocalizationProvider.getInstance().setLanguage("hr");
+			Locale hrLocale = new Locale("hr");
+			collator = Collator.getInstance(hrLocale);
 		}
 	};
 
@@ -1149,7 +1240,8 @@ public class JNotepadPP extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			LocalizationProvider.getInstance().setLanguage("de");
-
+			Locale deLocale = new Locale("de");
+			collator = Collator.getInstance(deLocale);
 		}
 	};
 
@@ -1169,6 +1261,8 @@ public class JNotepadPP extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			LocalizationProvider.getInstance().setLanguage("en");
+			Locale enLocale = new Locale("en");
+			collator = Collator.getInstance(enLocale);
 		}
 	};
 
@@ -1294,8 +1388,6 @@ public class JNotepadPP extends JFrame {
 		return new String(data);
 	}
 
-	
-
 	/**
 	 * Counts all non-whitespace characters. White space characters are : tab, new
 	 * line and space.
@@ -1389,7 +1481,7 @@ public class JNotepadPP extends JFrame {
 			}
 
 			windowTitle = ((DefaultSingleDocumentModel) currentModel).getPathName();
-			setTitle("(" + windowTitle + ") - JNotepad++");
+			setTitle(windowTitle + " - JNotepad++");
 
 			Caret caret = currentModel.getTextComponent().getCaret();
 
@@ -1447,16 +1539,16 @@ public class JNotepadPP extends JFrame {
 		private void updateStatusBar(SingleDocumentModel currentModel, Caret caret) {
 			JTextArea editor = currentModel.getTextComponent();
 			String text = currentModel.getTextComponent().getText();
-			
+
 			int length = text.length();
-			
+
 			int pos = editor.getCaret().getDot();
-			Document doc = editor.getDocument(); 
+			Document doc = editor.getDocument();
 			Element root = doc.getDefaultRootElement();
-			
-			int row = root.getElementIndex(pos); 
-			int col = pos - root.getElement(row).getStartOffset(); 
-			
+
+			int row = root.getElementIndex(pos);
+			int col = pos - root.getElement(row).getStartOffset();
+
 			int selection = Math.abs(caret.getDot() - caret.getMark());
 
 			StringBuilder sb = new StringBuilder();
