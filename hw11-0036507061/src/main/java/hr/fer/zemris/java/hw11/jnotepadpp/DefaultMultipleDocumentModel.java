@@ -23,6 +23,8 @@ import javax.swing.JTextArea;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import hr.fer.zemris.java.hw11.jnotepadpp.local.FormLocalizationProvider;
+
 /**
  * Implementation of {@link MultipleDocumentModel}.
  * 
@@ -73,9 +75,15 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	private ImageIcon saved;
 
 	/**
+	 * {@link FormLocalizationProvider}.
+	 */
+	private FormLocalizationProvider flp;
+
+	/**
 	 * Constructor.
 	 */
-	public DefaultMultipleDocumentModel() {
+	public DefaultMultipleDocumentModel(FormLocalizationProvider flp) {
+		this.flp = flp;
 		listeners = new ArrayList<>();
 		list = new ArrayList<>();
 
@@ -118,7 +126,8 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 			if (is == null) {
 				JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this,
-						"Cannot open icons for showing modified status.", "Error", JOptionPane.ERROR_MESSAGE);
+						flp.getString("Cannot_open_icons_for_showing_modified_status."), flp.getString("Error"),
+						JOptionPane.ERROR_MESSAGE);
 			}
 
 			byte[] bytes = null;
@@ -126,12 +135,14 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 				bytes = is.readAllBytes();
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this,
-						"Cannot open icons for showing modified status.", "Error", JOptionPane.ERROR_MESSAGE);
+						flp.getString("Cannot_open_icons_for_showing_modified_status."), flp.getString("Error"),
+						JOptionPane.ERROR_MESSAGE);
 			}
 			return new ImageIcon(bytes);
 		} catch (IOException e1) {
 			JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this,
-					"Cannot open icons for showing modified status.", "Error", JOptionPane.ERROR_MESSAGE);
+					flp.getString("Cannot_open_icons_for_showing_modified_status."), flp.getString("Error"),
+					JOptionPane.ERROR_MESSAGE);
 		}
 		return null;
 	}
@@ -292,9 +303,10 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		try {
 			text = Files.readString(path);
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, "Cannot load document.", "Error",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, flp.getString("Cannot_load_document."),
+					flp.getString("Error"), JOptionPane.ERROR_MESSAGE);
 		}
+
 		return text;
 	}
 
@@ -373,7 +385,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 		editor = model.getTextComponent();
 
-		saveDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Save"));
+		saveDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, flp.getString("Save")));
 
 		if (openedFilePath != null) {
 			current.setFilePath(openedFilePath);
@@ -398,7 +410,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 		editor = model.getTextComponent();
 
-		saveAsDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Save as..."));
+		saveAsDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, flp.getString("Save_as")));
 
 		if (openedFilePath == null) {
 			return;
@@ -561,7 +573,8 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (openedFilePath == null) {
-				saveAsDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Save"));
+				saveAsDocument
+						.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, flp.getString("Save")));
 			}
 
 			// User pressed cancel.
@@ -573,12 +586,14 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 				Files.writeString(openedFilePath, editor.getText());
 			} catch (IOException e1) {
 				JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this,
-						"An error occured while saving document.", "Error", JOptionPane.ERROR_MESSAGE);
+						flp.getString("An_error_occured_while_saving_document."), flp.getString("Error"),
+						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
-			JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, "Document is saved successfully.",
-					"Information", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this,
+					flp.getString("Document_is_saved_successfully."), flp.getString("Information"),
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 	};
 
@@ -603,25 +618,26 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JFileChooser jfc = new JFileChooser();
-			jfc.setDialogTitle("Save file");
+			jfc.setDialogTitle(flp.getString("Save_file"));
 
 			if (jfc.showSaveDialog(DefaultMultipleDocumentModel.this) != JFileChooser.APPROVE_OPTION) {
-				JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, "Nothing is saved.", "Information",
-						JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, flp.getString("Nothing_is_saved."),
+						flp.getString("Information"), JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 
 			openedFilePath = jfc.getSelectedFile().toPath();
 
 			if (alreadyExistsModel(openedFilePath) != null && model != current) {
-				JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, "Tab already exists", "Warning",
-						JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, flp.getString("Tab_already_exists"),
+						flp.getString("Warning"), JOptionPane.WARNING_MESSAGE);
 				openedFilePath = null;
 				return;
 			} else if (Files.exists(openedFilePath)) {
-				int result = JOptionPane.showConfirmDialog(DefaultMultipleDocumentModel.this, "File already exists. Do you want to overwrite?",
-						"Question", JOptionPane.YES_NO_OPTION);
-				
+				int result = JOptionPane.showConfirmDialog(DefaultMultipleDocumentModel.this,
+						flp.getString("File_already_exists._Do_you_want_to_overwrite?"), flp.getString("Question"),
+						JOptionPane.YES_NO_OPTION);
+
 				if (result == JOptionPane.NO_OPTION) {
 					openedFilePath = null;
 				}

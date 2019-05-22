@@ -125,7 +125,7 @@ public class JNotepadPP extends JFrame {
 
 		flp = new FormLocalizationProvider(LocalizationProvider.getInstance(), this);
 
-		model = new DefaultMultipleDocumentModel();
+		model = new DefaultMultipleDocumentModel(flp);
 
 		setTitle("JNotepad++");
 
@@ -1034,13 +1034,14 @@ public class JNotepadPP extends JFrame {
 	 * @param name Text to be presented in option pane.
 	 */
 	private void askUser(SingleDocumentModel tab, String name) {
-		int result = JOptionPane.showConfirmDialog(JNotepadPP.this, "Do you want to close " + name + " without saving?",
-				"Question", JOptionPane.YES_NO_CANCEL_OPTION);
+		int result = JOptionPane.showConfirmDialog(JNotepadPP.this,
+				flp.getString("Do_you_want_to_close") + " " + name + " " + flp.getString("without_saving?"), flp.getString("Question"),
+				JOptionPane.YES_NO_CANCEL_OPTION);
 
 		if (result == JOptionPane.YES_OPTION) {
 			model.closeDocument(tab);
 		} else if (result == JOptionPane.NO_OPTION) {
-			saveDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Save"));
+			saveDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, flp.getString("Save")));
 		}
 	}
 
@@ -1131,7 +1132,8 @@ public class JNotepadPP extends JFrame {
 				text = doc.getText(start, len);
 				doc.remove(start, len);
 			} catch (BadLocationException e1) {
-				JOptionPane.showMessageDialog(JNotepadPP.this, "Cannot cut.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(JNotepadPP.this, flp.getString("Cannot_cut."), flp.getString("Error"),
+						JOptionPane.ERROR_MESSAGE);
 			}
 
 			setTextToClipboard(text);
@@ -1164,7 +1166,8 @@ public class JNotepadPP extends JFrame {
 			try {
 				theString = editor.getDocument().getText(start, len);
 			} catch (BadLocationException e1) {
-				JOptionPane.showMessageDialog(JNotepadPP.this, "Cannot copy", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(JNotepadPP.this, flp.getString("Cannot_copy"), flp.getString("Error"),
+						JOptionPane.ERROR_MESSAGE);
 			}
 
 			setTextToClipboard(theString);
@@ -1204,7 +1207,7 @@ public class JNotepadPP extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JFileChooser jfc = new JFileChooser();
-			jfc.setDialogTitle("Open file");
+			jfc.setDialogTitle(flp.getString("Open_file"));
 
 			if (jfc.showOpenDialog(JNotepadPP.this) != JFileChooser.APPROVE_OPTION) {
 				return;
@@ -1213,7 +1216,8 @@ public class JNotepadPP extends JFrame {
 			Path file = jfc.getSelectedFile().toPath();
 
 			if (!Files.isReadable(file)) {
-				JOptionPane.showMessageDialog(JNotepadPP.this, "You do not have right to read from that file.", "Error",
+				JOptionPane.showMessageDialog(JNotepadPP.this,
+						flp.getString("You_do_not_have_right_to_read_from_that_file."), flp.getString("Error"),
 						JOptionPane.ERROR_MESSAGE);
 				return;
 			}
@@ -1259,7 +1263,8 @@ public class JNotepadPP extends JFrame {
 			sb.append(s1).append(" ").append(length).append(" ").append(s2).append(", ").append(nonSpaceLength)
 					.append(" ").append(s3).append(" ").append(row + 1).append(" ").append(s4).append(".");
 
-			JOptionPane.showMessageDialog(JNotepadPP.this, sb.toString(), "Info", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(JNotepadPP.this, sb.toString(), flp.getString("Info"),
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 	};
 
@@ -1490,7 +1495,8 @@ public class JNotepadPP extends JFrame {
 
 				if (document.isModified()) {
 					StringBuilder sb = new StringBuilder();
-					sb.append("Do you want to close the: ").append(document.toString()).append(" without saving?");
+					sb.append(flp.getString("Do you want to close the:")).append(" ").append(document.toString())
+							.append(" ").append(flp.getString("without saving?"));
 
 					if (!askUserToCloseTheTab(itr, sb.toString())) {
 						return;
@@ -1510,12 +1516,13 @@ public class JNotepadPP extends JFrame {
 	 * @return False if user click on cancel button, otherwise returns true.
 	 */
 	private boolean askUserToCloseTheTab(Iterator<SingleDocumentModel> itr, String text) {
-		int result = JOptionPane.showConfirmDialog(JNotepadPP.this, text, "Question", JOptionPane.YES_NO_CANCEL_OPTION);
+		int result = JOptionPane.showConfirmDialog(JNotepadPP.this, text, flp.getString("Question"),
+				JOptionPane.YES_NO_CANCEL_OPTION);
 
 		if (JOptionPane.YES_OPTION == result) {
 			itr.remove();
 		} else if (JOptionPane.NO_OPTION == result) {
-			saveDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Save"));
+			saveDocument.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, flp.getString("Save")));
 		} else {
 			return false;
 		}
