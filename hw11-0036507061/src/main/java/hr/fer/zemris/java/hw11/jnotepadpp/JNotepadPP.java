@@ -65,8 +65,7 @@ import hr.fer.zemris.java.hw11.jnotepadpp.local.LocalizationProvider;
  * @author david
  *
  */
-public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava spreminiti vec postojeci file pitaj
-											// ga da li to stvarno zeli
+public class JNotepadPP extends JFrame {
 
 	/**
 	 * Serial version UID.
@@ -444,6 +443,12 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		addLocalizationListener(invertCaseAction, "Invert_Case", "Invert_casing_of_selected_part");
 	}
 
+	/**
+	 * Configure croatianLanguage action. This method sets name for this action,
+	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureCroatiaLanguage() {
 		String translation = flp.getString("Croatian");
 		croatiaLanguage.putValue(Action.NAME, translation);
@@ -456,6 +461,12 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		addLocalizationListener(croatiaLanguage, "Croatian", "Change_language_to_croatian");
 	}
 
+	/**
+	 * Configure englishLanguage action. This method sets name for this action, also
+	 * it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureEnglishLanguage() {
 		String translation = flp.getString("English");
 		englishLanguage.putValue(Action.NAME, translation);
@@ -468,8 +479,14 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		addLocalizationListener(englishLanguage, "English", "Change_language_to_english");
 	}
 
+	/**
+	 * Configure configureGermany action. This method sets name for this action,
+	 * also it sets accelerator key and mnemonic key. It sets one additional thing:
+	 * description of the action. This description is shown when user holds the
+	 * mouse for some time under the action menu of button on toolbar.
+	 */
 	private void configureGermanyLanguage() {
-		String translation = flp.getString("Germany");
+		String translation = flp.getString("German");
 		germanyLanguage.putValue(Action.NAME, translation);
 		germanyLanguage.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control B"));
 		germanyLanguage.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_B);
@@ -477,9 +494,17 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		String descriptionTranslation = flp.getString("Change_language_to_germany");
 		germanyLanguage.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
 
-		addLocalizationListener(germanyLanguage, "Germany", "Change_language_to_germany");
+		addLocalizationListener(germanyLanguage, "German", "Change_language_to_germany");
 	}
 
+	/**
+	 * Adds localization listener, so that when user changes language in menu, GUI
+	 * updates instantly.
+	 * 
+	 * @param action      Reference to action.
+	 * @param text        Name of action to be translated.
+	 * @param description Description of action to be translated.
+	 */
 	private void addLocalizationListener(Action action, String text, String description) {
 		flp.addLocalizationListener(new ILocalizationListener() {
 
@@ -534,12 +559,21 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 
 		addLanguageMenuItem(languages);
 
+		addSortMenuItems(sort);
+
 		menuBar.add(languages);
 		menuBar.add(tools);
 
 		setJMenuBar(menuBar);
 	}
 
+	/**
+	 * Adds localization listener, so that when user changes language in menu, GUI
+	 * updates instantly.
+	 * 
+	 * @param menu Reference to manu.
+	 * @param text Text to be translated.
+	 */
 	private void addLocalizationListenerForMenu(JMenu menu, String text) {
 		flp.addLocalizationListener(new ILocalizationListener() {
 
@@ -551,20 +585,29 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		});
 	}
 
+	/**
+	 * Adds items to Language Menu.
+	 * @param language reference to language menu. 
+	 */
 	private void addLanguageMenuItem(JMenu language) {
 		language.add(new JMenuItem(croatiaLanguage));
 		language.add(new JMenuItem(germanyLanguage));
 		language.add(new JMenuItem(englishLanguage));
 	}
 
+	/**
+	 * Adds item to sort menu. 
+	 * @param sort reference to sort menu.
+	 */
 	private void addSortMenuItems(JMenu sort) {
-
+		sort.add(new JMenuItem(ascending));
+		sort.add(new JMenuItem(descending));
 	}
 
 	/**
 	 * Disables all actions.
 	 */
-	private void disableActions() {
+	private void disableActions() { 
 		paste.setEnabled(false);
 		copy.setEnabled(false);
 		cut.setEnabled(false);
@@ -577,6 +620,9 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		invertCaseAction.setEnabled(false);
 		toLowerCase.setEnabled(false);
 		toUpperCase.setEnabled(false);
+		
+		ascending.setEnabled(false);
+		descending.setEnabled(false);
 	}
 
 	/**
@@ -615,6 +661,57 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		file.add(new JMenuItem(exitApplication));
 		file.add(new JMenuItem(openExistingDocument));
 	}
+
+	/**
+	 * Action that sorts selected lines in ascending order. If there is no selected
+	 * lines this action will be disabled. This action uses local setting, i.e. it
+	 * checks which language is currently selected, and according to this executes
+	 * sort.
+	 * 
+	 */
+	private final Action ascending = new AbstractAction() {
+
+		/**
+		 * Default serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Method that performs action that sorts selected lines in ascending order. If
+		 * there is no selected lines this action will be disabled. This action uses
+		 * local setting, i.e. it checks which language is currently selected, and
+		 * according to this executes sort.
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+		}
+	};
+
+	/**
+	 * Action that sorts selected lines in descending order. If there is no selected
+	 * lines this action will be disabled. This action uses local setting, i.e. it
+	 * checks which language is currently selected, and according to this executes
+	 * sort.
+	 */
+	private final Action descending = new AbstractAction() {
+
+		/**
+		 * Default serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Method that performs action that sorts selected lines in descending order. If
+		 * there is no selected lines this action will be disabled. This action uses
+		 * local setting, i.e. it checks which language is currently selected, and
+		 * according to this executes sort.
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+		}
+	};
 
 	/**
 	 * Action that saves documents. If document is not saved yet, this action ask
@@ -964,6 +1061,9 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		}
 	};
 
+	/**
+	 * Action changes language to croatian.
+	 */
 	private final Action croatiaLanguage = new AbstractAction() {
 
 		/**
@@ -971,12 +1071,18 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * {@inheritDoc}. Performs action that changes language to croatian.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			LocalizationProvider.getInstance().setLanguage("hr");
 		}
 	};
 
+	/**
+	 * Action changes language to german.
+	 */
 	private final Action germanyLanguage = new AbstractAction() {
 
 		/**
@@ -984,6 +1090,9 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * Performs action that changes language to german.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			LocalizationProvider.getInstance().setLanguage("de");
@@ -991,6 +1100,9 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		}
 	};
 
+	/**
+	 * Action changes language to english.
+	 */
 	private final Action englishLanguage = new AbstractAction() {
 
 		/**
@@ -998,6 +1110,9 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		 */
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * {@inheritDoc}. Performs action that changes language to english.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			LocalizationProvider.getInstance().setLanguage("en");
@@ -1105,7 +1220,7 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 	 * If action is 1 then change all characters to lower case. If action is 2 then
 	 * invert all character casing.
 	 */
-	private String toggleCase(String text, int action) { /// TODO must do locale casing.
+	private String toggleCase(String text, int action) {
 		switch (action) {
 		case 0:
 			return text.toUpperCase();
