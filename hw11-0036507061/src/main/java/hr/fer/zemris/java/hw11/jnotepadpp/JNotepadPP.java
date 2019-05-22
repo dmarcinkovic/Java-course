@@ -58,7 +58,9 @@ import hr.fer.zemris.java.hw11.jnotepadpp.local.LocalizationProvider;
  * new document, open existing document. All those actions are also available
  * via menu buttons presented at page start. Information about changes are
  * printed to status bar which is placed at bottom of window. Also, user can
- * access actions via keyboard shortcuts.
+ * access actions via keyboard shortcuts. Program allows user to choose the
+ * language in which hole GUI will be presented. Available languages are :
+ * German, Croatian and English.
  * 
  * @author david
  *

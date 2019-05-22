@@ -434,7 +434,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 	@Override
 	public void closeDocument(SingleDocumentModel model) {
 		int index = list.indexOf(model);
-		
+
 		this.remove(index);
 		boolean removed = list.remove(model);
 
@@ -619,8 +619,12 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 				openedFilePath = null;
 				return;
 			} else if (Files.exists(openedFilePath)) {
-				JOptionPane.showMessageDialog(DefaultMultipleDocumentModel.this, "File already exists", "Warning",
-						JOptionPane.WARNING_MESSAGE);
+				int result = JOptionPane.showConfirmDialog(DefaultMultipleDocumentModel.this, "File already exists. Do you want to overwrite?",
+						"Question", JOptionPane.YES_NO_OPTION);
+				
+				if (result == JOptionPane.NO_OPTION) {
+					openedFilePath = null;
+				}
 			}
 		}
 	};
