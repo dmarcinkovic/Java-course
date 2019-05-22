@@ -232,7 +232,7 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 	 * the mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureSaveDocumentAction() {
-		String translation = flp.getString("New");
+		String translation = flp.getString("Save");
 		saveDocument.putValue(Action.NAME, translation);
 		saveDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
 		saveDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
