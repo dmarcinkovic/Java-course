@@ -218,9 +218,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		exitApplication.putValue(Action.NAME, translation);
 		exitApplication.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control W"));
 		exitApplication.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
-		exitApplication.putValue(Action.SHORT_DESCRIPTION, "Exit application");
 
-		addLocalizationListener(exitApplication, "Exit");
+		String descriptionTranslation = flp.getString("Exit_application");
+		exitApplication.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(exitApplication, "Exit", "Exit_application");
 	}
 
 	/**
@@ -234,9 +236,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		saveDocument.putValue(Action.NAME, translation);
 		saveDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
 		saveDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
-		saveDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
 
-		addLocalizationListener(saveDocument, "New");
+		String descriptionTranslation = flp.getString("Save_file_to_disk");
+		saveDocument.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(saveDocument, "New", "Save_file_to_disk");
 	}
 
 	/**
@@ -251,9 +255,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		createNewDocument.putValue(Action.NAME, translation);
 		createNewDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control N"));
 		createNewDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
-		createNewDocument.putValue(Action.SHORT_DESCRIPTION, "Create new document");
 
-		addLocalizationListener(createNewDocument, "New");
+		String descriptionTranslation = flp.getString("Create_new_document");
+		createNewDocument.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(createNewDocument, "New", "Create_new_document");
 	}
 
 	/**
@@ -267,9 +273,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		saveAsDocument.putValue(Action.NAME, translation);
 		saveAsDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift A"));
 		saveAsDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
-		saveAsDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
 
-		addLocalizationListener(saveAsDocument, "Save_as");
+		String descriptionTranslation = flp.getString("Save_file_to_disk");
+		saveAsDocument.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(saveAsDocument, "Save_as", "Save_file_to_disk");
 	}
 
 	/**
@@ -283,9 +291,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		paste.putValue(Action.NAME, translation);
 		paste.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift V"));
 		paste.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
-		paste.putValue(Action.SHORT_DESCRIPTION, "Paste text");
 
-		addLocalizationListener(paste, "Paste");
+		String descriptionTranslation = flp.getString("Paste_text");
+		paste.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(paste, "Paste", "Paste_text");
 	}
 
 	/**
@@ -299,9 +309,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		copy.putValue(Action.NAME, translation);
 		copy.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift C"));
 		copy.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
-		copy.putValue(Action.SHORT_DESCRIPTION, "Copy text");
 
-		addLocalizationListener(copy, "Copy");
+		String descrptionTranslation = flp.getString("Copy_text");
+		copy.putValue(Action.SHORT_DESCRIPTION, descrptionTranslation);
+
+		addLocalizationListener(copy, "Copy", "Copy_text");
 	}
 
 	/**
@@ -315,9 +327,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		cut.putValue(Action.NAME, translation);
 		cut.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift X"));
 		cut.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
-		cut.putValue(Action.SHORT_DESCRIPTION, "Cut text. Delete and save to clipboard.");
 
-		addLocalizationListener(cut, "Cut");
+		String descriptionTranslation = flp.getString("Cut_text._Delete_and_save_to_clipboard");
+		cut.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(cut, "Cut", "Cut_text._Delete_and_save_to_clipboard");
 	}
 
 	/**
@@ -331,9 +345,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		statisticalInfo.putValue(Action.NAME, translation);
 		statisticalInfo.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control I"));
 		statisticalInfo.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_I);
-		statisticalInfo.putValue(Action.SHORT_DESCRIPTION, "Show statistical info.");
 
-		addLocalizationListener(statisticalInfo, "Info");
+		String descriptionTranslation = flp.getString("Show_statistical_info");
+		statisticalInfo.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(statisticalInfo, "Info", "Show_statistical_info");
 	}
 
 	/**
@@ -347,9 +363,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		openExistingDocument.putValue(Action.NAME, translation);
 		openExistingDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control O"));
 		openExistingDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
-		openExistingDocument.putValue(Action.SHORT_DESCRIPTION, "Open existing document.");
 
-		addLocalizationListener(openExistingDocument, "Open");
+		String descriptionTranslation = flp.getString("Open_existing_document");
+		openExistingDocument.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(openExistingDocument, "Open", "Open_existing_document");
 	}
 
 	/**
@@ -363,9 +381,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		close.putValue(Action.NAME, translation);
 		close.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control Q"));
 		close.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
-		close.putValue(Action.SHORT_DESCRIPTION, "Close current tab.");
 
-		addLocalizationListener(close, "Close");
+		String descriptionTranslation = flp.getString("Close_current_tab");
+		close.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(close, "Close", "Close_current_tab");
 	}
 
 	/**
@@ -379,9 +399,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		toUpperCase.putValue(Action.NAME, translation);
 		toUpperCase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control U"));
 		toUpperCase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_U);
-		toUpperCase.putValue(Action.SHORT_DESCRIPTION, "Convert selected part to uppercase.");
 
-		addLocalizationListener(toUpperCase, "To_Upper_Case");
+		String descriptionTranslation = flp.getString("Convert_selected_part_to_uppercase");
+		toUpperCase.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(toUpperCase, "To_Upper_Case", "Convert_selected_part_to_uppercase");
 	}
 
 	/**
@@ -395,9 +417,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		toLowerCase.putValue(Action.NAME, translation);
 		toLowerCase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control L"));
 		toLowerCase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
-		toLowerCase.putValue(Action.SHORT_DESCRIPTION, "Convert selected part to lowercase.");
 
-		addLocalizationListener(toLowerCase, "To_Lower_Case");
+		String descriptionTranslation = flp.getString("Convert_selected_part_to_lowercase");
+		toLowerCase.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(toLowerCase, "To_Lower_Case", "Convert_selected_part_to_lowercase");
 	}
 
 	/**
@@ -411,9 +435,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		invertCaseAction.putValue(Action.NAME, translation);
 		invertCaseAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control G"));
 		invertCaseAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_G);
-		invertCaseAction.putValue(Action.SHORT_DESCRIPTION, "Invert casing of selected part.");
 
-		addLocalizationListener(invertCaseAction, "Invert_Case");
+		String descriptionTranslation = flp.getString("Invert_casing_of_selected_part");
+		invertCaseAction.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(invertCaseAction, "Invert_Case", "Invert_casing_of_selected_part");
 	}
 
 	private void configureCroatiaLanguage() {
@@ -421,9 +447,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		croatiaLanguage.putValue(Action.NAME, translation);
 		croatiaLanguage.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control M"));
 		croatiaLanguage.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_M);
-		croatiaLanguage.putValue(Action.SHORT_DESCRIPTION, "Change language to croatian.");
 
-		addLocalizationListener(croatiaLanguage, "Croatian");
+		String descriptionTranslation = flp.getString("Change_language_to_croatian");
+		croatiaLanguage.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(croatiaLanguage, "Croatian", "Change_language_to_croatian");
 	}
 
 	private void configureEnglishLanguage() {
@@ -431,9 +459,11 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		englishLanguage.putValue(Action.NAME, translation);
 		englishLanguage.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control N"));
 		englishLanguage.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
-		englishLanguage.putValue(Action.SHORT_DESCRIPTION, "Change language to english.");
 
-		addLocalizationListener(englishLanguage, "English");
+		String descriptionTranslation = flp.getString("Change_language_to_english");
+		englishLanguage.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(englishLanguage, "English", "Change_language_to_english");
 	}
 
 	private void configureGermanyLanguage() {
@@ -441,18 +471,23 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 		germanyLanguage.putValue(Action.NAME, translation);
 		germanyLanguage.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control B"));
 		germanyLanguage.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_B);
-		germanyLanguage.putValue(Action.SHORT_DESCRIPTION, "Change language to germany.");
 
-		addLocalizationListener(germanyLanguage, "Germany");
+		String descriptionTranslation = flp.getString("Change_language_to_germany");
+		germanyLanguage.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(germanyLanguage, "Germany", "Change_language_to_germany");
 	}
 
-	private void addLocalizationListener(Action action, String text) {
+	private void addLocalizationListener(Action action, String text, String description) {
 		flp.addLocalizationListener(new ILocalizationListener() {
 
 			@Override
 			public void localizationChanged() {
 				String translation = flp.getString(text);
 				action.putValue(Action.NAME, translation);
+
+				String descriptionTranslation = flp.getString(description);
+				action.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
 			}
 		});
 	}
@@ -473,17 +508,17 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 
 		JMenu edit = new JMenu(flp.getString("Edit"));
 		addLocalizationListenerForMenu(edit, "Edit");
-		
+
 		menuBar.add(edit);
 
 		addEditFileMenuItems(edit);
 
 		JMenu tools = new JMenu(flp.getString("Tools"));
 		addLocalizationListenerForMenu(tools, "Tools");
-		
+
 		JMenu changeCase = new JMenu(flp.getString("Change_case"));
 		addLocalizationListenerForMenu(changeCase, "Change_case");
-		
+
 		tools.add(changeCase);
 
 		addChangeCaseMenuItems(changeCase);
@@ -494,7 +529,7 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 
 		JMenu languages = new JMenu(flp.getString("Languages"));
 		addLocalizationListenerForMenu(languages, "Languages");
-		
+
 		addLanguageMenuItem(languages);
 
 		menuBar.add(languages);
@@ -502,7 +537,7 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 
 		setJMenuBar(menuBar);
 	}
-	
+
 	private void addLocalizationListenerForMenu(JMenu menu, String text) {
 		flp.addLocalizationListener(new ILocalizationListener() {
 
@@ -511,7 +546,7 @@ public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava sprem
 				String translation = flp.getString(text);
 				menu.setText(translation);
 			}
-		});	
+		});
 	}
 
 	private void addLanguageMenuItem(JMenu language) {
