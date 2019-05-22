@@ -24,7 +24,9 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -219,6 +221,7 @@ public class JNotepadPP extends JFrame {
 		configureCroatiaLanguage();
 		configureAscending();
 		configureDescending();
+		configureUnique();
 	}
 
 	/**
@@ -548,6 +551,24 @@ public class JNotepadPP extends JFrame {
 	}
 
 	/**
+	 * Configure unique action. This method sets name for this action, also it sets
+	 * accelerator key and mnemonic key. It sets one additional thing: description
+	 * of the action. This description is shown when user holds the mouse for some
+	 * time under the action menu of button on toolbar.
+	 */
+	private void configureUnique() {
+		String translation = flp.getString("Unique");
+		unique.putValue(Action.NAME, translation);
+		unique.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift F"));
+		unique.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_Y);
+
+		String descriptionTranslation = flp.getString("Removes_duplicate_lines");
+		unique.putValue(Action.SHORT_DESCRIPTION, descriptionTranslation);
+
+		addLocalizationListener(unique, "Unique", "Removes_duplicate_lines");
+	}
+
+	/**
 	 * Adds localization listener, so that when user changes language in menu, GUI
 	 * updates instantly.
 	 * 
@@ -606,6 +627,8 @@ public class JNotepadPP extends JFrame {
 
 		JMenu languages = new JMenu(flp.getString("Languages"));
 		addLocalizationListenerForMenu(languages, "Languages");
+
+		tools.add(new JMenuItem(unique));
 
 		addLanguageMenuItem(languages);
 
@@ -675,6 +698,7 @@ public class JNotepadPP extends JFrame {
 
 		ascending.setEnabled(false);
 		descending.setEnabled(false);
+		unique.setEnabled(false);
 	}
 
 	/**
@@ -715,6 +739,31 @@ public class JNotepadPP extends JFrame {
 	}
 
 	/**
+	 * Action that removes all duplicate lines. If there is no selected lines this
+	 * action will be disabled.
+	 * 
+	 */
+	private final Action unique = new AbstractAction() {
+
+		/**
+		 * Default serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Method that performs action that removes all duplicate lines. If there is no
+		 * selected lines this action will be disabled.
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JTextArea editor = model.getCurrentDocument().getTextComponent();
+
+			editor.setText(newString(2));
+		}
+
+	};
+
+	/**
 	 * Action that sorts selected lines in ascending order. If there is no selected
 	 * lines this action will be disabled. This action uses local setting, i.e. it
 	 * checks which language is currently selected, and according to this executes
@@ -744,8 +793,8 @@ public class JNotepadPP extends JFrame {
 
 	/**
 	 * Return string after sorting text. It accepts only one argument. When argument
-	 * is 0 then selected part of the text is sorted ascending, otherwise it is
-	 * sorted descending.
+	 * is 0 then selected part of the text is sorted ascending, if action is 1 then
+	 * it sorts descending. If action is 2 it removes duplicate lines.
 	 * 
 	 * @param action Argument explained in text.
 	 * @return String after sorting text.
@@ -765,8 +814,14 @@ public class JNotepadPP extends JFrame {
 
 		if (action == 0) {
 			Arrays.sort(lines, collator);
-		} else {
+		} else if (action == 1){
 			Arrays.sort(lines, collator.reversed());
+		} else {
+			Set<String> set = new LinkedHashSet<>();
+
+			set.addAll(Arrays.asList(lines));
+			
+			lines = set.toArray(new String[set.size()]);
 		}
 
 		String joined = String.join("\n", lines);
@@ -1493,6 +1548,7 @@ public class JNotepadPP extends JFrame {
 				invertCaseAction.setEnabled(true);
 				ascending.setEnabled(true);
 				descending.setEnabled(true);
+				unique.setEnabled(true);
 			} else {
 				copy.setEnabled(false);
 				cut.setEnabled(false);
@@ -1501,6 +1557,7 @@ public class JNotepadPP extends JFrame {
 				invertCaseAction.setEnabled(false);
 				ascending.setEnabled(false);
 				descending.setEnabled(false);
+				unique.setEnabled(false);
 			}
 
 			if (currentModel.getTextComponent().isFocusOwner()) {
