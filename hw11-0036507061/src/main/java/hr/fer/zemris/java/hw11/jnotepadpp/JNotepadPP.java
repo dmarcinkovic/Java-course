@@ -44,6 +44,10 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
 
+import hr.fer.zemris.java.hw11.jnotepadpp.local.FormLocalizationProvider;
+import hr.fer.zemris.java.hw11.jnotepadpp.local.ILocalizationListener;
+import hr.fer.zemris.java.hw11.jnotepadpp.local.LocalizationProvider;
+
 /**
  * Program that creates program similar to Notepad++ on Window operating system.
  * User can add one or more tabs in which he can work in parallel. Also, user
@@ -59,7 +63,8 @@ import javax.swing.text.Document;
  * @author david
  *
  */
-public class JNotepadPP extends JFrame {
+public class JNotepadPP extends JFrame { /// TODO ako je korisnik pokusava spreminiti vec postojeci file pitaj
+											// ga da li to stvarno zeli
 
 	/**
 	 * Serial version UID.
@@ -92,27 +97,18 @@ public class JNotepadPP extends JFrame {
 	private String date;
 
 	/**
-	 * Menu item for converting selected part of text to upper case.
+	 * {@link FormLocalizationProvider}.
 	 */
-	private JMenuItem toUppercase;
-
-	/**
-	 * Menu item for converting selected part of text to lower case.
-	 */
-	private JMenuItem toLowercase;
-
-	/**
-	 * Menu item for inverting case of every character. For example, if current text
-	 * is AbCd then after this menu is clicked, text will be aBcD.
-	 */
-	private JMenuItem invertCase;
+	private FormLocalizationProvider flp;
 
 	/**
 	 * Constructor that initializes GUI and creates all necessary listeners.
 	 */
-	public JNotepadPP() {
+	public JNotepadPP() throws HeadlessException {
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		setSize(600, 500);
+		setSize(800, 600);
+
+		flp = new FormLocalizationProvider(LocalizationProvider.getInstance(), this);
 
 		model = new DefaultMultipleDocumentModel();
 
@@ -205,6 +201,9 @@ public class JNotepadPP extends JFrame {
 		configureInverCase();
 		configureToLowercase();
 		configureToUppercase();
+		configureEnglishLanguage();
+		configureGermanyLanguage();
+		configureCroatiaLanguage();
 	}
 
 	/**
@@ -215,10 +214,13 @@ public class JNotepadPP extends JFrame {
 	 * toolbar.
 	 */
 	private void configureExitApplication() {
-		exitApplication.putValue(Action.NAME, "Exit");
+		String translation = flp.getString("Exit");
+		exitApplication.putValue(Action.NAME, translation);
 		exitApplication.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control W"));
 		exitApplication.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
 		exitApplication.putValue(Action.SHORT_DESCRIPTION, "Exit application");
+
+		addLocalizationListener(exitApplication, "Exit");
 	}
 
 	/**
@@ -228,10 +230,13 @@ public class JNotepadPP extends JFrame {
 	 * the mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureSaveDocumentAction() {
-		saveDocument.putValue(Action.NAME, "Save");
+		String translation = flp.getString("New");
+		saveDocument.putValue(Action.NAME, translation);
 		saveDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
 		saveDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 		saveDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
+
+		addLocalizationListener(saveDocument, "New");
 	}
 
 	/**
@@ -242,10 +247,13 @@ public class JNotepadPP extends JFrame {
 	 * toolbar.
 	 */
 	private void configureCreateNewDocument() {
-		createNewDocument.putValue(Action.NAME, "New");
+		String translation = flp.getString("New");
+		createNewDocument.putValue(Action.NAME, translation);
 		createNewDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control N"));
 		createNewDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
 		createNewDocument.putValue(Action.SHORT_DESCRIPTION, "Create new document");
+
+		addLocalizationListener(createNewDocument, "New");
 	}
 
 	/**
@@ -255,10 +263,13 @@ public class JNotepadPP extends JFrame {
 	 * the mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureSaveAsDocument() {
-		saveAsDocument.putValue(Action.NAME, "Save as...");
+		String translation = flp.getString("Save_as");
+		saveAsDocument.putValue(Action.NAME, translation);
 		saveAsDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift A"));
 		saveAsDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAsDocument.putValue(Action.SHORT_DESCRIPTION, "Save file to disk");
+
+		addLocalizationListener(saveAsDocument, "Save_as");
 	}
 
 	/**
@@ -268,10 +279,13 @@ public class JNotepadPP extends JFrame {
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configurePaste() {
-		paste.putValue(Action.NAME, "Paste");
+		String translation = flp.getString("Paste");
+		paste.putValue(Action.NAME, translation);
 		paste.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift V"));
 		paste.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		paste.putValue(Action.SHORT_DESCRIPTION, "Paste text");
+
+		addLocalizationListener(paste, "Paste");
 	}
 
 	/**
@@ -281,10 +295,13 @@ public class JNotepadPP extends JFrame {
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureCopy() {
-		copy.putValue(Action.NAME, "Copy");
+		String translation = flp.getString("Copy");
+		copy.putValue(Action.NAME, translation);
 		copy.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift C"));
 		copy.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
 		copy.putValue(Action.SHORT_DESCRIPTION, "Copy text");
+
+		addLocalizationListener(copy, "Copy");
 	}
 
 	/**
@@ -294,10 +311,13 @@ public class JNotepadPP extends JFrame {
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureCut() {
-		cut.putValue(Action.NAME, "Cut");
+		String translation = flp.getString("Cut");
+		cut.putValue(Action.NAME, translation);
 		cut.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift X"));
 		cut.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
 		cut.putValue(Action.SHORT_DESCRIPTION, "Cut text. Delete and save to clipboard.");
+
+		addLocalizationListener(cut, "Cut");
 	}
 
 	/**
@@ -307,10 +327,13 @@ public class JNotepadPP extends JFrame {
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureStatisticalInfo() {
-		statisticalInfo.putValue(Action.NAME, "Info");
+		String translation = flp.getString("Info");
+		statisticalInfo.putValue(Action.NAME, translation);
 		statisticalInfo.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control I"));
 		statisticalInfo.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_I);
 		statisticalInfo.putValue(Action.SHORT_DESCRIPTION, "Show statistical info.");
+
+		addLocalizationListener(statisticalInfo, "Info");
 	}
 
 	/**
@@ -320,10 +343,13 @@ public class JNotepadPP extends JFrame {
 	 * the mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureOpen() {
-		openExistingDocument.putValue(Action.NAME, "Open");
+		String translation = flp.getString("Open");
+		openExistingDocument.putValue(Action.NAME, translation);
 		openExistingDocument.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control O"));
 		openExistingDocument.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		openExistingDocument.putValue(Action.SHORT_DESCRIPTION, "Open existing document.");
+
+		addLocalizationListener(openExistingDocument, "Open");
 	}
 
 	/**
@@ -333,10 +359,13 @@ public class JNotepadPP extends JFrame {
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureClose() {
-		close.putValue(Action.NAME, "Close");
+		String translation = flp.getString("Close");
+		close.putValue(Action.NAME, translation);
 		close.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control Q"));
 		close.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
 		close.putValue(Action.SHORT_DESCRIPTION, "Close current tab.");
+
+		addLocalizationListener(close, "Close");
 	}
 
 	/**
@@ -346,10 +375,13 @@ public class JNotepadPP extends JFrame {
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureToUppercase() {
-		toUpperCase.putValue(Action.NAME, "To UpperCase");
+		String translation = flp.getString("To_Upper_Case");
+		toUpperCase.putValue(Action.NAME, translation);
 		toUpperCase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control U"));
 		toUpperCase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_U);
 		toUpperCase.putValue(Action.SHORT_DESCRIPTION, "Convert selected part to uppercase.");
+
+		addLocalizationListener(toUpperCase, "To_Upper_Case");
 	}
 
 	/**
@@ -359,10 +391,13 @@ public class JNotepadPP extends JFrame {
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureToLowercase() {
-		toLowerCase.putValue(Action.NAME, "To LowerCase");
+		String translation = flp.getString("To_Lower_Case");
+		toLowerCase.putValue(Action.NAME, translation);
 		toLowerCase.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control L"));
 		toLowerCase.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
 		toLowerCase.putValue(Action.SHORT_DESCRIPTION, "Convert selected part to lowercase.");
+
+		addLocalizationListener(toLowerCase, "To_Lower_Case");
 	}
 
 	/**
@@ -372,10 +407,54 @@ public class JNotepadPP extends JFrame {
 	 * mouse for some time under the action menu of button on toolbar.
 	 */
 	private void configureInverCase() {
-		invertCaseAction.putValue(Action.NAME, "Invert case");
+		String translation = flp.getString("Invert_Case");
+		invertCaseAction.putValue(Action.NAME, translation);
 		invertCaseAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control G"));
 		invertCaseAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_G);
 		invertCaseAction.putValue(Action.SHORT_DESCRIPTION, "Invert casing of selected part.");
+
+		addLocalizationListener(invertCaseAction, "Invert_Case");
+	}
+
+	private void configureCroatiaLanguage() {
+		String translation = flp.getString("Croatian");
+		croatiaLanguage.putValue(Action.NAME, translation);
+		croatiaLanguage.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control M"));
+		croatiaLanguage.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_M);
+		croatiaLanguage.putValue(Action.SHORT_DESCRIPTION, "Change language to croatian.");
+
+		addLocalizationListener(croatiaLanguage, "Croatian");
+	}
+
+	private void configureEnglishLanguage() {
+		String translation = flp.getString("English");
+		englishLanguage.putValue(Action.NAME, translation);
+		englishLanguage.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control N"));
+		englishLanguage.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
+		englishLanguage.putValue(Action.SHORT_DESCRIPTION, "Change language to english.");
+
+		addLocalizationListener(englishLanguage, "English");
+	}
+
+	private void configureGermanyLanguage() {
+		String translation = flp.getString("Germany");
+		germanyLanguage.putValue(Action.NAME, translation);
+		germanyLanguage.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control B"));
+		germanyLanguage.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_B);
+		germanyLanguage.putValue(Action.SHORT_DESCRIPTION, "Change language to germany.");
+
+		addLocalizationListener(germanyLanguage, "Germany");
+	}
+
+	private void addLocalizationListener(Action action, String text) {
+		flp.addLocalizationListener(new ILocalizationListener() {
+
+			@Override
+			public void localizationChanged() {
+				String translation = flp.getString(text);
+				action.putValue(Action.NAME, translation);
+			}
+		});
 	}
 
 	/**
@@ -386,24 +465,63 @@ public class JNotepadPP extends JFrame {
 
 		disableActions();
 
-		JMenu file = new JMenu("File");
+		JMenu file = new JMenu(flp.getString("File"));
 		menuBar.add(file);
+		addLocalizationListenerForMenu(file, "File");
 
 		addFileMenuItems(file);
 
-		JMenu edit = new JMenu("Edit");
+		JMenu edit = new JMenu(flp.getString("Edit"));
+		addLocalizationListenerForMenu(edit, "Edit");
+		
 		menuBar.add(edit);
 
 		addEditFileMenuItems(edit);
 
-		JMenu tools = new JMenu("Tools");
-		JMenu changeCase = new JMenu("Change case");
+		JMenu tools = new JMenu(flp.getString("Tools"));
+		addLocalizationListenerForMenu(tools, "Tools");
+		
+		JMenu changeCase = new JMenu(flp.getString("Change_case"));
+		addLocalizationListenerForMenu(changeCase, "Change_case");
+		
 		tools.add(changeCase);
-		menuBar.add(tools);
 
 		addChangeCaseMenuItems(changeCase);
 
+		JMenu sort = new JMenu(flp.getString("Sort"));
+		tools.add(sort);
+		addLocalizationListenerForMenu(sort, "Sort");
+
+		JMenu languages = new JMenu(flp.getString("Languages"));
+		addLocalizationListenerForMenu(languages, "Languages");
+		
+		addLanguageMenuItem(languages);
+
+		menuBar.add(languages);
+		menuBar.add(tools);
+
 		setJMenuBar(menuBar);
+	}
+	
+	private void addLocalizationListenerForMenu(JMenu menu, String text) {
+		flp.addLocalizationListener(new ILocalizationListener() {
+
+			@Override
+			public void localizationChanged() {
+				String translation = flp.getString(text);
+				menu.setText(translation);
+			}
+		});	
+	}
+
+	private void addLanguageMenuItem(JMenu language) {
+		language.add(new JMenuItem(croatiaLanguage));
+		language.add(new JMenuItem(germanyLanguage));
+		language.add(new JMenuItem(englishLanguage));
+	}
+
+	private void addSortMenuItems(JMenu sort) {
+
 	}
 
 	/**
@@ -430,13 +548,9 @@ public class JNotepadPP extends JFrame {
 	 * @param changeCase changeCase menu.
 	 */
 	private void addChangeCaseMenuItems(JMenu changeCase) {
-		toUppercase = new JMenuItem(toUpperCase);
-		toLowercase = new JMenuItem(toLowerCase);
-		invertCase = new JMenuItem(invertCaseAction);
-
-		changeCase.add(toUppercase);
-		changeCase.add(toLowercase);
-		changeCase.add(invertCase);
+		changeCase.add(new JMenuItem(toUpperCase));
+		changeCase.add(new JMenuItem(toLowerCase));
+		changeCase.add(new JMenuItem(invertCaseAction));
 	}
 
 	/**
@@ -813,6 +927,46 @@ public class JNotepadPP extends JFrame {
 		}
 	};
 
+	private final Action croatiaLanguage = new AbstractAction() {
+
+		/**
+		 * Default serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			LocalizationProvider.getInstance().setLanguage("hr");
+		}
+	};
+
+	private final Action germanyLanguage = new AbstractAction() {
+
+		/**
+		 * Default serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			LocalizationProvider.getInstance().setLanguage("de");
+
+		}
+	};
+
+	private final Action englishLanguage = new AbstractAction() {
+
+		/**
+		 * Default serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			LocalizationProvider.getInstance().setLanguage("en");
+		}
+	};
+
 	/**
 	 * Action used to convert selected part of the text to upper case. For example,
 	 * if selected String is abCD then after this action is executed this part will
@@ -924,7 +1078,7 @@ public class JNotepadPP extends JFrame {
 
 		char[] data = text.toCharArray();
 
-		for (int i = 0; i<data.length; i++) {
+		for (int i = 0; i < data.length; i++) {
 			if (Character.isUpperCase(data[i])) {
 				data[i] = Character.toLowerCase(data[i]);
 			} else if (Character.isLowerCase(data[i])) {
@@ -1183,6 +1337,7 @@ public class JNotepadPP extends JFrame {
 	public static void main(String[] args) {
 		try {
 			SwingUtilities.invokeAndWait(() -> {
+				LocalizationProvider.getInstance().setLanguage("en");
 				new JNotepadPP().setVisible(true);
 			});
 		} catch (InvocationTargetException | InterruptedException e) {
