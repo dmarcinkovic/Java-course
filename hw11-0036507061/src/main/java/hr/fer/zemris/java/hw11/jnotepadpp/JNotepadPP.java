@@ -45,6 +45,7 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
@@ -1286,6 +1287,10 @@ public class JNotepadPP extends JFrame {
 			LocalizationProvider.getInstance().setLanguage("hr");
 			Locale hrLocale = new Locale("hr");
 			collator = Collator.getInstance(hrLocale);
+			
+			UIManager.put("OptionPane.cancelButtonText", flp.getString("Cancel"));
+			UIManager.put("OptionPane.yesButtonText", flp.getString("Yes"));
+			UIManager.put("OptionPane.noButtonText", flp.getString("No"));
 		}
 	};
 
@@ -1307,6 +1312,10 @@ public class JNotepadPP extends JFrame {
 			LocalizationProvider.getInstance().setLanguage("de");
 			Locale deLocale = new Locale("de");
 			collator = Collator.getInstance(deLocale);
+			
+			UIManager.put("OptionPane.cancelButtonText", flp.getString("Cancel"));
+			UIManager.put("OptionPane.yesButtonText", flp.getString("Yes"));
+			UIManager.put("OptionPane.noButtonText", flp.getString("No"));
 		}
 	};
 
@@ -1328,6 +1337,10 @@ public class JNotepadPP extends JFrame {
 			LocalizationProvider.getInstance().setLanguage("en");
 			Locale enLocale = new Locale("en");
 			collator = Collator.getInstance(enLocale);
+
+			UIManager.put("OptionPane.cancelButtonText", flp.getString("Cancel"));
+			UIManager.put("OptionPane.yesButtonText", flp.getString("Yes"));
+			UIManager.put("OptionPane.noButtonText", flp.getString("No"));
 		}
 	};
 
@@ -1495,8 +1508,8 @@ public class JNotepadPP extends JFrame {
 
 				if (document.isModified()) {
 					StringBuilder sb = new StringBuilder();
-					sb.append(flp.getString("Do you want to close the:")).append(" ").append(document.toString())
-							.append(" ").append(flp.getString("without saving?"));
+					sb.append(flp.getString("Do_you_want_to_close_the")).append(": ").append(document.toString())
+							.append(" ").append(flp.getString("without_saving?"));
 
 					if (!askUserToCloseTheTab(itr, sb.toString())) {
 						return;
