@@ -814,13 +814,13 @@ public class JNotepadPP extends JFrame {
 
 		if (action == 0) {
 			Arrays.sort(lines, collator);
-		} else if (action == 1){
+		} else if (action == 1) {
 			Arrays.sort(lines, collator.reversed());
 		} else {
 			Set<String> set = new LinkedHashSet<>();
 
 			set.addAll(Arrays.asList(lines));
-			
+
 			lines = set.toArray(new String[set.size()]);
 		}
 
@@ -1251,8 +1251,13 @@ public class JNotepadPP extends JFrame {
 			int row = root.getElementIndex(length - 1);
 
 			StringBuilder sb = new StringBuilder();
-			sb.append("Your document has ").append(length).append(" characters, ").append(nonSpaceLength)
-					.append(" non-blank characters and ").append(row + 1).append(" lines.");
+
+			String s1 = flp.getString("Your_document_has");
+			String s2 = flp.getString("characters");
+			String s3 = flp.getString("non_blank_characters_and");
+			String s4 = flp.getString("lines");
+			sb.append(s1).append(" ").append(length).append(" ").append(s2).append(", ").append(nonSpaceLength)
+					.append(" ").append(s3).append(" ").append(row + 1).append(" ").append(s4).append(".");
 
 			JOptionPane.showMessageDialog(JNotepadPP.this, sb.toString(), "Info", JOptionPane.INFORMATION_MESSAGE);
 		}
