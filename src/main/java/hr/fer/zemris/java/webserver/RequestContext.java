@@ -360,15 +360,14 @@ public class RequestContext {
 		if (mimeType.startsWith("text/")) {
 			mimeType += "; charset=" + encoding;
 		}
-
+		
 		outputStream.write(new String("Content-Type: " + mimeType + "\r\n").getBytes(StandardCharsets.ISO_8859_1));
 
 		if (contentLength != null) {
-			outputStream.write(new String("Content-Type: " + mimeType + "\r\n").getBytes(StandardCharsets.ISO_8859_1));
 			outputStream.write(new String("Content-Length: " + contentLength.toString() + "\r\n")
 					.getBytes(StandardCharsets.ISO_8859_1));
 		}
-
+		 
 		if (!outputCookies.isEmpty()) {
 			outputCookies.forEach(t -> {
 				try {

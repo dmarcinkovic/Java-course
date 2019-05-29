@@ -33,7 +33,7 @@ public class SmartScriptEngineDemo1 {
 	 *             used.
 	 */
 	public static void main(String[] args) {
-		String documentBody = readFromDisk("osnovni.smscr");
+		String documentBody = readFromDisk("webroot/scripts/osnovni.smscr");
 		Map<String, String> parameters = new HashMap<String, String>();
 		Map<String, String> persistentParameters = new HashMap<String, String>();
 
@@ -42,7 +42,7 @@ public class SmartScriptEngineDemo1 {
 		// create engine and execute it
 		new SmartScriptEngine(new SmartScriptParser(documentBody).getDocumentNode(),
 				new RequestContext(System.out, parameters, persistentParameters, cookies)).execute();
-
+		
 	}
 
 	/**

@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import hr.fer.zemris.java.custom.scripting.exec.SmartScriptEngine;
+import hr.fer.zemris.java.custom.scripting.parser.SmartScriptParser;
 import hr.fer.zemris.java.webserver.RequestContext.RCCookie;
 
 /**
@@ -405,7 +407,7 @@ public class SmartHttpServer {
 					sendError(ostream, 404, "Cannot open file");
 					return;
 				}
-				
+
 				internalDispatchRequest(reqPath.toString(), true);
 
 				String extension = null;
@@ -416,6 +418,11 @@ public class SmartHttpServer {
 					extension = reqPath.toString().substring(index + 1);
 				}
 				
+				if (extension.equals("smscr")) {
+					startEngine(reqPath.toString());
+					return;
+				}
+
 				String mimeType = mimeTypes.get(extension);
 				if (mimeType == null) {
 					mimeType = "application/octet-stream";
@@ -424,15 +431,56 @@ public class SmartHttpServer {
 				RequestContext rc = new RequestContext(ostream, params, permPrams, outputCookies);
 				rc.setMimeType(mimeType);
 				rc.setStatusCode(200);
-
-				long len = Files.size(reqPath);
-				rc.setContentLength(len);
-
+				
 				byte[] data = Files.readAllBytes(reqPath);
 				rc.write(data);
 				ostream.flush();
+				ostream.close();
 			} catch (Exception e) {
 			}
+		}
+
+		private void startEngine(String file) throws IOException {
+			String documentBody = readFromDisk(file);
+			Map<String, String> parameters = new HashMap<String, String>();
+			Map<String, String> persistentParameters = new HashMap<String, String>();
+
+			List<RCCookie> cookies = new ArrayList<RequestContext.RCCookie>();
+
+			RequestContext rc = new RequestContext(ostream, parameters, persistentParameters, cookies, new HashMap<>(), this);
+			rc.setStatusCode(200);
+			
+			// create engine and execute it
+			new SmartScriptEngine(new SmartScriptParser(documentBody).getDocumentNode(), rc).execute(); // TODO change
+			
+			ostream.flush();
+			ostream.close();
+		}
+
+		/**
+		 * Method used to read content of file and convert it to one String.
+		 * 
+		 * @param path Path of file.
+		 * @return String that is obtained by concatenating all lines of input file.
+		 */
+		private String readFromDisk(String path) {
+			Path file = Paths.get(path);
+
+			List<String> lines = null;
+			try {
+				lines = Files.readAllLines(file);
+			} catch (IOException e) {
+				System.err.println("Cannot read from file");
+				System.exit(1);
+			}
+
+			StringBuilder sb = new StringBuilder();
+
+			for (String s : lines) {
+				sb.append(s).append("\n");
+			}
+
+			return sb.toString();
 		}
 
 		private void parseParameters(String paramString) {
@@ -564,7 +612,7 @@ public class SmartHttpServer {
 		}
 
 		public void internalDispatchRequest(String urlPath, boolean directCall) throws Exception {
-			
+
 		}
 	}
 

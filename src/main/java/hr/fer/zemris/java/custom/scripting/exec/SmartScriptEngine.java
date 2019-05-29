@@ -335,7 +335,6 @@ public class SmartScriptEngine {
 				System.err.println("Error");
 				System.exit(1);
 			}
-
 			String x = (String) stack.pop();
 			requestContext.setMimeType(x);
 		}

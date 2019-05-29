@@ -33,7 +33,7 @@ public class SmartScriptEngineDemo3 {
 	 *             used.
 	 */
 	public static void main(String[] args) {
-		String documentBody = readFromDisk("brojPoziva.smscr");
+		String documentBody = readFromDisk("webroot/scripts/brojPoziva.smscr");
 		
 		Map<String,String> parameters = new HashMap<String, String>();
 		Map<String,String> persistentParameters = new HashMap<String, String>();

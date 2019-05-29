@@ -33,7 +33,7 @@ public class SmartScriptEngineDemo5 {
 	 *             used.
 	 */
 	public static void main(String[] args) {
-		String documentBody = readFromDisk("fibonaccih.smscr");
+		String documentBody = readFromDisk("webroot/scripts/fibonaccih.smscr");
 		
 		Map<String,String> parameters = new HashMap<String, String>();
 		Map<String,String> persistentParameters = new HashMap<String, String>();
