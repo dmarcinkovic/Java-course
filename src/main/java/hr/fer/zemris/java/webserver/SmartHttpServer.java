@@ -390,7 +390,6 @@ public class SmartHttpServer {
 					host = domainName;
 				}
 
-				/// String path = requestedPath.substring(0, requestedPath.lastIndexOf('/'));
 				String paramString = requestedPath.substring(requestedPath.lastIndexOf('/'));
 
 				parseParameters(paramString);
@@ -406,6 +405,8 @@ public class SmartHttpServer {
 					sendError(ostream, 404, "Cannot open file");
 					return;
 				}
+				
+				internalDispatchRequest(reqPath.toString(), true);
 
 				String extension = null;
 				int index = reqPath.toString().lastIndexOf('.');
@@ -414,6 +415,7 @@ public class SmartHttpServer {
 				} else {
 					extension = reqPath.toString().substring(index + 1);
 				}
+				
 				String mimeType = mimeTypes.get(extension);
 				if (mimeType == null) {
 					mimeType = "application/octet-stream";
@@ -429,7 +431,7 @@ public class SmartHttpServer {
 				byte[] data = Files.readAllBytes(reqPath);
 				rc.write(data);
 				ostream.flush();
-			} catch (IOException e) {
+			} catch (Exception e) {
 			}
 		}
 

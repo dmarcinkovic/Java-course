@@ -82,7 +82,34 @@ public class RequestContext {
 	private boolean headerGenerated = false;
 
 	/**
-	 * Constructor to initialize private field.
+	 * Read-only IDispatcher property.
+	 */
+	private IDispatcher dispatcher;
+
+	/**
+	 * Constructor to initialize private fields.
+	 * 
+	 * @param outputStream         Stream to which the data is written. must not be
+	 *                             null.
+	 * @param parameters           Map to store parameters. If null, will be treated
+	 *                             as empty.
+	 * @param persistentParameters Map to store persistent parameters. If null, will
+	 *                             be treated as empty.
+	 * @param outputCookies        Cookies. If null, will be treated as empty.
+	 * @param temporaryParameters  Temporary parameters map.
+	 * @param dispatcher           Reference to IDispatcher.
+	 * @throws NullPointerException if outputStream is null.
+	 */
+	public RequestContext(OutputStream outputStream, Map<String, String> parameters,
+			Map<String, String> persistentParameters, List<RCCookie> outputCookies,
+			Map<String, String> temporaryParameters, IDispatcher dispatcher) {
+		this(outputStream, parameters, persistentParameters, outputCookies);
+		this.dispatcher = dispatcher;
+		this.temporaryParameters = temporaryParameters;
+	}
+
+	/**
+	 * Constructor to initialize private fields.
 	 * 
 	 * @param outputStream         Stream to which the data is written. Must not be
 	 *                             null.
@@ -117,7 +144,6 @@ public class RequestContext {
 		parameters = new HashMap<>();
 	}
 
-	
 	/**
 	 * Sets encoding.
 	 * 
