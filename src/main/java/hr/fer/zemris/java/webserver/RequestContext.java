@@ -144,6 +144,10 @@ public class RequestContext {
 		parameters = new HashMap<>();
 	}
 
+	public IDispatcher getDispatcher() {
+		return dispatcher;
+	}
+	
 	/**
 	 * Sets encoding.
 	 * 

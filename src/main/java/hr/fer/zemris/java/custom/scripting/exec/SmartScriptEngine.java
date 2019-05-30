@@ -252,8 +252,8 @@ public class SmartScriptEngine {
 
 			String defValue = (String) stack.pop();
 			String name = (String) stack.pop();
+			
 			String value = requestContext.getTemporaryParameter(name);
-
 			if (value != null) {
 				stack.push(value);
 			} else {

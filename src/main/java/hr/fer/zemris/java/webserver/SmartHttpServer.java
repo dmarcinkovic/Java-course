@@ -2,7 +2,6 @@ package hr.fer.zemris.java.webserver;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,16 +17,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import hr.fer.zemris.java.custom.scripting.exec.SmartScriptEngine;
-import hr.fer.zemris.java.custom.scripting.nodes.EchoNode;
 import hr.fer.zemris.java.custom.scripting.parser.SmartScriptParser;
 import hr.fer.zemris.java.webserver.RequestContext.RCCookie;
 import hr.fer.zemris.java.webserver.workers.CircleWorker;
 import hr.fer.zemris.java.webserver.workers.EchoParams;
 import hr.fer.zemris.java.webserver.workers.HelloWorker;
+import hr.fer.zemris.java.webserver.workers.Home;
+import hr.fer.zemris.java.webserver.workers.SumWorker;
 
 /**
  * Program that runs simple multithreading HTTP server. It reads server
@@ -98,6 +99,9 @@ public class SmartHttpServer {
 	 * Stores informations about the workers.
 	 */
 	private Map<String, IWebWorker> workersMap;
+
+	private Map<String, SessionMapEntry> sessions = new HashMap<String, SmartHttpServer.SessionMapEntry>();
+	private Random sessionRandom = new Random();
 
 	/**
 	 * Constructor which expects only one argument. Path to server.properties file.
@@ -487,12 +491,12 @@ public class SmartHttpServer {
 		}
 
 		private void startEngine(String file) throws IOException {
-			String documentBody = readFromDisk(file);
+			String documentBody = readFromDisk(file.trim());
 
 			List<RCCookie> cookies = new ArrayList<RequestContext.RCCookie>();
 
 			if (context == null) {
-				context = new RequestContext(ostream, params, permPrams, cookies, new HashMap<>(), this);
+				context = new RequestContext(ostream, params, permPrams, cookies, tempParams, this);
 			}
 
 			context.setStatusCode(200);
@@ -511,8 +515,8 @@ public class SmartHttpServer {
 		 */
 		private String readFromDisk(String path) {
 			Path file = Paths.get(path);
-
 			List<String> lines = null;
+
 			try {
 				lines = Files.readAllLines(file);
 			} catch (IOException e) {
@@ -650,6 +654,7 @@ public class SmartHttpServer {
 		 */
 		@Override
 		public void dispatchRequest(String urlPath) throws Exception {
+			urlPath = "webroot" + urlPath;
 			internalDispatchRequest(urlPath, false);
 		}
 
@@ -661,6 +666,10 @@ public class SmartHttpServer {
 				return new HelloWorker();
 			case "CircleWorker":
 				return new CircleWorker();
+			case "SumWorker":
+				return new SumWorker();
+			case "Home":
+				return new Home();
 			}
 			return null;
 		}
@@ -669,7 +678,7 @@ public class SmartHttpServer {
 			String extension = null;
 
 			if (context == null) {
-				context = new RequestContext(ostream, params, permPrams, outputCookies);
+				context = new RequestContext(ostream, params, permPrams, outputCookies, tempParams, this);
 			}
 
 			int index = urlPath.lastIndexOf('.');
@@ -679,8 +688,18 @@ public class SmartHttpServer {
 				extension = urlPath.substring(index + 1);
 			}
 
-			int startIndex = documentRoot.toAbsolutePath().toString().length() + 1;
-			String path = "/" + urlPath.substring(startIndex);
+			String path = null;
+			if (urlPath.startsWith(documentRoot.toAbsolutePath().toString())) {
+				int startIndex = documentRoot.toAbsolutePath().toString().length() + 1;
+				path = "/" + urlPath.substring(startIndex);
+			} else {
+				path = urlPath;
+			}
+
+			if ((path.startsWith("/webroot/private") || path.startsWith("/private")) && directCall) {
+				sendError(ostream, 404, "Cannot open file");
+				return;
+			}
 
 			if (path.startsWith("/ext")) {
 				if (path.length() < 6) {
@@ -727,6 +746,13 @@ public class SmartHttpServer {
 			byte[] data = Files.readAllBytes(Paths.get(urlPath));
 			context.write(data);
 		}
+	}
+
+	private static class SessionMapEntry {
+		String sid;
+		String host;
+		long validUntil;
+		Map<String, String> map;
 	}
 
 	public static void main(String[] args) {
