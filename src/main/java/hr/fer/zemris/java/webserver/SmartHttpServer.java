@@ -2,11 +2,11 @@ package hr.fer.zemris.java.webserver;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +15,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +22,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import hr.fer.zemris.java.custom.scripting.exec.SmartScriptEngine;
+import hr.fer.zemris.java.custom.scripting.nodes.EchoNode;
 import hr.fer.zemris.java.custom.scripting.parser.SmartScriptParser;
 import hr.fer.zemris.java.webserver.RequestContext.RCCookie;
+import hr.fer.zemris.java.webserver.workers.CircleWorker;
+import hr.fer.zemris.java.webserver.workers.EchoParams;
+import hr.fer.zemris.java.webserver.workers.HelloWorker;
 
 /**
  * Program that runs simple multithreading HTTP server. It reads server
@@ -92,6 +95,11 @@ public class SmartHttpServer {
 	private String workersConfig;
 
 	/**
+	 * Stores informations about the workers.
+	 */
+	private Map<String, IWebWorker> workersMap;
+
+	/**
 	 * Constructor which expects only one argument. Path to server.properties file.
 	 * Then it reads all necessary information about the server, including the path
 	 * to mime.properties and workers.properties file.
@@ -109,8 +117,8 @@ public class SmartHttpServer {
 	 * 
 	 * @param path Path to workers.properties file.
 	 */
-	private void readWorkersProperties(String path) {
-		Path file = Paths.get(path);
+	private void readWorkersProperties(String pathToFile) {
+		Path file = Paths.get(pathToFile);
 
 		List<String> lines = null;
 		try {
@@ -120,7 +128,41 @@ public class SmartHttpServer {
 			System.exit(1);
 		}
 
-		/// TODO workers
+		workersMap = new HashMap<>();
+		for (String s : lines) {
+			insertInMap(s);
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private void insertInMap(String s) {
+		int index = s.indexOf('=');
+
+		if (index < 0 || index >= s.length()) {
+			System.err.println("Error");
+			System.exit(1);
+		}
+
+		String path = s.substring(0, index).trim();
+		String fqcn = s.substring(index + 1).trim();
+
+		if (workersMap.containsKey(path)) {
+			throw new IllegalStateException();
+		}
+
+		Class<?> referenceToClass = null;
+		Object newObject = null;
+
+		try {
+			referenceToClass = this.getClass().getClassLoader().loadClass(fqcn);
+			newObject = referenceToClass.newInstance();
+		} catch (Exception e) {
+			System.err.println("Error");
+			System.exit(1);
+		}
+
+		IWebWorker iww = (IWebWorker) newObject;
+		workersMap.put(path, iww);
 	}
 
 	/**
@@ -327,6 +369,8 @@ public class SmartHttpServer {
 		 */
 		private String SID;
 
+		private RequestContext context = null;
+
 		/**
 		 * Constructor to initialize socket.
 		 * 
@@ -392,67 +436,69 @@ public class SmartHttpServer {
 					host = domainName;
 				}
 
-				String paramString = requestedPath.substring(requestedPath.lastIndexOf('/'));
+				String path = getPath(requestedPath);
+				String paramString = getParamString(requestedPath);
 
 				parseParameters(paramString);
 
-				Path reqPath = documentRoot.resolve(requestedPath.substring(1)).toAbsolutePath();
+				Path reqPath = documentRoot.resolve(path.substring(1)).toAbsolutePath();
 
 				if (!reqPath.startsWith(documentRoot.toAbsolutePath().toString())) {
 					sendError(ostream, 403, "Forbidden");
 					return;
 				}
 
-				if (!Files.exists(reqPath) || !Files.isReadable(reqPath)) {
-					sendError(ostream, 404, "Cannot open file");
-					return;
-				}
-
 				internalDispatchRequest(reqPath.toString(), true);
 
-				String extension = null;
-				int index = reqPath.toString().lastIndexOf('.');
-				if (index == -1) {
-					extension = "";
-				} else {
-					extension = reqPath.toString().substring(index + 1);
-				}
-				
-				if (extension.equals("smscr")) {
-					startEngine(reqPath.toString());
-					return;
-				}
-
-				String mimeType = mimeTypes.get(extension);
-				if (mimeType == null) {
-					mimeType = "application/octet-stream";
-				}
-
-				RequestContext rc = new RequestContext(ostream, params, permPrams, outputCookies);
-				rc.setMimeType(mimeType);
-				rc.setStatusCode(200);
-				
-				byte[] data = Files.readAllBytes(reqPath);
-				rc.write(data);
 				ostream.flush();
+
 				ostream.close();
 			} catch (Exception e) {
 			}
 		}
 
+		private String getPath(String requestedPath) {
+			int indexOfQuestion = requestedPath.lastIndexOf('?');
+
+			if (indexOfQuestion == -1) {
+				indexOfQuestion = requestedPath.length();
+			}
+
+			String path = requestedPath.substring(requestedPath.indexOf('/'), indexOfQuestion);
+
+			return path;
+		}
+
+		private String getParamString(String requestedPath) {
+			int indexOfQuestion = requestedPath.lastIndexOf('?');
+
+			if (indexOfQuestion == -1) {
+				indexOfQuestion = requestedPath.length();
+			}
+
+			String paramString = null;
+			if (indexOfQuestion == requestedPath.length()) {
+				paramString = "";
+			} else {
+				paramString = requestedPath.substring(indexOfQuestion + 1).trim();
+			}
+
+			return paramString;
+		}
+
 		private void startEngine(String file) throws IOException {
 			String documentBody = readFromDisk(file);
-			Map<String, String> parameters = new HashMap<String, String>();
-			Map<String, String> persistentParameters = new HashMap<String, String>();
 
 			List<RCCookie> cookies = new ArrayList<RequestContext.RCCookie>();
 
-			RequestContext rc = new RequestContext(ostream, parameters, persistentParameters, cookies, new HashMap<>(), this);
-			rc.setStatusCode(200);
-			
-			// create engine and execute it
-			new SmartScriptEngine(new SmartScriptParser(documentBody).getDocumentNode(), rc).execute(); // TODO change
-			
+			if (context == null) {
+				context = new RequestContext(ostream, params, permPrams, cookies, new HashMap<>(), this);
+			}
+
+			context.setStatusCode(200);
+
+			new SmartScriptEngine(new SmartScriptParser(documentBody).getDocumentNode(), context).execute();
+
 			ostream.flush();
 			ostream.close();
 		}
@@ -484,14 +530,9 @@ public class SmartHttpServer {
 		}
 
 		private void parseParameters(String paramString) {
-			int indexOfQuestion = paramString.indexOf('?');
-
-			if (indexOfQuestion == -1 || indexOfQuestion == paramString.length() - 1) {
+			if (paramString.equals("")) {
 				return;
 			}
-
-			paramString = paramString.substring(indexOfQuestion + 1).trim();
-
 			String[] groups = paramString.split("&");
 
 			for (String s : groups) {
@@ -529,6 +570,7 @@ public class SmartHttpServer {
 			if (!currentLine.isEmpty()) {
 				headers.add(currentLine);
 			}
+
 			return headers;
 		}
 
@@ -608,11 +650,82 @@ public class SmartHttpServer {
 		 */
 		@Override
 		public void dispatchRequest(String urlPath) throws Exception {
+			internalDispatchRequest(urlPath, false);
+		}
 
+		private IWebWorker loadClass(String className) {
+			switch (className) {
+			case "EchoParams":
+				return new EchoParams();
+			case "HelloWorker":
+				return new HelloWorker();
+			case "CircleWorker":
+				return new CircleWorker();
+			}
+			return null;
 		}
 
 		public void internalDispatchRequest(String urlPath, boolean directCall) throws Exception {
+			String extension = null;
 
+			if (context == null) {
+				context = new RequestContext(ostream, params, permPrams, outputCookies);
+			}
+
+			int index = urlPath.lastIndexOf('.');
+			if (index == -1) {
+				extension = "";
+			} else {
+				extension = urlPath.substring(index + 1);
+			}
+
+			int startIndex = documentRoot.toAbsolutePath().toString().length() + 1;
+			String path = "/" + urlPath.substring(startIndex);
+
+			if (path.startsWith("/ext")) {
+				if (path.length() < 6) {
+					sendError(ostream, 404, "Cannot open file");
+					return;
+				}
+				String className = path.substring(5);
+
+				IWebWorker worker = loadClass(className);
+
+				if (worker == null) {
+					sendError(ostream, 404, "Cannot open file");
+					return;
+				}
+
+				worker.processRequest(context);
+				return;
+			}
+
+			if (workersMap.containsKey(path)) {
+				IWebWorker worker = workersMap.get(path);
+				worker.processRequest(context);
+				return;
+			}
+
+			if (extension.equals("smscr")) {
+				startEngine(urlPath);
+				return;
+			}
+
+			if (!Files.exists(Paths.get(urlPath)) || !Files.isReadable(Paths.get(urlPath))) {
+				sendError(ostream, 404, "Cannot open file");
+				return;
+			}
+
+			String mimeType = mimeTypes.get(extension);
+			if (mimeType == null) {
+				mimeType = "application/octet-stream";
+			}
+
+			context.setMimeType(mimeType);
+			context.setStatusCode(200);
+
+			byte[] data = Files.readAllBytes(Paths.get(urlPath));
+			context.write(data);
 		}
 	}
 
