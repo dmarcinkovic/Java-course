@@ -493,10 +493,8 @@ public class SmartHttpServer {
 		private void startEngine(String file) throws IOException {
 			String documentBody = readFromDisk(file.trim());
 
-			List<RCCookie> cookies = new ArrayList<RequestContext.RCCookie>();
-
 			if (context == null) {
-				context = new RequestContext(ostream, params, permPrams, cookies, tempParams, this);
+				context = new RequestContext(ostream, params, permPrams, outputCookies, tempParams, this);
 			}
 
 			context.setStatusCode(200);
@@ -655,6 +653,7 @@ public class SmartHttpServer {
 		@Override
 		public void dispatchRequest(String urlPath) throws Exception {
 			urlPath = "webroot" + urlPath;
+			
 			internalDispatchRequest(urlPath, false);
 		}
 
@@ -719,6 +718,10 @@ public class SmartHttpServer {
 				return;
 			}
 
+			if (path.startsWith("webroot/")) {
+				path = path.substring(7);
+			}
+			
 			if (workersMap.containsKey(path)) {
 				IWebWorker worker = workersMap.get(path);
 				worker.processRequest(context);

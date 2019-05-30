@@ -123,7 +123,7 @@ public class RequestContext {
 	public RequestContext(OutputStream outputStream, Map<String, String> parameters,
 			Map<String, String> persistentParameters, List<RCCookie> outputCookies) {
 		Objects.requireNonNull(outputStream);
-
+		
 		if (parameters == null) {
 			parameters = new HashMap<>();
 		}
@@ -416,6 +416,7 @@ public class RequestContext {
 		if (!headerGenerated) {
 			generateHeader();
 		}
+		
 		outputStream.write(data, offset, len);
 		return this;
 	}
