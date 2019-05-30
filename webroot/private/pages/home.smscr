@@ -1,0 +1,48 @@
+{$= "text/html" @setMimeType $}
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Home</title>
+		<style>
+			body {background-color: #{$= "background" "7F7F7F" @tparamGet $};}
+		</style>
+	</head>
+	<body>
+		<h1>Home</h1>
+		<p>
+			Scripts
+			<br><a href="/scripts/osnovni.smscr">osnovni.smscr</a>
+			<br><a href="/scripts/brojPoziva.smscr">brojPoziva.smscr</a>
+			<br><a href="/scripts/fibonaccih.smscr">fibonaccih.smscr</a>
+		</p>
+		<p>
+			Workers
+			<br><a href="/hello">HelloWorker</a>
+			<br><a href="/cw">CircleWorker</a>
+		</p>
+		<p>
+			SumWorker
+			<FORM action="/calc" method="GET">
+				a = <INPUT type="text" name="a"><br>
+				b = <INPUT type="text" name="b"><br>
+				<INPUT type="submit" value="Submit">
+			</FORM>
+		</p>
+		<p>
+			Background color
+			<FORM action="/setbgcolor">
+				<SELECT name="bgcolor">
+				<OPTION value="7F7F7F"">Gray</OPTION>
+				<OPTION value="FFFFFF"">White</OPTION>
+				<OPTION value="FF0000"">Red</OPTION>
+				<OPTION value="FF7F00"">Orange</OPTION>
+				<OPTION value="FFFF00"">Yellow</OPTION>
+				<OPTION value="00FF00"">Green</OPTION>
+				<OPTION value="007FFF"">Light Blue</OPTION>
+				<OPTION value="0000FF"">Blue</OPTION>
+				<OPTION value="7F007F"">Purple</OPTION>
+				<INPUT type="submit" value="Change">
+			</FORM>
+		</p>
+	</body>
+</html>
