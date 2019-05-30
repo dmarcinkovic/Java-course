@@ -2,26 +2,26 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Home</title>
 		<style>
 			body {background-color: #{$= "background" "7F7F7F" @tparamGet $};}
 		</style>
 	</head>
 	<body>
-		<h1>Home</h1>
+		<p>Color updated: {$= "colorUpdated"  "1" @tparamGet $}</p>
+	
 		<p>
-			Scripts
+			Scripts available
 			<br><a href="/scripts/osnovni.smscr">osnovni.smscr</a>
 			<br><a href="/scripts/brojPoziva.smscr">brojPoziva.smscr</a>
 			<br><a href="/scripts/fibonaccih.smscr">fibonaccih.smscr</a>
 		</p>
 		<p>
-			Workers
+			Workers available
 			<br><a href="/hello">HelloWorker</a>
 			<br><a href="/cw">CircleWorker</a>
 		</p>
 		<p>
-			SumWorker
+			SumWorker : Input two numbers
 			<FORM action="/calc" method="GET">
 				a = <INPUT type="text" name="a"><br>
 				b = <INPUT type="text" name="b"><br>
@@ -32,16 +32,29 @@
 			Background color
 			<FORM action="/setbgcolor">
 				<SELECT name="bgcolor">
-				<OPTION value="7F7F7F"">Gray</OPTION>
 				<OPTION value="FFFFFF"">White</OPTION>
-				<OPTION value="FF0000"">Red</OPTION>
+				<OPTION value="7F7F7F"">Gray</OPTION>
 				<OPTION value="FF7F00"">Orange</OPTION>
-				<OPTION value="FFFF00"">Yellow</OPTION>
-				<OPTION value="00FF00"">Green</OPTION>
-				<OPTION value="007FFF"">Light Blue</OPTION>
 				<OPTION value="0000FF"">Blue</OPTION>
 				<OPTION value="7F007F"">Purple</OPTION>
-				<INPUT type="submit" value="Change">
+				<OPTION value="FFFF00"">Yellow</OPTION>
+				<OPTION value="FF0000"">Red</OPTION>
+				<OPTION value="00FF00"">Green</OPTION>
+				<OPTION value="F0F8FF"">AliceBlue</OPTION>
+				<OPTION value="7FFFD4"">Aquamarine</OPTION>
+				<OPTION value="000000"">Black</OPTION>
+				<OPTION value="8A2BE2"">BlueViolet</OPTION>
+				<OPTION value="A52A2A"">Brown</OPTION>
+				<OPTION value="D2691E"">Chocolate</OPTION>
+				<OPTION value="00FFFF"">Cyan</OPTION>
+				<OPTION value="008B8B"">DarkCyan</OPTION>
+				<OPTION value="006400"">DarkGreen</OPTION>
+				<OPTION value="FF1493"">DeepPink</OPTION>
+				<OPTION value="FFD700"">Gold</OPTION>
+				<OPTION value="7CFC00"">LawnGreen</OPTION>
+				<OPTION value="00FF00"">Lime</OPTION>
+				
+				<INPUT type="submit" value="Change backgroud color">
 			</FORM>
 		</p>
 	</body>
