@@ -85,6 +85,11 @@ public class RequestContext {
 	 * Read-only IDispatcher property.
 	 */
 	private IDispatcher dispatcher;
+	
+	/**
+	 * Session id.
+	 */
+	private String SID; 
 
 	/**
 	 * Constructor to initialize private fields.
@@ -102,10 +107,11 @@ public class RequestContext {
 	 */
 	public RequestContext(OutputStream outputStream, Map<String, String> parameters,
 			Map<String, String> persistentParameters, List<RCCookie> outputCookies,
-			Map<String, String> temporaryParameters, IDispatcher dispatcher) {
+			Map<String, String> temporaryParameters, IDispatcher dispatcher, String SID) {
 		this(outputStream, parameters, persistentParameters, outputCookies);
 		this.dispatcher = dispatcher;
 		this.temporaryParameters = temporaryParameters;
+		this.SID = SID;
 	}
 
 	/**
@@ -123,7 +129,7 @@ public class RequestContext {
 	public RequestContext(OutputStream outputStream, Map<String, String> parameters,
 			Map<String, String> persistentParameters, List<RCCookie> outputCookies) {
 		Objects.requireNonNull(outputStream);
-		
+
 		if (parameters == null) {
 			parameters = new HashMap<>();
 		}
@@ -144,10 +150,15 @@ public class RequestContext {
 		parameters = new HashMap<>();
 	}
 
+	/**
+	 * Returns dispatcher.
+	 * 
+	 * @return Dispatcher.
+	 */
 	public IDispatcher getDispatcher() {
 		return dispatcher;
 	}
-	
+
 	/**
 	 * Sets encoding.
 	 * 
@@ -322,7 +333,7 @@ public class RequestContext {
 	 * @return Session ID.
 	 */
 	public String getSessionID() {
-		return "";
+		return SID;
 	}
 
 	/**
@@ -364,14 +375,14 @@ public class RequestContext {
 		if (mimeType.startsWith("text/")) {
 			mimeType += "; charset=" + encoding;
 		}
-		
+
 		outputStream.write(new String("Content-Type: " + mimeType + "\r\n").getBytes(StandardCharsets.ISO_8859_1));
 
 		if (contentLength != null) {
 			outputStream.write(new String("Content-Length: " + contentLength.toString() + "\r\n")
 					.getBytes(StandardCharsets.ISO_8859_1));
 		}
-		 
+
 		if (!outputCookies.isEmpty()) {
 			outputCookies.forEach(t -> {
 				try {
@@ -416,7 +427,7 @@ public class RequestContext {
 		if (!headerGenerated) {
 			generateHeader();
 		}
-		
+
 		outputStream.write(data, offset, len);
 		return this;
 	}
@@ -551,6 +562,5 @@ public class RequestContext {
 
 			return sb.toString();
 		}
-
 	}
 }

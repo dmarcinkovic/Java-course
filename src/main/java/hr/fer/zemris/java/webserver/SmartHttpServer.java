@@ -14,10 +14,12 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -373,6 +375,9 @@ public class SmartHttpServer {
 		 */
 		private String SID;
 
+		/**
+		 * Reference to RequestContext.
+		 */
 		private RequestContext context = null;
 
 		/**
@@ -383,6 +388,18 @@ public class SmartHttpServer {
 		public ClientWorker(Socket csocket) {
 			super();
 			this.csocket = csocket;
+		}
+		
+		private String generateSID() {
+			StringBuilder sb = new StringBuilder();
+
+			for (int i = 0; i < 20; i++) {
+				int rand = sessionRandom.nextInt(26);
+				char random = (char) ('A' + rand);
+				sb.append(random);
+			}
+
+			return sb.toString();
 		}
 
 		/**
@@ -443,6 +460,8 @@ public class SmartHttpServer {
 				String path = getPath(requestedPath);
 				String paramString = getParamString(requestedPath);
 
+				checkSession(request);
+				
 				parseParameters(paramString);
 
 				Path reqPath = documentRoot.resolve(path.substring(1)).toAbsolutePath();
@@ -459,6 +478,76 @@ public class SmartHttpServer {
 				ostream.close();
 			} catch (Exception e) {
 			}
+		}
+
+		private synchronized void checkSession(List<String> request) {
+			String sidCandidate= null;
+			permPrams = new ConcurrentHashMap<String, String>();
+			
+			for (String header : request) {
+				if (!header.startsWith("Cookie:")){
+					continue;
+				}
+				String cookieName = getCookieName(header);
+				if (cookieName.equals("sid")) {
+					int index = header.indexOf('=');
+					sidCandidate = header.substring(index+2, header.length()-1);
+				}
+			}
+			
+			if (sidCandidate == null) {
+				addNewSession();
+				return;
+			}
+			
+			SessionMapEntry mapEntry = sessions.get(sidCandidate);
+			
+			if (mapEntry == null) {
+				addNewSession();
+				return;
+			}
+			
+			if (!mapEntry.getHost().equals(host)) {
+				addNewSession();
+				return;
+			}
+			
+			System.out.println("Updated session timeout");
+			permPrams.forEach((k,v) -> System.out.println(k + " " + v));
+			permPrams = mapEntry.getMap();
+			
+			Date date = new Date();
+			long currentTime = date.getTime();
+			if (mapEntry.getValidUntil() < currentTime) {
+				sessions.remove(sidCandidate);
+				addNewSession();
+				return;
+			}
+			
+			permPrams = mapEntry.getMap();
+			currentTime = date.getTime();
+			mapEntry.setValidUntil(currentTime+sessionTimeout);
+		}
+		
+		private void addNewSession() {
+			SID = generateSID();
+			Date date = new Date();
+			long time = date.getTime();
+			
+			SessionMapEntry sessionMapEntry = new SessionMapEntry(SID, time + sessionTimeout,
+					permPrams, host);
+			
+			sessions.put(SID, sessionMapEntry);
+			RCCookie cookie = new RCCookie("sid", SID, null, host, "/");
+			
+			outputCookies.add(cookie);
+		}
+		
+		private String getCookieName(String cookie) {
+			int index1 = cookie.indexOf(':');
+			int index2 = cookie.indexOf('=');
+			
+			return cookie.substring(index1+1, index2).trim();
 		}
 
 		private String getPath(String requestedPath) {
@@ -494,7 +583,7 @@ public class SmartHttpServer {
 			String documentBody = readFromDisk(file.trim());
 
 			if (context == null) {
-				context = new RequestContext(ostream, params, permPrams, outputCookies, tempParams, this);
+				context = new RequestContext(ostream, params, permPrams, outputCookies, tempParams, this, SID);
 			}
 
 			context.setStatusCode(200);
@@ -653,7 +742,7 @@ public class SmartHttpServer {
 		@Override
 		public void dispatchRequest(String urlPath) throws Exception {
 			urlPath = "webroot" + urlPath;
-			
+
 			internalDispatchRequest(urlPath, false);
 		}
 
@@ -677,7 +766,7 @@ public class SmartHttpServer {
 			String extension = null;
 
 			if (context == null) {
-				context = new RequestContext(ostream, params, permPrams, outputCookies, tempParams, this);
+				context = new RequestContext(ostream, params, permPrams, outputCookies, tempParams, this, SID);
 			}
 
 			int index = urlPath.lastIndexOf('.');
@@ -721,7 +810,7 @@ public class SmartHttpServer {
 			if (path.startsWith("webroot/")) {
 				path = path.substring(7);
 			}
-			
+
 			if (workersMap.containsKey(path)) {
 				IWebWorker worker = workersMap.get(path);
 				worker.processRequest(context);
@@ -756,8 +845,40 @@ public class SmartHttpServer {
 		String host;
 		long validUntil;
 		Map<String, String> map;
+
+		public SessionMapEntry(String sid, long validUntil, Map<String, String> map, String host) {
+			this.sid = sid;
+			this.validUntil = validUntil;
+			this.map = map;
+			this.host = host;
+		}
+		
+		public String getHost() {
+			return host; 
+		}
+		
+		public long getValidUntil() {
+			return validUntil;
+		}
+		
+		public void setValidUntil(long validUntil) {
+			this.validUntil = validUntil;
+		}
+		
+		private Map<String, String> getMap(){
+			return map;
+		}
 	}
 
+	/**
+	 * Method invoked when running the program. This method creates instance of
+	 * SmartHttpServer and starts the server. It accepts exactly one argument: path
+	 * to server.properties file. In that file all required informations are
+	 * provided. For example: domain name, address, port, session timeout.
+	 * 
+	 * @param args Arguments provided via command line. Only one argument is
+	 *             expected. Path to server.properties file.
+	 */
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.out.println("I expected exactly one argument: path to server.properties file.");

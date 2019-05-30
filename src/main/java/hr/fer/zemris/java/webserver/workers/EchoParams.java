@@ -5,8 +5,20 @@ import java.util.Set;
 import hr.fer.zemris.java.webserver.IWebWorker;
 import hr.fer.zemris.java.webserver.RequestContext;
 
+/**
+ * Worker that is used to simply write all parameters as table. This page can be
+ * accessed by typing /ext/EchoParams to the end of url. Parameters can be
+ * provided by typing question mark and then providing parameters split by &
+ * symbol.
+ * 
+ * @author David
+ *
+ */
 public class EchoParams implements IWebWorker {
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void processRequest(RequestContext context) throws Exception {
 		context.setMimeType("text/html");
