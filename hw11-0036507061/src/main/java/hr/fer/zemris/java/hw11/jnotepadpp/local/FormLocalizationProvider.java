@@ -5,8 +5,18 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
+/**
+ * Class used to form localization.
+ * @author David
+ *
+ */
 public class FormLocalizationProvider extends LocalizationProviderBridge {
 
+	/**
+	 * Constructor to form localization provided.
+	 * @param parent Localization provided. 
+	 * @param frame Instance of this window.
+	 */
 	public FormLocalizationProvider(ILocalizationProvider parent, JFrame frame) {
 		super(parent);
 

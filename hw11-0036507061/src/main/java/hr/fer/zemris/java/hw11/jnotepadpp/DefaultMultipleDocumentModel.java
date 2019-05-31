@@ -414,7 +414,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
 		if (openedFilePath == null) {
 			return;
-		}
+		}	
 
 		current.setFilePath(openedFilePath);
 		current.setModified(false);
@@ -639,6 +639,8 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 						JOptionPane.YES_NO_OPTION);
 
 				if (result == JOptionPane.NO_OPTION) {
+					openedFilePath = null;
+				}else if (result == JOptionPane.CANCEL_OPTION) {
 					openedFilePath = null;
 				}
 			}

@@ -136,6 +136,10 @@ public class JNotepadPP extends JFrame {
 		addWindowListener(new MyWindowListener());
 
 		model.addMultipleDocumentListener(new MyMultipleDocumentListener());
+		
+		Thread thread = new DateUpdater();
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	/**
@@ -153,6 +157,27 @@ public class JNotepadPP extends JFrame {
 		createStatusBar();
 	}
 
+	/**
+	 * Thread that updates the clock presented at status bar at the bottom of the window.
+	 * @author David
+	 *
+	 */
+	private class DateUpdater extends Thread {
+		@Override 
+		public void run() {
+			while (true) {
+				date = getDate();
+				statusBarRight.setText(date + " ");
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+				}
+				
+			}
+			
+		}
+	}
+	
 	/**
 	 * Creates status bar. Status bar is just JLabel. This status bar is updated
 	 * when some changes in GUI occurs. For example when document is saved.
@@ -1541,6 +1566,19 @@ public class JNotepadPP extends JFrame {
 		}
 		return true;
 	}
+	
+	/**
+	 * Returns the current date and time in format : yyyy/MM/dd HH:mm:ss. For
+	 * example: 2019/05/19 13:24:23
+	 * 
+	 * @return Current date as String.
+	 */
+	private String getDate() {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+
+		return dateFormat.format(date);
+	}
 
 	/**
 	 * Implementation of MultipleDocumentListener. This class is used to inform this
@@ -1598,18 +1636,6 @@ public class JNotepadPP extends JFrame {
 			updateStatusBar(currentModel, caret);
 		}
 
-		/**
-		 * Returns the current date and time in format : yyyy/MM/dd HH:mm:ss. For
-		 * example: 2019/05/19 13:24:23
-		 * 
-		 * @return Current date as String.
-		 */
-		private String getDate() {
-			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-			Date date = new Date();
-
-			return dateFormat.format(date);
-		}
 
 		/**
 		 * Method to update status bar. On status bar is presented total length of text,
@@ -1629,7 +1655,7 @@ public class JNotepadPP extends JFrame {
 			Element root = doc.getDefaultRootElement();
 
 			int row = root.getElementIndex(pos);
-			int col = pos - root.getElement(row).getStartOffset();
+			int col = pos - root.getElement(row).getStartOffset() + 1;
 
 			int selection = Math.abs(caret.getDot() - caret.getMark());
 
