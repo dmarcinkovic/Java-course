@@ -7,7 +7,7 @@
 		</style>
 	</head>
 	<body>
-		<p>Color updated: {$= "colorUpdated"  "1" @tparamGet $}</p>
+		<p>Color updated: {$= "colorUpdated"  "1" @pparamGet $}</p>
 	
 		<p>
 			Scripts available
