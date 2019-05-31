@@ -23,9 +23,9 @@ public class BgColorWorker implements IWebWorker {
 
 		if (bgColor != null && bgColor.length() == 6) {
 			context.setPersistentParameter("bgcolor", bgColor);
-			context.setTemporaryParameter("colorUpdated", "yes");
+			context.setPersistentParameter("colorUpdated", "yes");
 		} else {
-			context.setTemporaryParameter("colorUpdated", "no");
+			context.setPersistentParameter("colorUpdated", "no");
 		}
 
 		IDispatcher dispatcher = context.getDispatcher();

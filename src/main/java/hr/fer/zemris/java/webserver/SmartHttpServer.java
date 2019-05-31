@@ -45,6 +45,7 @@ public class SmartHttpServer {
 	/**
 	 * Address this server listen.
 	 */
+	@SuppressWarnings("unused")
 	private String address;
 
 	/**
@@ -102,7 +103,14 @@ public class SmartHttpServer {
 	 */
 	private Map<String, IWebWorker> workersMap;
 
+	/**
+	 * Method that maps SID with Session.
+	 */
 	private Map<String, SessionMapEntry> sessions = new HashMap<String, SmartHttpServer.SessionMapEntry>();
+
+	/**
+	 * Session random generator.
+	 */
 	private Random sessionRandom = new Random();
 
 	/**
@@ -140,6 +148,13 @@ public class SmartHttpServer {
 		}
 	}
 
+	/**
+	 * Method to fill the map that stores workers. This map is used to connect path
+	 * and workers so that when special path is presented in url different worker
+	 * done its job.
+	 * 
+	 * @param s Full qualified class name.
+	 */
 	@SuppressWarnings("deprecation")
 	private void insertInMap(String s) {
 		int index = s.indexOf('=');
@@ -259,14 +274,50 @@ public class SmartHttpServer {
 	}
 
 	/**
+	 * Class that extends Thread. This thread is used to every five minutes remove
+	 * all sessions that have expired. This thread is supposed to be demonic.
+	 * 
+	 * @author David
+	 *
+	 */
+	private class SessionRemover extends Thread {
+		/**
+		 * Constant. 60000 is number of miliseconds in one minute.
+		 */
+		private final long MINUTE = 60_000;
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void run() {
+			while (true) {
+				sessions.entrySet().removeIf(t -> {
+					Date date = new Date();
+					long time = date.getTime();
+					return t.getValue().getValidUntil() < time;
+				});
+
+				try {
+					Thread.sleep(5 * MINUTE);
+				} catch (InterruptedException e) {
+				}
+			}
+		}
+	}
+
+	/**
 	 * Method that starts serverThread if this thread is not already started. Also,
 	 * it initializes thread pool with 'workerThreads' threads.
 	 */
 	protected synchronized void start() {
 		if (serverThread == null) {
 			serverThread = new ServerThread();
-
 			serverThread.start();
+
+			Thread t = new SessionRemover();
+			t.setDaemon(true);
+			t.start();
 		}
 
 		threadPool = Executors.newFixedThreadPool(workerThreads);
@@ -389,7 +440,11 @@ public class SmartHttpServer {
 			super();
 			this.csocket = csocket;
 		}
-		
+
+		/**
+		 * Method used to generate randomly 20 characters. Characters generated are in
+		 * range 'A' - 'Z'. This is used to get every session its unique session id.
+		 */
 		private String generateSID() {
 			StringBuilder sb = new StringBuilder();
 
@@ -461,7 +516,7 @@ public class SmartHttpServer {
 				String paramString = getParamString(requestedPath);
 
 				checkSession(request);
-				
+
 				parseParameters(paramString);
 
 				Path reqPath = documentRoot.resolve(path.substring(1)).toAbsolutePath();
@@ -480,42 +535,51 @@ public class SmartHttpServer {
 			}
 		}
 
+		/**
+		 * Method used to check session.This method goes through all lines of header and
+		 * if it finds header line that starts with 'Cookie' then it performs: It finds
+		 * if cookie name is 'sid'. If so, then we extract session id from that line and
+		 * if that session id is not presented in sessions map we create new
+		 * SessionMapEntry, otherwise we get already existing SessionMapEntry from
+		 * sessions map.
+		 * 
+		 * @param request List of String representing header.
+		 */
 		private synchronized void checkSession(List<String> request) {
-			String sidCandidate= null;
+			String sidCandidate = null;
 			permPrams = new ConcurrentHashMap<String, String>();
-			
+
 			for (String header : request) {
-				if (!header.startsWith("Cookie:")){
+				if (!header.startsWith("Cookie:")) {
 					continue;
 				}
 				String cookieName = getCookieName(header);
 				if (cookieName.equals("sid")) {
 					int index = header.indexOf('=');
-					sidCandidate = header.substring(index+2, header.length()-1);
+					sidCandidate = header.substring(index + 2, header.length() - 1);
 				}
 			}
-			
+
 			if (sidCandidate == null) {
 				addNewSession();
 				return;
 			}
-			
+
 			SessionMapEntry mapEntry = sessions.get(sidCandidate);
-			
+
 			if (mapEntry == null) {
 				addNewSession();
 				return;
 			}
-			
+
 			if (!mapEntry.getHost().equals(host)) {
 				addNewSession();
 				return;
 			}
-			
-			System.out.println("Updated session timeout");
-			permPrams.forEach((k,v) -> System.out.println(k + " " + v));
+
+			permPrams.forEach((k, v) -> System.out.println(k + " " + v));
 			permPrams = mapEntry.getMap();
-			
+
 			Date date = new Date();
 			long currentTime = date.getTime();
 			if (mapEntry.getValidUntil() < currentTime) {
@@ -523,33 +587,50 @@ public class SmartHttpServer {
 				addNewSession();
 				return;
 			}
-			
+
 			permPrams = mapEntry.getMap();
 			currentTime = date.getTime();
-			mapEntry.setValidUntil(currentTime+sessionTimeout);
+			mapEntry.setValidUntil(currentTime + sessionTimeout);
 		}
-		
+
+		/**
+		 * Adds new session. This method generates new session id by calling
+		 * generateId() method. Then it takes current time and adds to it session
+		 * timeout. After that it creates new cookie which is added to outputCookies
+		 * list.
+		 */
 		private void addNewSession() {
 			SID = generateSID();
 			Date date = new Date();
 			long time = date.getTime();
-			
-			SessionMapEntry sessionMapEntry = new SessionMapEntry(SID, time + sessionTimeout,
-					permPrams, host);
-			
+
+			SessionMapEntry sessionMapEntry = new SessionMapEntry(SID, time + sessionTimeout, permPrams, host);
+
 			sessions.put(SID, sessionMapEntry);
 			RCCookie cookie = new RCCookie("sid", SID, null, host, "/");
-			
+
 			outputCookies.add(cookie);
 		}
-		
+
+		/**
+		 * Extracts cookie name from line that start with 'Cookie: '.
+		 * 
+		 * @param cookie Line that starts with 'Cookie: '.
+		 * @return Cookie name.
+		 */
 		private String getCookieName(String cookie) {
 			int index1 = cookie.indexOf(':');
 			int index2 = cookie.indexOf('=');
-			
-			return cookie.substring(index1+1, index2).trim();
+
+			return cookie.substring(index1 + 1, index2).trim();
 		}
 
+		/**
+		 * Returns path from url. It ignores parameters from url.
+		 * 
+		 * @param requestedPath Full path typed in url, including parameters.
+		 * @return Path without parameters.
+		 */
 		private String getPath(String requestedPath) {
 			int indexOfQuestion = requestedPath.lastIndexOf('?');
 
@@ -562,6 +643,12 @@ public class SmartHttpServer {
 			return path;
 		}
 
+		/**
+		 * Returns parameter provided in url. It ignores path from url.
+		 * 
+		 * @param requestedPath Full path typed in url, including path and parameters.
+		 * @return Parameters provided in url.
+		 */
 		private String getParamString(String requestedPath) {
 			int indexOfQuestion = requestedPath.lastIndexOf('?');
 
@@ -579,6 +666,13 @@ public class SmartHttpServer {
 			return paramString;
 		}
 
+		/**
+		 * Method that is invoked when extension of the file is .smscr. This method
+		 * executes that script using SmartScriptEngine.
+		 * 
+		 * @param file Path of the file represented as String.
+		 * @throws IOException When IO operation cannot be executed successfully.
+		 */
 		private void startEngine(String file) throws IOException {
 			String documentBody = readFromDisk(file.trim());
 
@@ -620,6 +714,14 @@ public class SmartHttpServer {
 			return sb.toString();
 		}
 
+		/**
+		 * This method get string with parameters and parse them and put them in
+		 * parameters map. For example if paramString is 'param1=param2&param3=param4'
+		 * then in parametersMap param1 will be the key for param2 value, as well as
+		 * param3 will be key for param4 value.
+		 * 
+		 * @param paramString
+		 */
 		private void parseParameters(String paramString) {
 			if (paramString.equals("")) {
 				return;
@@ -746,6 +848,11 @@ public class SmartHttpServer {
 			internalDispatchRequest(urlPath, false);
 		}
 
+		/**
+		 * Returns the instance of IWebWorker depending on the className.
+		 * @param className Provided class name.
+		 * @return The instance of IWebWorker depending on the class name.
+		 */
 		private IWebWorker loadClass(String className) {
 			switch (className) {
 			case "EchoParams":
@@ -762,6 +869,12 @@ public class SmartHttpServer {
 			return null;
 		}
 
+		/**
+		 * Method used to do internal dispatch request. If direct call is true and path starts with /private than this method will cancel that request.
+		 * @param urlPath Path provided in url. 
+		 * @param directCall Boolean flag that indicates if this method is called directly or not. 
+		 * @throws Exception If error occurs.
+		 */
 		public void internalDispatchRequest(String urlPath, boolean directCall) throws Exception {
 			String extension = null;
 
@@ -840,33 +953,86 @@ public class SmartHttpServer {
 		}
 	}
 
+	/**
+	 * Class that stores all informations about the one session.
+	 * @author David
+	 *
+	 */
 	private static class SessionMapEntry {
-		String sid;
-		String host;
-		long validUntil;
-		Map<String, String> map;
+		
+		/**
+		 * Session id.
+		 */
+		@SuppressWarnings("unused")
+		private String sid;
+		
+		/**
+		 * Host.
+		 */
+		private String host;
+		
+		/**
+		 * The time this session is valid.
+		 */
+		private long validUntil;
+		
+		/**
+		 * Persistent map.
+		 */
+		private Map<String, String> map;
 
+		/**
+		 * Constructor.
+		 * @param sid Session id.
+		 * @param validUntil The time session is valid.
+		 * @param map Persistent map.
+		 * @param host Host.
+		 */
 		public SessionMapEntry(String sid, long validUntil, Map<String, String> map, String host) {
-			this.sid = sid;
+			this.setSid(sid);
 			this.validUntil = validUntil;
 			this.map = map;
 			this.host = host;
 		}
-		
+
+		/**
+		 * Returns host.
+		 * @return Host.
+		 */
 		public String getHost() {
-			return host; 
+			return host;
 		}
-		
+
+		/**
+		 * Returns the time this session is valid.
+		 * @return The time this session is valid.
+		 */
 		public long getValidUntil() {
 			return validUntil;
 		}
-		
+
+		/**
+		 * Sets the time this session is valid.
+		 * @param validUntil New validUntil time.
+		 */
 		public void setValidUntil(long validUntil) {
 			this.validUntil = validUntil;
 		}
-		
-		private Map<String, String> getMap(){
+
+		/**
+		 * Returns map. 
+		 * @return Map.
+		 */
+		private Map<String, String> getMap() {
 			return map;
+		}
+
+		/**
+		 * Sets session id. 
+		 * @param sid Session id.
+		 */
+		public void setSid(String sid) {
+			this.sid = sid;
 		}
 	}
 

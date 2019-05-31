@@ -30,7 +30,7 @@ public class Home implements IWebWorker {
 			context.setPersistentParameter("bgcolor", bgColor);
 		} else {
 			context.setTemporaryParameter("background", "7F7F7F");
-			context.setTemporaryParameter("colorUpdated", "yes");
+			context.setPersistentParameter("colorUpdated", "yes");
 		}
 
 		IDispatcher dispatcher = context.getDispatcher();
