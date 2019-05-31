@@ -57,7 +57,7 @@ class CalcLayoutTest {
 		p.add(l2, new RCPosition(3, 3));
 		Dimension dim = p.getPreferredSize();
 
-		assertEquals(dim.getWidth(), 699);
+		assertEquals(dim.getWidth(), 572);
 		assertEquals(dim.getHeight(), 83);
 	}
 	

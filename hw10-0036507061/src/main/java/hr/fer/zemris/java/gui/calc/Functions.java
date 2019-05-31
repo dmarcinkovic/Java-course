@@ -154,7 +154,6 @@ public class Functions implements ICalculator {
 	 */
 	private void doOperation(String name) {
 		double number = model.getValue();
-		
 		double result = 0;
 		switch (name) {
 		case "1/x":
@@ -197,6 +196,6 @@ public class Functions implements ICalculator {
 			result = Math.atan(1. / number);
 			break;
 		}
-		model.setValue(result);
+		model.setResult(result);
 	}
 }

@@ -27,29 +27,27 @@ public class DemoFrame1 extends JFrame {
 	/**
 	 * Constructor to initialize gui components.
 	 */
-	public DemoFrame1() {
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setSize(500, 500);
-		initGUI();
-	}
+	/*
+	 * public DemoFrame1() {
+	 * setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE); setSize(500,
+	 * 500); initGUI(); }
+	 */
 
 	/**
 	 * Constructor to initialize gui components.
 	 */
-	/*
-	 * public DemoFrame1() {
-	 * setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE); initGUI();
-	 * pack(); }
-	 * 
-	 */
-	
+	public DemoFrame1() {
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		initGUI();
+		pack();
+	}
+
 	/**
 	 * Method to initialize gui components. This method is used to add components to
 	 * this layout.
 	 */
 	private void initGUI() {
 		Container cp = getContentPane();
-		
 		CalcLayout layout = new CalcLayout(3);
 		cp.setLayout(layout);
 

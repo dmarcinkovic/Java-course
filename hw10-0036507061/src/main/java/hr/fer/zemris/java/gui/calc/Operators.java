@@ -126,7 +126,6 @@ public class Operators implements ICalculator {
 	 * @param text Name of the operator.
 	 */
 	private void doAction(String text) {
-		
 		switch (text) {
 		case "=":
 			equal();
