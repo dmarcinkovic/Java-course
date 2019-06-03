@@ -7,6 +7,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Servlet that is used to calculate sin and cosine of all hole numbers between
+ * a and b. 'a' and 'b' are provided as parameters. If 'a' is greater that 'b'
+ * then those two number will be swapped, i.e. 'a' will become 'b' and 'b' will
+ * become 'a'. Also, difference between those two number cannot be greater than
+ * 720.
+ * 
+ * @author David
+ *
+ */
 public class Trigonometric extends HttpServlet {
 
 	/**
@@ -14,6 +24,9 @@ public class Trigonometric extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String a = req.getParameter("a");

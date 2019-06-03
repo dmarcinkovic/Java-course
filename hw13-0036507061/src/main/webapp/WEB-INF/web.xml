@@ -55,7 +55,6 @@
 
 	</servlet-mapping>
 
-
 	<servlet>
 		<servlet-name>cetvrti</servlet-name>
 		<servlet-class>hr.fer.zemris.java.hw13.servleti.Excel</servlet-class>
@@ -66,6 +65,75 @@
 
 		<url-pattern>
   /powers
+  </url-pattern>
+
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>peti</servlet-name>
+		<servlet-class>hr.fer.zemris.java.hw13.servleti.GlasanjeServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>peti</servlet-name>
+
+		<url-pattern>
+  /glasanje
+  </url-pattern>
+
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>sesti</servlet-name>
+		<servlet-class>hr.fer.zemris.java.hw13.servleti.GlasanjeGlasajServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>sesti</servlet-name>
+
+		<url-pattern>
+	/glasanje-glasaj
+  </url-pattern>
+
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>sedmi</servlet-name>
+		<servlet-class>hr.fer.zemris.java.hw13.servleti.GlasanjeRezultatiServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>sedmi</servlet-name>
+
+		<url-pattern>
+	 /glasanje-rezultati
+  </url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>osmi</servlet-name>
+		<servlet-class>hr.fer.zemris.java.hw13.servleti.VotingGraphics</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>osmi</servlet-name>
+
+		<url-pattern>
+	 /glasanje-grafika
+  </url-pattern>
+
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>deveti</servlet-name>
+		<servlet-class>hr.fer.zemris.java.hw13.servleti.VotingXLS</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>deveti</servlet-name>
+
+		<url-pattern>
+	  /glasanje-xls
   </url-pattern>
 
 	</servlet-mapping>

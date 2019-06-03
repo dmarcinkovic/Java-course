@@ -27,7 +27,6 @@
 			</tr>
 		</thead>
 
-
 		<%
 			int a = (Integer) session.getAttribute("a");
 			int b = (Integer) session.getAttribute("b");

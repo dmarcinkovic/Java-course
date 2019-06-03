@@ -16,14 +16,14 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.DefaultPieDataset;
 
 /**
- * Servlet used to draw image of pie-chart using information about the OS usage.
- * The image is presented in .png format. This servlet can be accessed by typing
- * /reportImage to the end of the path.
+ * Servlet that is used to create pie chart that will graphically show the
+ * result of voting. The picture of the pie chart will be presented on
+ * /glasanje-rezultati link.
  * 
  * @author David
  *
  */
-public class ReportImage extends HttpServlet {
+public class VotingGraphics extends HttpServlet {
 
 	/**
 	 * Serial version UID.
@@ -38,33 +38,35 @@ public class ReportImage extends HttpServlet {
 		resp.setContentType("image/png");
 
 		OutputStream outputStream = resp.getOutputStream();
-
-		JFreeChart chart = getChart();
+		int numberOfBands = (int) req.getSession().getAttribute("numberOfBands");
+		JFreeChart chart = getChart(numberOfBands, req);
 		int width = 500;
 		int height = 350;
 		ChartUtilities.writeChartAsPNG(outputStream, chart, width, height);
 	}
 
 	/**
-	 * Method that returns an image of pie chart. This pie chart show the percentage
-	 * of operating system usage. At the first place is linux, with 70% of users.
-	 * Then Mac follows with 20% of users. At the third place if windows with 9% of
-	 * users. An remaining 1% is for other operating systems.
+	 * Method to get pie chart with all informations about the band names.
 	 * 
-	 * @return Image of pie chart.
+	 * @param numberOfBands Number of bands for which it is possible to vote.
+	 * @param req           Request.
+	 * @return Returns Pie chart image.
 	 */
-	public JFreeChart getChart() {
+	public JFreeChart getChart(int numberOfBands, HttpServletRequest req) {
 		DefaultPieDataset dataset = new DefaultPieDataset();
-		dataset.setValue("Linux", 70);
-		dataset.setValue("Windows", 9);
-		dataset.setValue("Max", 20);
-		dataset.setValue("Other", 1);
+
+		for (int i = 1; i <= numberOfBands; i++) {
+			int score = (int) req.getSession().getAttribute(String.valueOf(i));
+			String bandName = (String) req.getSession().getAttribute("id" + String.valueOf(i));
+
+			dataset.setValue(bandName, score);
+		}
 
 		boolean legend = true;
 		boolean tooltips = false;
 		boolean urls = false;
 
-		JFreeChart chart = ChartFactory.createPieChart("OS usage", dataset, legend, tooltips, urls);
+		JFreeChart chart = ChartFactory.createPieChart("Voting results", dataset, legend, tooltips, urls);
 
 		chart.setBorderPaint(Color.GREEN);
 		chart.setBorderStroke(new BasicStroke(5.0f));

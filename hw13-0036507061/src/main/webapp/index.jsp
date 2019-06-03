@@ -24,6 +24,8 @@
 	<br>
 	<a href="powers?a=1&b=100&n=3">Microsoft Excel</a>
 	<br>
+	<a href="appinfo.jsp">App informations</a>
+	<br>
 	<br>
 
 	<form action="trigonometric" method="GET">
