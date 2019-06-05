@@ -36,9 +36,9 @@ public class Excel extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		int a = getA(req);
-		int b = getB(req);
-		int n = getN(req);
+		Integer a = getA(req);
+		Integer b = getB(req);
+		Integer n = getN(req);
 
 		checkParameters(a, b, n, req, resp);
 
@@ -79,9 +79,18 @@ public class Excel extends HttpServlet {
 	 * @throws ServletException If error occurs.
 	 * @throws IOException      If error occurs.
 	 */
-	private void checkParameters(int a, int b, int n, HttpServletRequest req, HttpServletResponse resp)
+	private void checkParameters(Integer a, Integer b, Integer n, HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		if (a < -100 || a > 100) {
+		if (a == null) {
+			req.getSession().setAttribute("error", "Please provide parameter 'a'");
+			req.getRequestDispatcher("WEB-INF/pages/error.jsp").forward(req, resp);
+		}else if (b == null) {
+			req.getSession().setAttribute("error", "Please provide parameter 'b'");
+			req.getRequestDispatcher("WEB-INF/pages/error.jsp").forward(req, resp);
+		}else if (n == null) {
+			req.getSession().setAttribute("error", "Please provide parameter 'n'");
+			req.getRequestDispatcher("WEB-INF/pages/error.jsp").forward(req, resp);
+		} else if (a < -100 || a > 100) {
 			req.getSession().setAttribute("error", "Parameter 'a' must be in range: [-100, 100]");
 			req.getRequestDispatcher("WEB-INF/pages/error.jsp").forward(req, resp);
 		} else if (b < -100 || b > 100) {
@@ -99,9 +108,13 @@ public class Excel extends HttpServlet {
 	 * @param req Request.
 	 * @return Integer value of parameter 'a'.
 	 */
-	private int getA(HttpServletRequest req) {
+	private Integer getA(HttpServletRequest req) {
 		String a = req.getParameter("a");
-
+		
+		if (a == null) {
+			return null;
+		}
+		
 		int varA = -200;
 		try {
 			varA = Integer.parseInt(a);
@@ -117,8 +130,12 @@ public class Excel extends HttpServlet {
 	 * @param req Request.
 	 * @return Integer value of parameter 'b'.
 	 */
-	private int getB(HttpServletRequest req) {
+	private Integer getB(HttpServletRequest req) {
 		String b = req.getParameter("b");
+		
+		if (b == null) {
+			return null;
+		}
 
 		int varB = -200;
 		try {
@@ -135,9 +152,13 @@ public class Excel extends HttpServlet {
 	 * @param req Request.
 	 * @return Integer value of parameter 'n'.
 	 */
-	private int getN(HttpServletRequest req) {
+	private Integer getN(HttpServletRequest req) {
 		String n = req.getParameter("n");
 
+		if (n == null) {
+			return null;
+		}
+		
 		int varN = -200;
 		try {
 			varN = Integer.parseInt(n);

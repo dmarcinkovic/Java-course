@@ -9,6 +9,7 @@
 %>
 <!DOCTYPE html>
 <html>
+<title>Voting results</title>
 <head>
 <style type="text/css">
 table.rez td {

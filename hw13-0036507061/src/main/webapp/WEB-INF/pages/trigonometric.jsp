@@ -14,7 +14,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Trigonometric</title>
 </head>
 <body bgcolor=<%out.write(color);%>>
 

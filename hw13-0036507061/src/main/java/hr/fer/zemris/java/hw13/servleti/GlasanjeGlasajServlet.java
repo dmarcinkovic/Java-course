@@ -64,11 +64,14 @@ public class GlasanjeGlasajServlet extends HttpServlet {
 
 		try (FileOutputStream os = new FileOutputStream(path.toFile())) {
 			for (int i = 1; i <= NUMBER_OF_BANDS; i++) {
-				String line = String.valueOf(i) + "\t" + String.valueOf(score.get(i - 1)) + "\n";
+				Integer value = score.get(i - 1);
+				if (value == null) {
+					value = 0;
+				}
+				String line = String.valueOf(i) + "\t" + String.valueOf(value) + "\n";
 				os.write(line.getBytes());
 			}
 		}
-
 		resp.sendRedirect(req.getContextPath() + "/glasanje-rezultati");
 	}
 }

@@ -15,7 +15,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
  * Servlet that is used to create .xls file in which voting results are written
  * in table. In column 0 there are presented names of the bands. In column 1 are
  * presented scores of the bands. When link to .xls file is clicked, .xls file
- * will be downloaded.
+ * will be download.
  * 
  * @author David
  *

@@ -10,17 +10,31 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Application info</title>
 </head>
 <body bgcolor=<%out.write(color);%>>
 	<%
-		int milisInDay=86_400_000;int milisInHour=3_600_000;int milisInMinute=60_000;int milisInSecond=1_000;
+		int milisInDay=86_400_000;
+		int milisInHour=3_600_000;
+		int milisInMinute=60_000;
+		int milisInSecond=1_000;
 
-			ServletContext sc=request.getServletContext();long startTime=(Long)sc.getAttribute("time");long currentTime=System.currentTimeMillis();
+		ServletContext sc=request.getServletContext();
+		long startTime=(Long)sc.getAttribute("time");
+		long currentTime=System.currentTimeMillis();
 
-			long diff=currentTime-startTime;int days=(int)(diff/milisInDay);int hours=(int)(diff/milisInHour);int minutes=(int)(diff/milisInMinute);int second=(int)(diff/milisInSecond);int milis=(int)(diff%milisInSecond);
+		long diff=currentTime-startTime;
+		int days=(int)(diff/milisInDay);
+		int hours=(int)(diff/milisInHour)%24;
+		int minutes=(int)(diff/milisInMinute)%60;
+		int second=(int)(diff/milisInSecond)%60;
+		int milis=(int)(diff%milisInSecond);
 
-			out.write(String.valueOf(days)+" days "+String.valueOf(hours)+" hours "+String.valueOf(minutes)+" minutes "+String.valueOf(second)+" seconds and "+String.valueOf(milis)+"miliseconds");
+			out.write(String.valueOf(days)+" days "+
+			String.valueOf(hours)+" hours "+
+					String.valueOf(minutes)+" minutes "+
+			String.valueOf(second)+" seconds and "+
+					String.valueOf(milis)+"miliseconds");
 	%>
 </body>
 </html>

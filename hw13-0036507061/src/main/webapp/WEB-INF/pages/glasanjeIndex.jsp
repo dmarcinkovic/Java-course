@@ -11,6 +11,7 @@
 
 <!DOCTYPE html>
 <html>
+<title>Voting</title>
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>

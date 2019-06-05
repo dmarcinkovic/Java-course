@@ -12,13 +12,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Error message</title>
 </head>
 <body bgcolor=<%out.write(color);%>>
 
 	<p>
 		<%
-			session.getAttribute("error");
+		out.write((String)session.getAttribute("error"));
+		
 		%>
 	</p>
 

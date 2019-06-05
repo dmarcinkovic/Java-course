@@ -12,7 +12,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Main page</title>
 </head>
 <body bgcolor=<%out.write(color);%>>
 

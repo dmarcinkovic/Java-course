@@ -13,7 +13,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Change background color</title>
 </head>
 <body bgcolor=<%out.write(color);%>>
 
