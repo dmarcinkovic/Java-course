@@ -1,5 +1,6 @@
 package hr.fer.zemris.java.p12;
 
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +18,11 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.DataSources;
+
+import hr.fer.zemris.java.p12.dao.sql.SQLConnectionProvider;
+
 /**
  * Listener used to listen when the server is started. When server is started,
  * in session map with key equal to 'time' will be remembered current time. This
@@ -27,21 +33,16 @@ import javax.servlet.annotation.WebListener;
  */
 @WebListener
 public class WebApplicationListener implements ServletContextListener {
-	private Map<String, String> map;
+	private Map<String, String> map; /// TODO change password and username
+										/// TODO you must not close connnection
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		System.out.println("App info hw14 started");
-		
-		try {
-			Class.forName("org.apache.derby.jdbc.ClientDriver");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		
+
 		String fileName = sce.getServletContext().getRealPath("/WEB-INF/dbsettings.properties");
 		Path path = Paths.get(fileName);
 
@@ -62,22 +63,39 @@ public class WebApplicationListener implements ServletContextListener {
 
 		initialize(lines);
 
-		String connectionURL = "jdbc:derby://" + map.get("host") + ":" + map.get("port") + "/" + map.get("name");
+		String connectionURL = "jdbc:derby://" + map.get("host") + ":" + map.get("port") + "/" + map.get("name")
+				+ ";user=" + map.get("user") + ";password=" + map.get("password");
 
-		java.util.Properties dbProperties = new java.util.Properties();
-		dbProperties.setProperty("user", map.get("user"));
-		dbProperties.setProperty("password", map.get("password"));
+		ComboPooledDataSource cpds = new ComboPooledDataSource();
+		try {
+			cpds.setDriverClass("org.apache.derby.jdbc.ClientDriver");
+		} catch (PropertyVetoException e1) {
+			throw new RuntimeException("Pogreška prilikom inicijalizacije poola.", e1);
+		}
+		cpds.setJdbcUrl(connectionURL);
+
+		sce.getServletContext().setAttribute("hr.fer.zemris.dbpool", cpds);
+
+		try {
+			Class.forName("org.apache.derby.jdbc.ClientDriver");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+
 		java.sql.Connection dbConnection = null;
 		try {
-			dbConnection = DriverManager.getConnection(connectionURL, dbProperties);
+			dbConnection = DriverManager.getConnection(connectionURL);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(0);
 		}
 
+		SQLConnectionProvider.setConnection(dbConnection);
+
 		createPollTable(dbConnection);
 		createPollOptionsTable(dbConnection);
-		
+
 		addToPollIfEmpty(dbConnection);
 		addToPollOptionsIfEmpty(dbConnection);
 	}
@@ -87,20 +105,29 @@ public class WebApplicationListener implements ServletContextListener {
 	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
+		ComboPooledDataSource cpds = (ComboPooledDataSource) sce.getServletContext()
+				.getAttribute("hr.fer.zemris.dbpool");
+		if (cpds != null) {
+			try {
+				DataSources.destroy(cpds);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	
+
 	private void addToPollOptionsIfEmpty(java.sql.Connection dbConnection) {
 		PreparedStatement pst = null;
 		try {
 			pst = dbConnection.prepareStatement("select * from polloptions");
 			ResultSet rset = pst.executeQuery();
-			
+
 			if (!rset.next()) {
 				addRowsToPollOptions(dbConnection);
 			}
 		} catch (SQLException e) {
 		}
-		
+
 	}
 
 	private void addToPollIfEmpty(java.sql.Connection dbConnection) {
@@ -109,12 +136,12 @@ public class WebApplicationListener implements ServletContextListener {
 		try {
 			pst = dbConnection.prepareStatement("select * from polls");
 			rset = pst.executeQuery();
-			
+
 			if (!rset.next()) {
 				addRowsToPolls(dbConnection);
 			}
 		} catch (SQLException e) {
-		}finally {
+		} finally {
 			try {
 				rset.close();
 			} catch (SQLException e) {
@@ -130,7 +157,7 @@ public class WebApplicationListener implements ServletContextListener {
 							+ " pollID BIGINT,\r\n" + " votesCount BIGINT,\r\n"
 							+ " FOREIGN KEY (pollID) REFERENCES Polls(id)\r\n" + ")");
 			pst.executeUpdate();
-			
+
 			addRowsToPollOptions(c);
 		} catch (SQLException e) {
 		}
@@ -149,60 +176,63 @@ public class WebApplicationListener implements ServletContextListener {
 		}
 
 	}
-	
+
 	private void addRowsToPolls(java.sql.Connection c) {
 		PreparedStatement pst = null;
-		
+
 		try {
 			pst = c.prepareStatement("INSERT INTO Polls (title, message) values(?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
-			
+
 			pst.setString(1, "Glasanje za omiljeni bend:");
 			pst.setString(2, "Od sljedećih bendova, koji Vam je bend najdraži? Kliknite na link kako biste glasali!");
 			pst.executeUpdate();
 
 			pst.setString(1, "Glasanje za omiljeni operacijski sustav:");
-			pst.setString(2, "Od sljedećih operacijskih sustava, koji Vam je najdraži? Kliknite na link kako biste glasali!");
+			pst.setString(2,
+					"Od sljedećih operacijskih sustava, koji Vam je najdraži? Kliknite na link kako biste glasali!");
 			pst.executeUpdate();
 		} catch (SQLException e) {
 		}
 	}
-	
-	private void addRowsToPollOptions(java.sql.Connection c) { // TODO change this
+
+	private void addRowsToPollOptions(java.sql.Connection c) {
 		PreparedStatement pst = null;
 		ResultSet res = null;
 		try {
 			pst = c.prepareStatement("select id from polls");
 			res = pst.executeQuery();
-			
+
 			res.next();
 			long id1 = res.getLong("id");
 			res.next();
 			long id2 = res.getLong("id");
-			
-			pst = c.prepareStatement("insert into polloptions (optionTitle, optionLink, pollID, votesCount) values (?, ?, ?, ?)");
-			
+
+			pst = c.prepareStatement(
+					"insert into polloptions (optionTitle, optionLink, pollID, votesCount) values (?, ?, ?, ?)");
+
 			insertToPollOptions(pst, "The Beatles", "https://www.youtube.com/watch?v=z9ypq6_5bsg", id1, 0);
 			insertToPollOptions(pst, "The Platters", "https://www.youtube.com/watch?v=H2di83WAOhU", id1, 0);
 			insertToPollOptions(pst, "The Beach Boys", "https://www.youtube.com/watch?v=2s4slliAtQU", id1, 0);
 			insertToPollOptions(pst, "The Four Seasons", "https://www.youtube.com/watch?v=y8yvnqHmFds", id1, 0);
-			insertToPollOptions(pst, "The Marcels", "https://www.youtube.com/watch?v=qoi3TH59ZEs" , id1, 0);
+			insertToPollOptions(pst, "The Marcels", "https://www.youtube.com/watch?v=qoi3TH59ZEs", id1, 0);
 			insertToPollOptions(pst, "The Everly Brothers", "https://www.youtube.com/watch?v=tbU3zdAgiX8", id1, 0);
 			insertToPollOptions(pst, "The Mamas And The Papas", "https://www.youtube.com/watch?v=N-aK6JnyFmk", id1, 0);
-			
+
 			insertToPollOptions(pst, "Windows", "https://www.microsoft.com/en-in/windows", id2, 0);
 			insertToPollOptions(pst, "Linux", "https://www.linux.org", id2, 0);
 			insertToPollOptions(pst, "Mac", "https://support.apple.com/macos", id2, 0);
 		} catch (SQLException e) {
-		}finally {
+		} finally {
 			try {
 				res.close();
 			} catch (SQLException e) {
 			}
 		}
 	}
-	
-	private void insertToPollOptions(PreparedStatement pst, String optionTitle, String optionLink, Long pollID, int votesCount) {
+
+	private void insertToPollOptions(PreparedStatement pst, String optionTitle, String optionLink, Long pollID,
+			int votesCount) {
 		try {
 			pst.setString(1, optionTitle);
 			pst.setString(2, optionLink);
@@ -211,9 +241,9 @@ public class WebApplicationListener implements ServletContextListener {
 			pst.executeUpdate();
 		} catch (SQLException e) {
 		}
-		
+
 	}
-	
+
 	private void initialize(List<String> lines) {
 		map = new HashMap<>();
 

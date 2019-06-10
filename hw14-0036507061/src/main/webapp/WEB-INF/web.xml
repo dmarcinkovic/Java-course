@@ -11,5 +11,19 @@
   <description>
      Prva aplikacija
   </description>
+  
+  <servlet>
+		<servlet-name>prvi</servlet-name>
+		<servlet-class>hr.fer.zemris.java.p12.servleti.ListPolls</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>prvi</servlet-name>
+
+		<url-pattern>
+   /servleti/index.html
+  </url-pattern>
+
+	</servlet-mapping>
 
 </web-app>

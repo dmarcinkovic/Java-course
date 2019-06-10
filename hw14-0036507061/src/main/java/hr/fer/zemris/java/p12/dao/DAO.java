@@ -7,5 +7,4 @@ package hr.fer.zemris.java.p12.dao;
  *
  */
 public interface DAO {
-	
 }
