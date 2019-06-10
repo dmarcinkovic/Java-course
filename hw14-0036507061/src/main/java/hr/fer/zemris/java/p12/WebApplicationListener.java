@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,29 +75,53 @@ public class WebApplicationListener implements ServletContextListener {
 			System.exit(0);
 		}
 
-		DatabaseMetaData dbmd = null;
-		ResultSet rs1 = null;
-		ResultSet rs2 = null;
-		try {
-			dbmd = dbConnection.getMetaData();
+		createPollTable(dbConnection);
+		createPollOptionsTable(dbConnection);
+		
+		addToPollIfEmpty(dbConnection);
+		addToPollOptionsIfEmpty(dbConnection);
+	}
 
-			rs1 = dbmd.getTables(null, null, "Polls", null);
-			rs2 = dbmd.getTables(null, null, "PollOptions", null);
-
-			if (!rs1.next()) {
-				createPollTable(dbConnection);
-				System.out.println("Created tables");
-			}
-
-			if (!rs2.next()) {
-				createPollOptionsTable(dbConnection);
-				System.out.println("Created poll options table");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void contextDestroyed(ServletContextEvent sce) {
 	}
 	
+	private void addToPollOptionsIfEmpty(java.sql.Connection dbConnection) {
+		PreparedStatement pst = null;
+		try {
+			pst = dbConnection.prepareStatement("select * from polloptions");
+			ResultSet rset = pst.executeQuery();
+			
+			if (!rset.next()) {
+				addRowsToPollOptions(dbConnection);
+			}
+		} catch (SQLException e) {
+		}
+		
+	}
+
+	private void addToPollIfEmpty(java.sql.Connection dbConnection) {
+		PreparedStatement pst = null;
+		ResultSet rset = null;
+		try {
+			pst = dbConnection.prepareStatement("select * from polls");
+			rset = pst.executeQuery();
+			
+			if (!rset.next()) {
+				addRowsToPolls(dbConnection);
+			}
+		} catch (SQLException e) {
+		}finally {
+			try {
+				rset.close();
+			} catch (SQLException e) {
+			}
+		}
+	}
+
 	private void createPollOptionsTable(java.sql.Connection c) {
 		try {
 			PreparedStatement pst = c.prepareStatement(
@@ -107,13 +130,9 @@ public class WebApplicationListener implements ServletContextListener {
 							+ " pollID BIGINT,\r\n" + " votesCount BIGINT,\r\n"
 							+ " FOREIGN KEY (pollID) REFERENCES Polls(id)\r\n" + ")");
 			pst.executeUpdate();
-			System.out.println("executed query poll options");
-			pst = c.prepareStatement(
-					"INSERT INTO PollOptions (optionTitle, optionLink, pollID, votesCount) values(?, ?, ? ,?)");
 			
-			
+			addRowsToPollOptions(c);
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
 
 	}
@@ -124,28 +143,75 @@ public class WebApplicationListener implements ServletContextListener {
 					"CREATE TABLE Polls\r\n" + " (id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,\r\n"
 							+ " title VARCHAR(150) NOT NULL,\r\n" + " message CLOB(2048) NOT NULL\r\n" + ")");
 			pst.executeUpdate();
-			System.out.println("executes query poll");
 
+			addRowsToPolls(c);
+		} catch (SQLException e) {
+		}
+
+	}
+	
+	private void addRowsToPolls(java.sql.Connection c) {
+		PreparedStatement pst = null;
+		
+		try {
 			pst = c.prepareStatement("INSERT INTO Polls (title, message) values(?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
-
+			
 			pst.setString(1, "Glasanje za omiljeni bend:");
 			pst.setString(2, "Od sljedećih bendova, koji Vam je bend najdraži? Kliknite na link kako biste glasali!");
 			pst.executeUpdate();
 
-			pst.setString(1, "Glasanje za omiljeni bend:");
-			pst.setString(2, "Od sljedećih bendova, koji Vam je bend najdraži? Kliknite na link kako biste glasali!");
+			pst.setString(1, "Glasanje za omiljeni operacijski sustav:");
+			pst.setString(2, "Od sljedećih operacijskih sustava, koji Vam je najdraži? Kliknite na link kako biste glasali!");
+			pst.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
 		}
-
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void contextDestroyed(ServletContextEvent sce) {
+	
+	private void addRowsToPollOptions(java.sql.Connection c) { // TODO change this
+		PreparedStatement pst = null;
+		ResultSet res = null;
+		try {
+			pst = c.prepareStatement("select id from polls");
+			res = pst.executeQuery();
+			
+			res.next();
+			long id1 = res.getLong("id");
+			res.next();
+			long id2 = res.getLong("id");
+			
+			pst = c.prepareStatement("insert into polloptions (optionTitle, optionLink, pollID, votesCount) values (?, ?, ?, ?)");
+			
+			insertToPollOptions(pst, "The Beatles", "https://www.youtube.com/watch?v=z9ypq6_5bsg", id1, 0);
+			insertToPollOptions(pst, "The Platters", "https://www.youtube.com/watch?v=H2di83WAOhU", id1, 0);
+			insertToPollOptions(pst, "The Beach Boys", "https://www.youtube.com/watch?v=2s4slliAtQU", id1, 0);
+			insertToPollOptions(pst, "The Four Seasons", "https://www.youtube.com/watch?v=y8yvnqHmFds", id1, 0);
+			insertToPollOptions(pst, "The Marcels", "https://www.youtube.com/watch?v=qoi3TH59ZEs" , id1, 0);
+			insertToPollOptions(pst, "The Everly Brothers", "https://www.youtube.com/watch?v=tbU3zdAgiX8", id1, 0);
+			insertToPollOptions(pst, "The Mamas And The Papas", "https://www.youtube.com/watch?v=N-aK6JnyFmk", id1, 0);
+			
+			insertToPollOptions(pst, "Windows", "https://www.microsoft.com/en-in/windows", id2, 0);
+			insertToPollOptions(pst, "Linux", "https://www.linux.org", id2, 0);
+			insertToPollOptions(pst, "Mac", "https://support.apple.com/macos", id2, 0);
+		} catch (SQLException e) {
+		}finally {
+			try {
+				res.close();
+			} catch (SQLException e) {
+			}
+		}
+	}
+	
+	private void insertToPollOptions(PreparedStatement pst, String optionTitle, String optionLink, Long pollID, int votesCount) {
+		try {
+			pst.setString(1, optionTitle);
+			pst.setString(2, optionLink);
+			pst.setLong(3, pollID);
+			pst.setLong(4, 0);
+			pst.executeUpdate();
+		} catch (SQLException e) {
+		}
+		
 	}
 	
 	private void initialize(List<String> lines) {
