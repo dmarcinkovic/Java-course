@@ -25,5 +25,20 @@
   </url-pattern>
 
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>drugi</servlet-name>
+		<servlet-class>hr.fer.zemris.java.p12.servleti.IndexServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>drugi</servlet-name>
+
+		<url-pattern>
+   /index.html
+  </url-pattern>
+
+	</servlet-mapping>
+
 
 </web-app>

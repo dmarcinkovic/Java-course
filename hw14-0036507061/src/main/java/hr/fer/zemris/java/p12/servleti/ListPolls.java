@@ -34,7 +34,8 @@ public class ListPolls extends HttpServlet{
 				String title = rset.getString("title");
 				Long id = rset.getLong("id");
 				
-				writer.print("<a href=\"/servleti/glasanje?pollID=");
+				writer.print("<a href=\"");
+				writer.print(req.getContextPath() + "/servleti/glasanje?pollID=");
 				writer.print(id.toString());
 				writer.print("\">");
 				

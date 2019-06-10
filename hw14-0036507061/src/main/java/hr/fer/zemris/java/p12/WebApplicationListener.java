@@ -34,7 +34,6 @@ import hr.fer.zemris.java.p12.dao.sql.SQLConnectionProvider;
 @WebListener
 public class WebApplicationListener implements ServletContextListener {
 	private Map<String, String> map; /// TODO change password and username
-										/// TODO you must not close connnection
 
 	/**
 	 * {@inheritDoc}
