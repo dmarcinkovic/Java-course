@@ -15,22 +15,38 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.sql.DataSource;
 
-@WebFilter(filterName="f1",urlPatterns={"/servleti/*"})
+/**
+ * Class that intercepts all request to /servlet and creates Connection to the
+ * database specified in dbsettings.properties.
+ * 
+ * @author David
+ *
+ */
+@WebFilter(filterName = "f1", urlPatterns = { "/servleti/*" })
 public class ConnectionSetterFilter implements Filter {
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void destroy() {
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
-		
-		DataSource ds = (DataSource)request.getServletContext().getAttribute("hr.fer.zemris.dbpool");
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+
+		DataSource ds = (DataSource) request.getServletContext().getAttribute("hr.fer.zemris.dbpool");
 		Connection con = null;
 		try {
 			con = ds.getConnection();
@@ -42,8 +58,11 @@ public class ConnectionSetterFilter implements Filter {
 			chain.doFilter(request, response);
 		} finally {
 			SQLConnectionProvider.setConnection(null);
-			try { con.close(); } catch(SQLException ignorable) {}
+			try {
+				con.close();
+			} catch (SQLException ignorable) {
+			}
 		}
 	}
-	
+
 }

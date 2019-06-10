@@ -25,23 +25,23 @@ import hr.fer.zemris.java.p12.dao.sql.SQLConnectionProvider;
 
 /**
  * Listener used to listen when the server is started. When server is started,
- * in session map with key equal to 'time' will be remembered current time. This
- * information is then used to display the time this server is running.
+ * connection with database is established and two new tables are created. First
+ * one called Polls that contains all polls this application will present.
+ * Second one called PollOptions which represents each option that user can vote
+ * for.
  * 
  * @author David
  *
  */
 @WebListener
 public class WebApplicationListener implements ServletContextListener {
-	private Map<String, String> map; /// TODO change password and username
+	private Map<String, String> map; 
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		System.out.println("App info hw14 started");
-
 		String fileName = sce.getServletContext().getRealPath("/WEB-INF/dbsettings.properties");
 		Path path = Paths.get(fileName);
 
@@ -115,6 +115,11 @@ public class WebApplicationListener implements ServletContextListener {
 		}
 	}
 
+	/**
+	 * Method to add rows to PollOptions table if this table is empty.
+	 * 
+	 * @param dbConnection Connection to database.
+	 */
 	private void addToPollOptionsIfEmpty(java.sql.Connection dbConnection) {
 		PreparedStatement pst = null;
 		try {
@@ -126,9 +131,13 @@ public class WebApplicationListener implements ServletContextListener {
 			}
 		} catch (SQLException e) {
 		}
-
 	}
 
+	/**
+	 * Method to add rows to Polls table if this table is empty.
+	 * 
+	 * @param dbConnection Connection to database.
+	 */
 	private void addToPollIfEmpty(java.sql.Connection dbConnection) {
 		PreparedStatement pst = null;
 		ResultSet rset = null;
@@ -148,6 +157,12 @@ public class WebApplicationListener implements ServletContextListener {
 		}
 	}
 
+	/**
+	 * Method to create PollOptions table and insert rows in it if not already
+	 * exists.
+	 * 
+	 * @param c Connection to database.
+	 */
 	private void createPollOptionsTable(java.sql.Connection c) {
 		try {
 			PreparedStatement pst = c.prepareStatement(
@@ -163,6 +178,11 @@ public class WebApplicationListener implements ServletContextListener {
 
 	}
 
+	/**
+	 * Method to create Polls table and insert rows in it if not already exists.
+	 * 
+	 * @param c Connections to database.
+	 */
 	private void createPollTable(java.sql.Connection c) {
 		try {
 			PreparedStatement pst = c.prepareStatement(
@@ -176,6 +196,11 @@ public class WebApplicationListener implements ServletContextListener {
 
 	}
 
+	/**
+	 * Method to add row to Polls table.
+	 * 
+	 * @param c Connection to database.
+	 */
 	private void addRowsToPolls(java.sql.Connection c) {
 		PreparedStatement pst = null;
 
@@ -195,6 +220,11 @@ public class WebApplicationListener implements ServletContextListener {
 		}
 	}
 
+	/**
+	 * Method to add row to PollOptions table.
+	 * 
+	 * @param c Connection to database.
+	 */
 	private void addRowsToPollOptions(java.sql.Connection c) {
 		PreparedStatement pst = null;
 		ResultSet res = null;
@@ -230,6 +260,15 @@ public class WebApplicationListener implements ServletContextListener {
 		}
 	}
 
+	/**
+	 * Method to insert one row to poll options.
+	 * 
+	 * @param pst         PreparedStatement.
+	 * @param optionTitle Title in PollOptions table.
+	 * @param optionLink  Link in PollOptions table.
+	 * @param pollID      Poll ID.
+	 * @param votesCount  Votes count.
+	 */
 	private void insertToPollOptions(PreparedStatement pst, String optionTitle, String optionLink, Long pollID,
 			int votesCount) {
 		try {
@@ -243,6 +282,12 @@ public class WebApplicationListener implements ServletContextListener {
 
 	}
 
+	/**
+	 * Method to initialize properties. This method will read host, port, name of
+	 * the database and user's name and password.
+	 * 
+	 * @param lines Lines of dbsetting.properties.
+	 */
 	private void initialize(List<String> lines) {
 		map = new HashMap<>();
 
