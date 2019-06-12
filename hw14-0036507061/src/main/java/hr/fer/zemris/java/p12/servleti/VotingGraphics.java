@@ -42,6 +42,12 @@ public class VotingGraphics extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		if (req.getParameter("id") == null) {
+			req.getSession().setAttribute("error", "Please provide one parameter.");
+			req.getRequestDispatcher("/WEB-INF/pages/error.jsp").forward(req, resp);
+			return;
+		}
+
 		resp.setContentType("image/png");
 		OutputStream outputStream = resp.getOutputStream();
 		JFreeChart chart = getChart(req);
@@ -59,27 +65,28 @@ public class VotingGraphics extends HttpServlet {
 	 */
 	public JFreeChart getChart(HttpServletRequest req) {
 		DefaultPieDataset dataset = new DefaultPieDataset();
+
 		Long id = Long.parseLong(req.getParameter("id"));
-		
+
 		java.sql.Connection dbConnection = SQLConnectionProvider.getConnection();
-		PreparedStatement pst = null; 
-		
+		PreparedStatement pst = null;
+
 		try {
 			pst = dbConnection.prepareStatement("select * from polloptions where pollID = ?");
 			pst.setLong(1, id);
-			
+
 			ResultSet rset = pst.executeQuery();
-			
+
 			while (rset.next()) {
 				Long score = rset.getLong("votesCount");
 				String title = rset.getString("optionTitle");
-				
+
 				dataset.setValue(title, score);
 			}
-			
+
 		} catch (SQLException e) {
 		}
-		
+
 		boolean legend = true;
 		boolean tooltips = false;
 		boolean urls = false;

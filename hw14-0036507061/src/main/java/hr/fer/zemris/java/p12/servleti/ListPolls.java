@@ -37,6 +37,8 @@ public class ListPolls extends HttpServlet {
 		java.sql.Connection dbConnection = SQLConnectionProvider.getConnection();
 
 		PreparedStatement pst = null;
+		
+		int numberOfPolls = 0;
 		try {
 			pst = dbConnection.prepareStatement("select * from polls");
 			ResultSet rset = pst.executeQuery();
@@ -52,8 +54,13 @@ public class ListPolls extends HttpServlet {
 				writer.print(title);
 
 				writer.println("</a> <br>");
+				numberOfPolls++;
 			}
 		} catch (SQLException e) {
+		}
+		
+		if (numberOfPolls == 0) {
+			writer.println("There are no polls currently available.");
 		}
 	}
 }

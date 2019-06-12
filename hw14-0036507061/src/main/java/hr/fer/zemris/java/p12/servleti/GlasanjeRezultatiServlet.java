@@ -52,6 +52,13 @@ public class GlasanjeRezultatiServlet extends HttpServlet {
 		setHeader(writer);
 
 		String pollId = req.getParameter("id");
+		
+		if (pollId == null) {
+			req.getSession().setAttribute("error", "Please provide one parameter.");
+			req.getRequestDispatcher("/WEB-INF/pages/error.jsp").forward(req, resp);
+			return;
+		}
+		
 		java.sql.Connection dbConnection = SQLConnectionProvider.getConnection();
 		PreparedStatement pst = null;
 
@@ -72,6 +79,10 @@ public class GlasanjeRezultatiServlet extends HttpServlet {
 				writer.println("</td></tr>");
 			}
 		} catch (SQLException e) {
+		} catch(NumberFormatException e) {
+			req.getSession().setAttribute("error", "Please provide parameters that can be converted to number.");
+			req.getRequestDispatcher("/WEB-INF/pages/error.jsp").forward(req, resp);
+			return;
 		}
 
 		setFooter(writer, req, pollId);

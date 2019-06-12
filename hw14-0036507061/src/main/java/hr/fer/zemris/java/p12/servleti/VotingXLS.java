@@ -39,7 +39,24 @@ public class VotingXLS extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		Long id = Long.parseLong(req.getParameter("id"));
+		String parameter = req.getParameter("id");
+		
+		if (parameter == null) {
+			req.getSession().setAttribute("error", "Please provide one parameter.");
+			req.getRequestDispatcher("/WEB-INF/pages/error.jsp").forward(req, resp);
+			return;
+		}
+		
+		Long id = null;
+		
+		try {
+			id = Long.parseLong(parameter);
+		}catch(NumberFormatException e) {
+			req.getSession().setAttribute("error", "Please provide one parameter that is number.");
+			req.getRequestDispatcher("/WEB-INF/pages/error.jsp").forward(req, resp);
+			return;
+		}
+		
 		java.sql.Connection dbConnection = SQLConnectionProvider.getConnection();
 		PreparedStatement pst = null; 
 		

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -92,9 +93,14 @@ public class WebApplicationListener implements ServletContextListener {
 
 		SQLConnectionProvider.setConnection(dbConnection);
 
-		createPollTable(dbConnection);
-		createPollOptionsTable(dbConnection);
-
+		if (!tableExistis("POLLS", dbConnection)) {
+			createPollTable(dbConnection);
+		}
+		
+		if (!tableExistis("POLLOPTIONS", dbConnection)) {
+			createPollOptionsTable(dbConnection);
+		}
+		
 		addToPollIfEmpty(dbConnection);
 		addToPollOptionsIfEmpty(dbConnection);
 	}
@@ -191,9 +197,8 @@ public class WebApplicationListener implements ServletContextListener {
 			pst.executeUpdate();
 
 			addRowsToPolls(c);
-		} catch (SQLException e) {
+		} catch (SQLException ignorable) {
 		}
-
 	}
 
 	/**
@@ -280,6 +285,31 @@ public class WebApplicationListener implements ServletContextListener {
 		} catch (SQLException e) {
 		}
 
+	}
+	
+	/**
+	 * Method to check if given table exists.
+	 * @param tableName Table name.
+	 * @param c Connection to database.
+	 * @return True if table exists, otherwise returns false.
+	 */
+	boolean tableExistis(String tableName, java.sql.Connection c) {
+		DatabaseMetaData metadata = null; 
+	   
+	    try {
+	    	metadata = c.getMetaData(); 
+	 	    String[] names = { "TABLE"}; 
+			ResultSet tableNames = metadata.getTables( null, null, null, names);
+			
+			while (tableNames.next()) {
+				if (tableNames.getString("TABLE_NAME").equals(tableName)) {
+					return true;
+				}
+			}
+		} catch (SQLException e) {
+		}
+		
+		return false;
 	}
 
 	/**

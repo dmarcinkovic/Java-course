@@ -36,6 +36,12 @@ public class GlasanjeGlasajServlet extends HttpServlet {
 		String pollId = req.getParameter("id2");
 		String pollOptionsId = req.getParameter("id1");
 
+		if (pollId == null || pollOptionsId == null) {
+			req.getSession().setAttribute("error", "Please provide exactly two arguments named id1 and id2.");
+			req.getRequestDispatcher("/WEB-INF/pages/error.jsp").forward(req, resp);
+			return;
+		}
+		
 		java.sql.Connection dbConnection = SQLConnectionProvider.getConnection();
 		PreparedStatement pst = null;
 
@@ -46,6 +52,10 @@ public class GlasanjeGlasajServlet extends HttpServlet {
 			pst.setLong(2, Long.parseLong(pollId));
 			pst.executeUpdate();
 		} catch (SQLException e) {
+		}catch(NumberFormatException e) {
+			req.getSession().setAttribute("error", "Please provide arguments that are numbers.");
+			req.getRequestDispatcher("/WEB-INF/pages/error.jsp").forward(req, resp);
+			return;
 		}
 
 		resp.sendRedirect(req.getContextPath() + "/servleti/glasanje-rezultati?id=" + pollId);
