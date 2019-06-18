@@ -20,6 +20,7 @@ import hr.fer.zemris.java.tecaj_13.model.BlogUser;
 @WebServlet("/servleti/author/*")
 public class Authors extends HttpServlet { /// TODO check if user has permitions 
 	private static final long serialVersionUID = 1L;
+	private boolean permits = false;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -37,28 +38,48 @@ public class Authors extends HttpServlet { /// TODO check if user has permitions
 			return;
 		}
 		
-		if (pathInfo.matches("/author/.*/new")) {
-			newMethod(request, response);
-		}else if (pathInfo.matches("/author/.*/edit")) {
-			editMethod(request, response);
-		}else if (pathInfo.matches("/author/.*/\\d+")) {
-			blogEntryPage(request, response);
+		if (!pathInfo.matches("/.*")) {
+			return;
 		}
 		
-		int index = pathInfo.substring(1).indexOf("/");
-		if (index == -1) {
-			index = pathInfo.length();
-		}
+		String nick = getNick(pathInfo);
+		String currentUser = (String)request.getSession().getAttribute("current.user.nick");
 		
-		String nick = pathInfo.substring(1, index);
-		String currentUserNick = (String)request.getSession().getAttribute("current.user.nick");
-		
-		if (nick.equals(currentUserNick)) {
-			request.getSession().setAttribute("permits", true);
+		if (nick.equals(currentUser)) {
+			permits = true;
 		}else {
-			request.getSession().setAttribute("permits", false);
+			permits = false;
 		}
 		
+		request.setAttribute("permits", permits);
+		if (pathInfo.matches("/.*/new")) {
+			System.out.println("New");
+			newMethod(request, response);
+			request.getRequestDispatcher("/WEB-INF/pages/New.jsp");
+			return;
+		}else if (pathInfo.matches("/.*/edit")) {
+			System.out.println("Edit");
+			editMethod(request, response);
+			request.getRequestDispatcher("/WEB-INF/pages/Edit.jsp");
+			return;
+		}else if (pathInfo.matches("/.*/\\d+")) {
+			System.out.println("With id");
+			blogEntryPage(request, response);
+			request.getRequestDispatcher("/WEB-INF/pages/BlogEntry.jsp");
+			return;
+		}else if (pathInfo.matches("/\\w+")) {
+			System.out.println("Authro");
+			author(request, response);
+			return;
+		}
+		
+			// TODO error
+	}
+
+	private void author(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String pathInfo = request.getPathInfo();
+		String nick = pathInfo.substring(1);
+
 		request.getSession().setAttribute("nick", nick);
 		
 		DAO dao = DAOProvider.getDAO();
@@ -69,26 +90,67 @@ public class Authors extends HttpServlet { /// TODO check if user has permitions
 			return;
 		}
 		
-		request.getSession().setAttribute("nick_id", user.getId().toString());
-		
 		List<BlogEntry> entries = dao.getBlogEntryForUser(user);
 		
 		request.setAttribute("blogEntries", entries);
 		request.getRequestDispatcher("/WEB-INF/pages/Authors.jsp").forward(request, response);
 	}
 
-	private void blogEntryPage(HttpServletRequest request, HttpServletResponse response) {
+	private void blogEntryPage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if (!permits) {
+			// TODO write error message
+			return;
+		}
 		
+		String pathInfo = request.getPathInfo();
+		Long id = Long.parseLong(pathInfo.substring(pathInfo.lastIndexOf('/')+1));
+		
+		DAO dao = DAOProvider.getDAO();
+		
+		BlogEntry entry = dao.getBlogEntry(id);
+		request.setAttribute("entry", entry);
+		String result = null; 
+		request.setAttribute("result", result);
+		
+		// TODO should send to servlet that lists blog entries
+		request.getRequestDispatcher("/WEB-INF/pages/Authors.jsp").forward(request, response);
 	}
 
-	private void editMethod(HttpServletRequest request, HttpServletResponse response) {
-		// TODO Auto-generated method stub
+	private void editMethod(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String pathInfo = request.getPathInfo();
+		String nick = getNick(pathInfo); 
 		
+		DAO dao = DAOProvider.getDAO();
+		BlogUser user = dao.getUser(nick);
+		
+		if (user == null) {
+			// TODO writer error message
+			return;
+		}
+		
+		List<BlogEntry> entries = dao.getBlogEntryForUser(user);
+		request.setAttribute("blogEntries", entries);	
+		
+		request.getRequestDispatcher("/WEB-INF/pages/Edit.jsp").forward(request, response);
 	}
 
-	private void newMethod(HttpServletRequest request, HttpServletResponse response) {
-		// TODO Auto-generated method stub
+	private void newMethod(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if (!permits) {
+			// TODO do some error
+			return;
+		}
+		request.getRequestDispatcher("/WEB-INF/pages/New.jsp").forward(request, response);
+	}
+	
+	private String getNick(String pathInfo) {
+		int index = pathInfo.substring(1).indexOf('/');
 		
+		if (index == -1) {
+			index = pathInfo.length();
+		}
+		
+		String nick = pathInfo.substring(1, index);
+		return nick;
 	}
 
 	/**

@@ -15,7 +15,6 @@ import javax.persistence.TemporalType;
 @Entity
 @Table(name="blog_comments")
 public class BlogComment {
-
 	private Long id;
 	private BlogEntry blogEntry;
 	private String usersEMail;

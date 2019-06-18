@@ -71,7 +71,7 @@ public class Login extends HttpServlet {
 			resp.sendRedirect(req.getServletContext().getContextPath() + "/servleti/author/"+user.getNick());
 		}else {
 			req.setAttribute("zapis", form);
-			form.setGreske("user", "User is not registered. Click on sign in link to register.");
+			form.setGreske("user", "Wrong nick name or password.");
 			req.getRequestDispatcher("/WEB-INF/pages/Login.jsp").forward(req, resp);
 		}
 	}
