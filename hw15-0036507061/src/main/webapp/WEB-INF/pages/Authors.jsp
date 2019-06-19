@@ -17,7 +17,7 @@
 		<c:otherwise>
 			<ol>
 				<c:forEach var="zapis" items="${blogEntries}">
-					<li><a href="author/<c:out value="${nick}"/>/<c:out value="${zapis.id}"/>"><c:out
+					<li><a href="<c:out value="${nick}"/>/<c:out value="${zapis.id}"/>"><c:out
 								value="${zapis.title}" /> </a>
 					</li>
 				</c:forEach>
@@ -25,8 +25,8 @@
 		</c:otherwise>
 	</c:choose>
 	<c:if test="${permits != null && permits == true}">
-		<a href="author/<c:out value="${nick}"/>/new">Add new blog entry.</a> <br>
-		<a href="author/<c:out value="${nick}"/>/edit">Edit existing entries.</a>
+		<a href="<c:out value="${nick}"/>/new">Add new blog entry.</a> <br>
+		<a href="<c:out value="${nick}"/>/edit">Edit existing entries.</a>
 	</c:if>
 	
 </body>

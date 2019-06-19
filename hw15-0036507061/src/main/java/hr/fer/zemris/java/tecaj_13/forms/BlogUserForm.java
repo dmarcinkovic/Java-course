@@ -130,7 +130,7 @@ public class BlogUserForm {
 		blogUser.setNick(this.nick);
 	}
 	
-	public void validateLogin() { /// TODO check if nickname already exists.
+	public void validateLogin() { 
 		greske.clear();
 		if (this.passwordHash.isEmpty()) {
 			greske.put("passwordHash", "Password is required!");

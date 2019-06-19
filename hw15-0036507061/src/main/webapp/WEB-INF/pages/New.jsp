@@ -35,25 +35,27 @@
 		
 		<div>
 			<div>
-				<span class="formLabel">Title</span><input type="text" name="nick"
+				<span class="formLabel">Title</span><input type="text" name="title"
 					value='<c:out value="${zapis.title}"/>' size="30">
 			</div>
-			<c:if test="${zapis.imaPogresku('title')}">
+			
+			<c:if test="${zapis.hasError('title')}">
 				<div class="greska">
-					<c:out value="${zapis.dohvatiPogresku('title')}" />
+					<c:out value="${zapis.getError('title')}" />
 				</div>
 			</c:if>
 		</div>
 
 		<div>
 			<div>
-				<span class="formLabel">Text</span><input type="password"
-					name="passwordHash" value='<c:out value="${zapis.text}"/>'
+				<span class="formLabel">Text</span><input type="text"
+					name="text" value='<c:out value="${zapis.text}"/>'
 					size="30">
 			</div>
-			<c:if test="${zapis.imaPogresku('text')}">
+			
+			<c:if test="${zapis.hasError('text')}">
 				<div class="greska">
-					<c:out value="${zapis.dohvatiPogresku('text')}" />
+					<c:out value="${zapis.getError('text')}" />
 				</div>
 			</c:if>
 		</div>
