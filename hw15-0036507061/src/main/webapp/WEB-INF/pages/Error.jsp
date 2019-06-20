@@ -11,7 +11,7 @@
 <%
 	String error = (String)session.getAttribute("error");
 %>
-<h1><%out.write(error); %></h1>
-	
+<h1><%out.write(error); %></h1> 
+	     
 </body>
 </html>

@@ -12,6 +12,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 @WebServlet("/servleti/register")
 public class Register extends HttpServlet {
+	
+	/**
+	 * Default serial version UID.
+	 */
 	private static final long serialVersionUID = 1L;
        
     /**

@@ -10,16 +10,28 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 
+/**
+ * Web filter that is mapped to any path that starts with /servleti.
+ * 
+ * @author David
+ *
+ */
 @WebFilter("/servleti/*")
 public class JPAFilter implements Filter {
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
 		try {
 			chain.doFilter(request, response);
 		} finally {
@@ -27,8 +39,10 @@ public class JPAFilter implements Filter {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void destroy() {
 	}
-	
 }

@@ -1,6 +1,5 @@
 package hr.fer.zemris.java.tecaj_13.forms;
 
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -11,79 +10,97 @@ import javax.servlet.http.HttpServletRequest;
 import hr.fer.zemris.java.tecaj_13.model.BlogUser;
 
 /**
- * <p>Model formulara koji odgovara web-reprezentaciji domenskog objekta {@link Record}.
- * U domenskom modelu, različita svojstva su različitih tipova; primjerice, {@link Record#getId()}
- * je tipa {@link Long}. U formularu, sva su svojstva stringovi jer se tako prenose preko HTTP-a
- * i čuvaju u web-stranici u formularima.</p>
+ * Class that represents blog user. Blog user can add and edit blog entries.
  * 
- * <p>Za svako svojstvo, mapa {@link #greske} omogućava da se pri validaciji (metoda {@link #validiraj()}) upiše 
- * je li došlo do pogreške u podatcima. Formular nudi sljedeće funkcionalnosti.</p>
- * 
- * <ol>
- * <li>Punjenje iz trenutnog zahtjeva metodom {@link #popuniIzHttpRequesta(HttpServletRequest)}. Čita parametre
- *     i upisuje odgovarajuća svojstva u formular.</li>
- * <li>Punjenje iz domenskog objekta metodom {@link #popuniIzRecorda(Record)}. Prima {@link Record} kao argument
- *     i temeljem toga što je u njemu upisano popunjava ovaj formular.</li>
- * <li>Punjenje domenskog objekta temeljem upisanog sadržaja u formularu metodom {@link #popuniURecord(Record)}.
- *     Ideja je da se ovo radi tek ako su podatci u formularu prošli validaciju. Pogledajte pojedine servlete koji
- *     su pripremljeni uz ovaj primjer za demonstraciju kako se to radi.</li>
- * </ol>
- * 
- * @author marcupic
+ * @author David
+ *
  */
 public class BlogUserForm {
+
+	/**
+	 * Id of blog user. This is primary key.
+	 */
 	private String id;
+
+	/**
+	 * First name of blog user.
+	 */
 	private String firstName;
+
+	/**
+	 * Last name of blog user.
+	 */
 	private String lastName;
+
+	/**
+	 * Nick of blog user. This is unique.
+	 */
 	private String nick;
+
+	/**
+	 * Email of blog user.
+	 */
 	private String email;
+
+	/**
+	 * Password stored as hash using secure hash algorithm.
+	 */
 	private String passwordHash;
 
 	/**
-	 * Mapa s pogreškama. Očekuje se da su ključevi nazivi svojstava a vrijednosti
-	 * tekstovi pogrešaka.
+	 * Map with errors.
 	 */
-	Map<String, String> greske = new HashMap<>();
-	
+	Map<String, String> errors = new HashMap<>();
+
 	/**
-	 * Konstruktor.
+	 * Constructor.
 	 */
 	public BlogUserForm() {
 	}
-	
+
+	/**
+	 * Sets value to errors map.
+	 * 
+	 * @param errorName Key.
+	 * @param error     Value.
+	 */
 	public void setGreske(String errorName, String error) {
-		greske.put(errorName, error);
+		errors.put(errorName, error);
 	}
-	
+
 	/**
 	 * Dohvaća poruku pogreške za traženo svojstvo.
 	 * 
 	 * @param ime naziv svojstva za koje se traži poruka pogreške
-	 * @return poruku pogreške ili <code>null</code> ako svojstvo nema pridruženu pogrešku
+	 * @return poruku pogreške ili <code>null</code> ako svojstvo nema pridruženu
+	 *         pogrešku
 	 */
 	public String dohvatiPogresku(String ime) {
-		return greske.get(ime);
+		return errors.get(ime);
 	}
-	
+
 	/**
 	 * Provjera ima li barem jedno od svojstava pridruženu pogrešku.
 	 * 
 	 * @return <code>true</code> ako ima, <code>false</code> inače.
 	 */
 	public boolean imaPogresaka() {
-		return !greske.isEmpty();
+		return !errors.isEmpty();
 	}
-	
+
 	/**
-	 * Provjerava ima li traženo svojstvo pridruženu pogrešku. 
+	 * Provjerava ima li traženo svojstvo pridruženu pogrešku.
 	 * 
 	 * @param ime naziv svojstva za koje se ispituje postojanje pogreške
 	 * @return <code>true</code> ako ima, <code>false</code> inače.
 	 */
 	public boolean imaPogresku(String firstName) {
-		return greske.containsKey(firstName);
+		return errors.containsKey(firstName);
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return "BlogUserForm [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", nick=" + nick
@@ -91,20 +108,25 @@ public class BlogUserForm {
 	}
 
 	/**
-	 * Na temelju parametara primljenih kroz {@link HttpServletRequest} popunjava
-	 * svojstva ovog formulara.
+	 * Method used to fill this BlogUserForm from HttpRequest.
 	 * 
-	 * @param req objekt s parametrima
+	 * @param req HttpRequest.
 	 */
 	public void popuniIzHttpRequesta(HttpServletRequest req) {
 		this.firstName = pripremi(req.getParameter("firstName"));
 		this.lastName = pripremi(req.getParameter("lastName"));
 		this.email = pripremi(req.getParameter("email"));
-		
+
 		this.passwordHash = getHashedPassword(req.getParameter("passwordHash"));
 		this.nick = pripremi(req.getParameter("nick"));
 	}
 
+	/**
+	 * Returns hashed password.
+	 * 
+	 * @param password Plain password.
+	 * @return Hashed password.
+	 */
 	private String getHashedPassword(String password) {
 		if (password == null || password.isEmpty()) {
 			return "";
@@ -113,13 +135,12 @@ public class BlogUserForm {
 			MessageDigest sha = MessageDigest.getInstance("SHA-256");
 			byte[] array = password.getBytes();
 			byte[] hash = sha.digest(array);
-			
+
 			return bytetohex(hash).trim();
 		} catch (NoSuchAlgorithmException e) {
 		}
-		return null; 
+		return null;
 	}
-	
 
 	/**
 	 * Method that converts hexadecimal byte array to String.
@@ -128,7 +149,7 @@ public class BlogUserForm {
 	 * @return Hexadecimal representation of given byte array.
 	 * @throws NullPointerException if byteArray is null.
 	 */
-	private  String bytetohex(byte[] byteArray) {
+	private String bytetohex(byte[] byteArray) {
 		if (byteArray == null) {
 			throw new NullPointerException();
 		}
@@ -146,11 +167,11 @@ public class BlogUserForm {
 
 		return sb.toString();
 	}
-	
+
 	/**
-	 * Na temelju predanog {@link Record}-a popunjava ovaj formular.
+	 * Fills this Form from given BlogUser.
 	 * 
-	 * @param r objekt koji čuva originalne podatke
+	 * @param blogUser Given BloUser.
 	 */
 	public void popuniIzRecorda(BlogUser blogUser) {
 		this.firstName = blogUser.getFirstName();
@@ -161,11 +182,9 @@ public class BlogUserForm {
 	}
 
 	/**
-	 * Temeljem sadržaja ovog formulara puni svojstva predanog domenskog
-	 * objekta. Metodu ne bi trebalo pozivati ako formular prethodno nije
-	 * validiran i ako nije utvrđeno da nema pogrešaka.
+	 * Fills given BlogUser from this form.
 	 * 
-	 * @param r domenski objekt koji treba napuniti
+	 * @param blogUser Given BlogUser.
 	 */
 	public void popuniURecord(BlogUser blogUser) {
 		blogUser.setFirstName(this.firstName);
@@ -174,59 +193,63 @@ public class BlogUserForm {
 		blogUser.setPasswordHash(this.passwordHash);
 		blogUser.setNick(this.nick);
 	}
-	
-	public void validateLogin() { 
-		greske.clear();
+
+	/**
+	 * Method to validate Login. It checks if passwordHash and nick are empty.If
+	 * they are empty then we put error in errors map.
+	 */
+	public void validateLogin() {
+		errors.clear();
 		if (this.passwordHash.isEmpty()) {
-			greske.put("passwordHash", "Password is required!");
+			errors.put("passwordHash", "Password is required!");
 		}
-		
+
 		if (this.nick.isEmpty()) {
-			greske.put("nick", "Nick is required");
+			errors.put("nick", "Nick is required");
 		}
 	}
-	
+
 	/**
-	 * Metoda obavlja validaciju formulara. Formular je prethodno na neki način potrebno
-	 * napuniti. Metoda provjerava semantičku korektnost svih podataka te po potrebi
-	 * registrira pogreške u mapu pogrešaka.
+	 * Method to validate registration. It check if fields are empty. If they are
+	 * empty then we put error in errors map.
 	 */
 	public void validateRegistration() {
 		validateLogin();
-		
-		if(this.firstName.isEmpty()) {
-			greske.put("firstName", "First name is required!");
-		}
-		
-		if(this.lastName.isEmpty()) {
-			greske.put("lastName", "Last name is required!");
+
+		if (this.firstName.isEmpty()) {
+			errors.put("firstName", "First name is required!");
 		}
 
-		if(this.email.isEmpty()) {
-			greske.put("email", "EMail is required!");
+		if (this.lastName.isEmpty()) {
+			errors.put("lastName", "Last name is required!");
+		}
+
+		if (this.email.isEmpty()) {
+			errors.put("email", "EMail is required!");
 		} else {
 			int l = email.length();
 			int p = email.indexOf('@');
-			if(l<3 || p==-1 || p==0 || p==l-1) {
-				greske.put("email", "EMail is not in the correct format.");
+			if (l < 3 || p == -1 || p == 0 || p == l - 1) {
+				errors.put("email", "EMail is not in the correct format.");
 			}
 		}
 	}
-	
+
 	/**
-	 * Pomoćna metoda koja <code>null</code> stringove konvertira u prazne stringove, što je
-	 * puno pogodnije za uporabu na webu.
+	 * Returns empty string if null is provided, otherwise it returns String itself.
 	 * 
-	 * @param s string
-	 * @return primljeni string ako je različit od <code>null</code>, prazan string inače.
+	 * @param s String provided.
+	 * @return Empty string if null is provided, otherwise it returns String itself.
 	 */
 	private String pripremi(String s) {
-		if(s==null) return "";
+		if (s == null)
+			return "";
 		return s.trim();
 	}
 
 	/**
-	 * Dohvat id-a.
+	 * Returns id.
+	 * 
 	 * @return id
 	 */
 	public String getId() {
@@ -234,49 +257,100 @@ public class BlogUserForm {
 	}
 
 	/**
-	 * Setter za id. 
-	 * @param id vrijednost na koju ga treba postaviti.
+	 * Sets id.
+	 * 
+	 * @param id Id.
 	 */
 	public void setId(String id) {
 		this.id = id;
 	}
 
+	/**
+	 * Returns first name.
+	 * 
+	 * @return First name
+	 */
 	public String getFirstName() {
 		return firstName;
 	}
 
+	/**
+	 * Sets first name.
+	 * 
+	 * @param firstName First name.
+	 */
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
 	}
 
+	/**
+	 * Returns last name.
+	 * 
+	 * @return Last name.
+	 */
 	public String getLastName() {
 		return lastName;
 	}
 
+	/**
+	 * Set the last name.
+	 * 
+	 * @param lastName Last name.
+	 */
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
 
+	/**
+	 * Returns nick.
+	 * 
+	 * @return Nick.
+	 */
 	public String getNick() {
 		return nick;
 	}
 
+	/**
+	 * Sets nick.
+	 * 
+	 * @param nick Nick.
+	 */
 	public void setNick(String nick) {
 		this.nick = nick;
 	}
 
+	/**
+	 * Returns email.
+	 * 
+	 * @return Email.
+	 */
 	public String getEmail() {
 		return email;
 	}
 
+	/**
+	 * Sets email.
+	 * 
+	 * @param email Email.
+	 */
 	public void setEmail(String email) {
 		this.email = email;
 	}
 
+	/**
+	 * Returns password hash.
+	 * 
+	 * @return Password hash.
+	 */
 	public String getPasswordHash() {
 		return passwordHash;
 	}
 
+	/**
+	 * Sets password hash.
+	 * 
+	 * @param passwordHash Password hash.
+	 */
 	public void setPasswordHash(String passwordHash) {
 		this.passwordHash = passwordHash;
 	}

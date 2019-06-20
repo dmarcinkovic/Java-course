@@ -24,8 +24,20 @@ import hr.fer.zemris.java.tecaj_13.model.BlogUser;
  */
 @WebServlet("/servleti/author/*")
 public class Authors extends HttpServlet {
+	
+	/**
+	 * Default serial version UID.
+	 */
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Boolean flag used to check permits to this servlet.
+	 */
 	private boolean permits = false;
+
+	/**
+	 * Blog entry.
+	 */
 	private BlogEntry commentEntry;
 
 	/**
@@ -40,6 +52,7 @@ public class Authors extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
 		String pathInfo = request.getPathInfo();
 
 		if (pathInfo == null) {
@@ -78,6 +91,17 @@ public class Authors extends HttpServlet {
 		request.getRequestDispatcher("/WEB-INF/pages/Error.jsp").forward(request, response);
 	}
 
+	/**
+	 * Method called when path does not have anything after the
+	 * /servleti/author/userName. In that case if logged user is 'userName' than
+	 * list of all blog entries is listed and link to adding and editing blog
+	 * entries is presented. Other no link will be presented.
+	 * 
+	 * @param request  HttpServletRequest.
+	 * @param response HttpServletResponse.
+	 * @throws ServletException If error occur.
+	 * @throws IOException      If error occur.
+	 */
 	private void author(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String pathInfo = request.getPathInfo();
 		String nick = pathInfo.substring(1);
@@ -99,6 +123,17 @@ public class Authors extends HttpServlet {
 		request.getRequestDispatcher("/WEB-INF/pages/Authors.jsp").forward(request, response);
 	}
 
+	/**
+	 * Method called when path is /servlet/author/username/id. Check if 'username'
+	 * is indeed owner of blog entry with 'id'. It lists all comments posted to this
+	 * blog entry and allows user to add new comments. Also, if logged user is
+	 * 'username' then link to editing blog entry is presented.
+	 * 
+	 * @param request  HttpServletRequest.
+	 * @param response HttpServletResponse.
+	 * @throws ServletException If error occur.
+	 * @throws IOException      If error occur.
+	 */
 	private void blogEntryPage(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String pathInfo = request.getPathInfo();
@@ -107,7 +142,7 @@ public class Authors extends HttpServlet {
 		String nick = getNick(pathInfo);
 		DAO dao = DAOProvider.getDAO();
 
-		BlogEntry entry = dao.getBlogEntry(id);
+		BlogEntry entry = dao.getBlogEntryForID(id);
 		commentEntry = entry;
 
 		if (!entry.getCreator().getNick().equals(nick)) {
@@ -137,6 +172,15 @@ public class Authors extends HttpServlet {
 		request.getRequestDispatcher("/WEB-INF/pages/BlogEntries.jsp").forward(request, response);
 	}
 
+	/**
+	 * Method called when url link is /servleti/author/username/edit.This method
+	 * checks permits and calls jsp file that shows form for editing blog entries.
+	 * 
+	 * @param request  HttpServletRequest.
+	 * @param response HttpServletResponse.
+	 * @throws ServletException If error occur.
+	 * @throws IOException      If error occur.
+	 */
 	private void editMethod(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		if (!permits) {
@@ -174,7 +218,17 @@ public class Authors extends HttpServlet {
 		request.getRequestDispatcher("/WEB-INF/pages/Edit.jsp").forward(request, response);
 	}
 
-	private void editBlog(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	/**
+	 * Method that checks if editing blog entry is valid. I.e., this method check if
+	 * new title and new text are empty.
+	 * 
+	 * @param request  HttpServletRequest.
+	 * @param response HttpServletResponse.
+	 * @throws ServletException If error occur.
+	 * @throws IOException      If error occur.
+	 */
+	private void editBlog(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		BlogEntryForm form = new BlogEntryForm();
 		form.popuniIzHttpRequesta(request);
 		form.validateEntry();
@@ -186,25 +240,33 @@ public class Authors extends HttpServlet {
 		}
 
 		Long id = Long.parseLong(request.getParameter("ID"));
-		
+
 		DAO dao = DAOProvider.getDAO();
-		BlogEntry entry = dao.getBlogEntry(id);
+		BlogEntry entry = dao.getBlogEntryForID(id);
 		entry.setTitle(form.getTitle());
 		entry.setText(form.getText());
-		
+
 		dao.persistEntry(entry);
 
 		String nick = getNick(request.getPathInfo());
 		response.sendRedirect(request.getServletContext().getContextPath() + "/servleti/author/" + nick);
 	}
 
+	/**
+	 * Method used to call EditBlogEntry.jsp file.
+	 * 
+	 * @param request  HttpServletRequest.
+	 * @param response HttpServletResponse.
+	 * @throws ServletException If error occur.
+	 * @throws IOException      If error occur.
+	 */
 	private void callEditBlogEntry(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String blogId = request.getParameter("blogId");
 
 		DAO dao = DAOProvider.getDAO();
 
-		BlogEntry be = dao.getBlogEntry(Long.parseLong(blogId));
+		BlogEntry be = dao.getBlogEntryForID(Long.parseLong(blogId));
 		BlogEntryForm form = new BlogEntryForm();
 		form.popuniIzRecorda(be);
 		form.setId(be.getId().toString());
@@ -214,6 +276,16 @@ public class Authors extends HttpServlet {
 		request.getRequestDispatcher("/WEB-INF/pages/EditBlogEntry.jsp").forward(request, response);
 	}
 
+	/**
+	 * Method called when url is /servleti/author/username/new. This is used to add
+	 * new entries. It checks if logged user is 'username', if not, then error is
+	 * presented.
+	 * 
+	 * @param request  HttpServletRequest.
+	 * @param response HttpServletResponse.
+	 * @throws ServletException If error occur.
+	 * @throws IOException      If error occur.
+	 */
 	private void newMethod(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		if (!permits) {
@@ -236,6 +308,16 @@ public class Authors extends HttpServlet {
 		request.getRequestDispatcher("/WEB-INF/pages/New.jsp").forward(request, response);
 	}
 
+	/**
+	 * Method used to validate the input from user. It check if blog entry title and
+	 * blog entry text are empty. If so, it calls New.jsp again and shows user that
+	 * title and text fields are empty.
+	 * 
+	 * @param request  HttpServletRequest.
+	 * @param response HttpServletResponse.
+	 * @throws IOException      If error occur.
+	 * @throws ServletException If error occur.
+	 */
 	private void addNewBlog(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
 		BlogEntryForm form = new BlogEntryForm();
@@ -265,6 +347,15 @@ public class Authors extends HttpServlet {
 		response.sendRedirect(request.getServletContext().getContextPath() + "/servleti/author/" + nick);
 	}
 
+	/**
+	 * Method to add comment to blog and checks if comment is empty or not. If
+	 * empty, then error is presented.
+	 * 
+	 * @param request  HttpServletRequest.
+	 * @param response HttpServletResponse.
+	 * @throws ServletException If error occur.
+	 * @throws IOException      If error occur.
+	 */
 	private void addComment(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		BlogCommentForm form = new BlogCommentForm();
@@ -289,6 +380,12 @@ public class Authors extends HttpServlet {
 		response.sendRedirect(request.getRequestURL().toString());
 	}
 
+	/**
+	 * Returns nick presented in url.
+	 * 
+	 * @param pathInfo The url after /servlet/author.
+	 * @return Nick presented in url.
+	 */
 	private String getNick(String pathInfo) {
 		int index = pathInfo.substring(1).indexOf("/");
 
@@ -302,6 +399,12 @@ public class Authors extends HttpServlet {
 		return nick;
 	}
 
+	/**
+	 * Converts list of BlogEntry objects to list of BlogEntryForm objects.
+	 * 
+	 * @param list List of BlogEntry objects.
+	 * @return List of converted BlogEntryForm object.
+	 */
 	private List<BlogEntryForm> getList(List<BlogEntry> list) {
 		List<BlogEntryForm> result = new ArrayList<>();
 
@@ -323,5 +426,4 @@ public class Authors extends HttpServlet {
 			throws ServletException, IOException {
 		doGet(request, response);
 	}
-
 }

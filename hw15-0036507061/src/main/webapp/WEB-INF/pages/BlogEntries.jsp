@@ -14,9 +14,10 @@
 			out.write(firstName + " " + lastName);
 		}
 	%>
+	<br>
 	<%
 		if (currentUser != null){ %>
-			<a href="logout">Logout</a>
+			<a href="${pageContext.request.contextPath}/servleti/logout">Logout</a>
 			<% 
 		}
 	%>
@@ -106,6 +107,7 @@
 		</div>
 
 	</form>
+	
 
 </body>
 </html>

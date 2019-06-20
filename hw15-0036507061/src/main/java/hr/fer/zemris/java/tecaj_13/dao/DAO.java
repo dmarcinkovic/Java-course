@@ -6,28 +6,68 @@ import hr.fer.zemris.java.tecaj_13.model.BlogComment;
 import hr.fer.zemris.java.tecaj_13.model.BlogEntry;
 import hr.fer.zemris.java.tecaj_13.model.BlogUser;
 
+/**
+ * Interface which implementations will communicate with database and store and
+ * get data from database.
+ * 
+ * @author David
+ *
+ */
 public interface DAO {
 
 	/**
-	 * Dohvaća entry sa zadanim <code>id</code>-em. Ako takav entry ne postoji,
-	 * vraća <code>null</code>.
+	 * Retrieves entry with provided id. If such a entry does not exists returns
+	 * null.
 	 * 
-	 * @param id ključ zapisa
-	 * @return entry ili <code>null</code> ako entry ne postoji
-	 * @throws DAOException ako dođe do pogreške pri dohvatu podataka
+	 * @param id Primary key.
+	 * @return entry of null if such a entry does not exists.
+	 * @throws DAOException If error occurs while retrieving data.
 	 */
-	public BlogEntry getBlogEntry(Long id) throws DAOException;
-	
-	 List<BlogEntry> getBlogEntryForUser(BlogUser user);
+	public BlogEntry getBlogEntryForID(Long id) throws DAOException;
 
-    BlogUser getUser(String nick);
+	/**
+	 * Retrieves list of blog entries with provided creator. Returns null if creator
+	 * did not create blog entries.
+	 * 
+	 * @param user Creator of blog entries.
+	 * @return List of blog entries with provided creator.
+	 */
+	List<BlogEntry> getBlogEntryForUser(BlogUser user);
 
-    List<BlogUser> getUsers();
+	/**
+	 * Returns user with nick provided.
+	 * 
+	 * @param nick Nick provided.
+	 * @return User with nick provided.
+	 */
+	BlogUser getUser(String nick);
 
-    void persistUser(BlogUser user);
-    
-    void persistEntry(BlogEntry entry);
-    
-    void persistComment(BlogComment comment);
-	
+	/**
+	 * Retrieves list of BlogUser-s.
+	 * 
+	 * @return List of BlogUser-s.
+	 */
+	List<BlogUser> getUsers();
+
+	/**
+	 * Method used to persist BlogUser in database.
+	 * 
+	 * @param user User that will be persisted.
+	 */
+	void persistUser(BlogUser user);
+
+	/**
+	 * Method used to persist BlogEntry in database.
+	 * 
+	 * @param entry Entry that will be persisted.
+	 */
+	void persistEntry(BlogEntry entry);
+
+	/**
+	 * Method used to persist BlogComment in database.
+	 * 
+	 * @param comment Blog Comment that will be persisted.
+	 */
+	void persistComment(BlogComment comment);
+
 }

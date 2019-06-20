@@ -19,58 +19,73 @@ import hr.fer.zemris.java.tecaj_13.model.BlogUser;
  */
 @WebServlet("/servleti/login")
 public class Login extends HttpServlet {
+
+	/**
+	 * Default serial version UID.
+	 */
 	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Login() {
-    }
 
 	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#HttpServlet()
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		obradi(request, response);
+	public Login() {
 	}
 
 	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		obradi(request, response);
-	}
-	
-	protected void obradi(HttpServletRequest req, HttpServletResponse resp)
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		obradi(request, response);
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		obradi(request, response);
+	}
+
+	/**
+	 * Method to process the request.
+	 * 
+	 * @param req  HttpServletReques.
+	 * @param resp HttpServletResponse.
+	 * @throws ServletException When error occurs.
+	 * @throws IOException      When error occurs.
+	 */
+	protected void obradi(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		req.setCharacterEncoding("UTF-8");
-		
+
 		DAO dao = DAOProvider.getDAO();
 		List<BlogUser> users = dao.getUsers();
-		
+
 		req.setAttribute("zapisi", users);
 
 		BlogUserForm form = new BlogUserForm();
 		form.popuniIzHttpRequesta(req);
-		
+
 		form.validateLogin();
-		
-		if(form.imaPogresaka()) {
+
+		if (form.imaPogresaka()) {
 			form.setPasswordHash("");
 			req.setAttribute("zapis", form);
 			req.getRequestDispatcher("/WEB-INF/pages/Login.jsp").forward(req, resp);
 			return;
 		}
-		
+
 		BlogUser user = dao.getUser(form.getNick());
-		
+
 		if (user != null && user.getPasswordHash().equals(form.getPasswordHash())) {
 			req.getSession().setAttribute("current.user.id", user.getId().toString());
 			req.getSession().setAttribute("current.user.fn", user.getFirstName());
 			req.getSession().setAttribute("current.user.ln", user.getLastName());
 			req.getSession().setAttribute("current.user.nick", user.getNick());
-			resp.sendRedirect(req.getServletContext().getContextPath() + "/servleti/author/"+user.getNick());
-		}else {
+			resp.sendRedirect(req.getServletContext().getContextPath() + "/servleti/author/" + user.getNick());
+		} else {
 			form.setPasswordHash("");
 			req.setAttribute("zapis", form);
 			form.setGreske("user", "Wrong nick name or password.");

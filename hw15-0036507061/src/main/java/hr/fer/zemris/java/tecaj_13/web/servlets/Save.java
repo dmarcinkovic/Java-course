@@ -14,26 +14,42 @@ import hr.fer.zemris.java.tecaj_13.forms.BlogUserForm;
 import hr.fer.zemris.java.tecaj_13.model.BlogUser;
 
 /**
- * Servlet koji obavlja akciju /save. Pogledajte slideove za opis: tamo odgovara
- * akciji /update.
- * 
- * @author marcupic
+ * Servlet implementation class Save.
  */
 @WebServlet("/servleti/save")
 public class Save extends HttpServlet {
 
+	/**
+	 * Default serial verion UID.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		obradi(req, resp);
 	}
 
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		obradi(req, resp);
 	}
 
+	/**
+	 * Method to process the request.
+	 * 
+	 * @param req  HttpServletReques.
+	 * @param resp HttpServletResponse.
+	 * @throws ServletException When error occurs.
+	 * @throws IOException      When error occurs.
+	 */
 	protected void obradi(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		req.setCharacterEncoding("UTF-8");
 		BlogUserForm form = new BlogUserForm();

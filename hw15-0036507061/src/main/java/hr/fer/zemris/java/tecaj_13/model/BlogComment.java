@@ -12,62 +12,144 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+/**
+ * Entity class that represents blog comment. Blog comment have information
+ * about the user's email and stores comment message. Blog comments can add all
+ * users, logged and not logged.
+ * 
+ * @author David
+ *
+ */
 @Entity
-@Table(name="blog_comments")
+@Table(name = "blog_comments")
 public class BlogComment {
+
+	/**
+	 * Blog comment id.
+	 */
 	private Long id;
+
+	/**
+	 * Reference to blog entry in which this comment is posted.
+	 */
 	private BlogEntry blogEntry;
+
+	/**
+	 * Mail of user who posted this comment.
+	 */
 	private String usersEMail;
+
+	/**
+	 * Comment message.
+	 */
 	private String message;
+
+	/**
+	 * Date when this comment is posted.
+	 */
 	private Date postedOn;
-	
-	@Id @GeneratedValue
+
+	/**
+	 * Returns id.
+	 * 
+	 * @return blog comment id.
+	 */
+	@Id
+	@GeneratedValue
 	public Long getId() {
 		return id;
 	}
-	
+
+	/**
+	 * Sets blog comment id.
+	 * 
+	 * @param id Comment id.
+	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
+	/**
+	 * Returns reference to blog entry.
+	 * 
+	 * @return Reference to blog entry.
+	 */
 	@ManyToOne
-	@JoinColumn(nullable=false)
+	@JoinColumn(nullable = false)
 	public BlogEntry getBlogEntry() {
 		return blogEntry;
 	}
-	
+
+	/**
+	 * Sets reference to blog entry.
+	 * 
+	 * @param blogEntry Reference to blog entry.
+	 */
 	public void setBlogEntry(BlogEntry blogEntry) {
 		this.blogEntry = blogEntry;
 	}
 
-	@Column(length=100,nullable=false)
+	/**
+	 * Returns user's email.
+	 * 
+	 * @return User's email.
+	 */
+	@Column(length = 100, nullable = false)
 	public String getUsersEMail() {
 		return usersEMail;
 	}
 
+	/**
+	 * Sets user's email.
+	 * 
+	 * @param usersEMail User's email.
+	 */
 	public void setUsersEMail(String usersEMail) {
 		this.usersEMail = usersEMail;
 	}
 
-	@Column(length=4096,nullable=false)
+	/**
+	 * Returns message comment.
+	 * 
+	 * @return Message comment.
+	 */
+	@Column(length = 4096, nullable = false)
 	public String getMessage() {
 		return message;
 	}
 
+	/**
+	 * Sets message commnet.
+	 * 
+	 * @param message Message comment.
+	 */
 	public void setMessage(String message) {
 		this.message = message;
 	}
 
+	/**
+	 * Returns the date when this comment is posted.
+	 * 
+	 * @return The date when this comment is posted.
+	 */
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(nullable=false)
+	@Column(nullable = false)
 	public Date getPostedOn() {
 		return postedOn;
 	}
 
+	/**
+	 * Sets the date when this comment is posted.
+	 * 
+	 * @param postedOn The date when this commnet is posted.
+	 */
 	public void setPostedOn(Date postedOn) {
 		this.postedOn = postedOn;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -76,6 +158,9 @@ public class BlogComment {
 		return result;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

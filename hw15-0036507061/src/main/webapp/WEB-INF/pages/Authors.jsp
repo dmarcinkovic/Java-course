@@ -14,9 +14,10 @@
 			out.write(firstName + " " + lastName);
 		}
 	%>
+	<br>
 	<%
 		if (currentUser != null){ %>
-			<a href="logout">Logout</a>
+			<a href="${pageContext.request.contextPath}/servleti/logout">Logout</a>
 			<% 
 		}
 	%>
@@ -45,6 +46,5 @@
 		<a href="<c:out value="${nick}"/>/new">Add new blog entry.</a> <br>
 		<a href="<c:out value="${nick}"/>/edit">Edit existing entries.</a>
 	</c:if>
-	
 </body>
 </html>

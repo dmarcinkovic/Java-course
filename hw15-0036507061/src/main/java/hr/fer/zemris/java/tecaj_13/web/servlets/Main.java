@@ -19,6 +19,7 @@ import hr.fer.zemris.java.tecaj_13.model.BlogUser;
  */
 @WebServlet("/servleti/main")
 public class Main extends HttpServlet {
+	
 	/**
 	 * Serial version UID.
 	 */

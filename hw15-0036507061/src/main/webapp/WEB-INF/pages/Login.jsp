@@ -14,7 +14,13 @@
 			out.write(firstName + " " + lastName);
 		}
 	%>
-
+	<br>
+	<%
+		if (currentUser != null){ %>
+			<a href="${pageContext.request.contextPath}/servleti/logout">Logout</a>
+			<% 
+		}
+	%>
 <head>
 <meta charset="UTF-8">
 <title>Login</title>
@@ -114,6 +120,7 @@
 			</ol>
 		</c:otherwise>
 	</c:choose>
+
 
 </body>
 </html>
