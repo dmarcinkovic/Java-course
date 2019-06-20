@@ -42,6 +42,7 @@ public class Save extends HttpServlet {
 		form.validateRegistration();
 
 		if (form.imaPogresaka()) {
+			form.setPasswordHash("");
 			req.setAttribute("zapis", form);
 			req.getRequestDispatcher("/WEB-INF/pages/SingIn.jsp").forward(req, resp);
 			return;
@@ -54,6 +55,7 @@ public class Save extends HttpServlet {
 
 		BlogUser user = dao.getUser(form.getNick());
 		if (user != null) {
+			form.setPasswordHash("");
 			req.setAttribute("zapis", form);
 			form.setGreske("nickAlreadyExists", "User with nick " + form.getNick() + " already exists.");
 			req.getRequestDispatcher("/WEB-INF/pages/SingIn.jsp").forward(req, resp);

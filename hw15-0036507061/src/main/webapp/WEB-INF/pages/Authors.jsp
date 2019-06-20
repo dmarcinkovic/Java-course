@@ -1,8 +1,25 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
     <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+     <%@ page session="true"%>
 <!DOCTYPE html>
 <html>
+<% String currentUser = (String)session.getAttribute("current.user.nick");%>
+	<%
+		if (currentUser == null){
+			out.write("Not loged in");
+		}else {
+			String firstName = (String)session.getAttribute("current.user.fn");
+			String lastName = (String)session.getAttribute("current.user.ln");
+			out.write(firstName + " " + lastName);
+		}
+	%>
+	<%
+		if (currentUser != null){ %>
+			<a href="logout">Logout</a>
+			<% 
+		}
+	%>
 <head>
 <meta charset="UTF-8">
 <title>Authors</title>

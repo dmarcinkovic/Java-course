@@ -1,6 +1,8 @@
 package hr.fer.zemris.java.tecaj_13.forms;
 
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,10 +100,53 @@ public class BlogUserForm {
 		this.firstName = pripremi(req.getParameter("firstName"));
 		this.lastName = pripremi(req.getParameter("lastName"));
 		this.email = pripremi(req.getParameter("email"));
-		this.passwordHash = pripremi(req.getParameter("passwordHash"));
+		
+		this.passwordHash = getHashedPassword(req.getParameter("passwordHash"));
 		this.nick = pripremi(req.getParameter("nick"));
 	}
 
+	private String getHashedPassword(String password) {
+		if (password == null || password.isEmpty()) {
+			return "";
+		}
+		try {
+			MessageDigest sha = MessageDigest.getInstance("SHA-256");
+			byte[] array = password.getBytes();
+			byte[] hash = sha.digest(array);
+			
+			return bytetohex(hash).trim();
+		} catch (NoSuchAlgorithmException e) {
+		}
+		return null; 
+	}
+	
+
+	/**
+	 * Method that converts hexadecimal byte array to String.
+	 * 
+	 * @param byteArray byte array to be converted.
+	 * @return Hexadecimal representation of given byte array.
+	 * @throws NullPointerException if byteArray is null.
+	 */
+	private  String bytetohex(byte[] byteArray) {
+		if (byteArray == null) {
+			throw new NullPointerException();
+		}
+
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < byteArray.length; i++) {
+			String hex = Integer.toHexString(0xff & byteArray[i]);
+
+			if (hex.length() == 1) {
+				sb.append("0");
+			}
+			sb.append(hex);
+		}
+
+		return sb.toString();
+	}
+	
 	/**
 	 * Na temelju predanog {@link Record}-a popunjava ovaj formular.
 	 * 

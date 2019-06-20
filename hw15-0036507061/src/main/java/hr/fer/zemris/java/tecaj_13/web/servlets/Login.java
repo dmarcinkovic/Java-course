@@ -56,6 +56,7 @@ public class Login extends HttpServlet {
 		form.validateLogin();
 		
 		if(form.imaPogresaka()) {
+			form.setPasswordHash("");
 			req.setAttribute("zapis", form);
 			req.getRequestDispatcher("/WEB-INF/pages/Login.jsp").forward(req, resp);
 			return;
@@ -70,6 +71,7 @@ public class Login extends HttpServlet {
 			req.getSession().setAttribute("current.user.nick", user.getNick());
 			resp.sendRedirect(req.getServletContext().getContextPath() + "/servleti/author/"+user.getNick());
 		}else {
+			form.setPasswordHash("");
 			req.setAttribute("zapis", form);
 			form.setGreske("user", "Wrong nick name or password.");
 			req.getRequestDispatcher("/WEB-INF/pages/Login.jsp").forward(req, resp);
