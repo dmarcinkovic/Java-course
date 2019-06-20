@@ -31,7 +31,14 @@
 <body>
 	<h1>Title: ${zapis.title}</h1>
 	<h2>Text: ${zapis.text}</h2>
-
+	
+	<c:if test="${permits != null && permits == true}">
+		<p>Edit blogs</p>
+		
+		<a href="edit?blogId=${id}">Edit blog entry.</a> <br>
+	</c:if>
+	
+	<a href=""></a>
 
 	<c:choose>
 		<c:when test="${comments.isEmpty() || comments == null}">
@@ -75,7 +82,7 @@
 				</div>
 			</c:if>
 		</div>
-
+	
 		<div class="formControls">
 			<span class="formLabel">&nbsp;</span> <input type="submit"
 				name="metoda" value="ADD COMMENT">

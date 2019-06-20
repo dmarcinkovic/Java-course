@@ -25,7 +25,6 @@ import javax.persistence.TemporalType;
 @Entity
 @Table(name="blog_entries")
 public class BlogEntry {
-
 	private Long id;
 	private List<BlogComment> comments = new ArrayList<>();
 	private Date createdAt;

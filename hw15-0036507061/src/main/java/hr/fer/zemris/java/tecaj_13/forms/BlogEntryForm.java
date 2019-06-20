@@ -30,17 +30,14 @@ public class BlogEntryForm {
 	}
 	
 	public String getError(String error) {
-		System.out.println(errors.get(error));
 		return errors.get(error);
 	}
 
 	public boolean hasErrors() {
-		System.out.println(!errors.isEmpty());
 		return !errors.isEmpty();
 	}
 
 	public boolean hasError(String firstName) {
-		System.out.println(errors.containsKey(firstName));
 		return errors.containsKey(firstName);
 	}
 	

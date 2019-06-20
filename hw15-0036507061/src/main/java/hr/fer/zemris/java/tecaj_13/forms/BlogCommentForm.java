@@ -60,8 +60,14 @@ public class BlogCommentForm {
 			errors.put("message", "Comment should not be empty.");
 		}
 		
-		if (usersEMail.isEmpty()) {
-			errors.put("usersEMail", "Users EMail should not be empty.");
+		if(usersEMail.isEmpty()) {
+			errors.put("usersEMail", "EMail is required!");
+		} else {
+			int l = usersEMail.length();
+			int p = usersEMail.indexOf('@');
+			if(l<3 || p==-1 || p==0 || p==l-1) {
+				errors.put("usersEMail", "EMail is not in the correct format.");
+			}
 		}
 	}
 

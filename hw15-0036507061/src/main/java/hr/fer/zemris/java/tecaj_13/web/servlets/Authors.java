@@ -1,6 +1,7 @@
 package hr.fer.zemris.java.tecaj_13.web.servlets;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +26,7 @@ import hr.fer.zemris.java.tecaj_13.model.BlogUser;
 public class Authors extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private boolean permits = false;
+	private BlogEntry commentEntry;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -91,7 +93,7 @@ public class Authors extends HttpServlet {
 			return;
 		}
 
-		List<BlogEntry> entries = dao.getBlogEntryForUser(user);	
+		List<BlogEntry> entries = dao.getBlogEntryForUser(user);
 
 		request.setAttribute("blogEntries", entries);
 		request.getRequestDispatcher("/WEB-INF/pages/Authors.jsp").forward(request, response);
@@ -104,39 +106,50 @@ public class Authors extends HttpServlet {
 
 		String nick = getNick(pathInfo);
 		DAO dao = DAOProvider.getDAO();
-		
+
 		BlogEntry entry = dao.getBlogEntry(id);
+		commentEntry = entry;
 
 		if (!entry.getCreator().getNick().equals(nick)) {
 			request.getSession().setAttribute("error", "Error. User is not owner of blog entry with given id.");
 			request.getRequestDispatcher("/WEB-INF/pages/Error.jsp").forward(request, response);
 			return;
 		}
-		
+
 		BlogEntryForm form = new BlogEntryForm();
 		form.popuniIzRecorda(entry);
 
 		request.setAttribute("zapis", entry);
 		List<BlogComment> comments = entry.getComments();
 		request.setAttribute("comments", comments);
-		
+
 		request.setAttribute("nick", nick);
 		request.setAttribute("id", id.toString());
-		
+
 		if (request.getParameter("comment.message") != null) {
 			addComment(request, response);
 			return;
 		}
-		
+
 		BlogCommentForm commentForm = new BlogCommentForm();
 		request.setAttribute("commentForm", commentForm);
-		request.setAttribute("entryComment", entry);
-		
+
 		request.getRequestDispatcher("/WEB-INF/pages/BlogEntries.jsp").forward(request, response);
 	}
 
 	private void editMethod(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		if (!permits) {
+			request.getSession().setAttribute("error", "Forbidden");
+			request.getRequestDispatcher("/WEB-INF/pages/Error.jsp").forward(request, response);
+			return;
+		}
+
+		if (request.getParameter("title") != null) {
+			editBlog(request, response);
+			return;
+		}
+
 		String pathInfo = request.getPathInfo();
 		String nick = getNick(pathInfo);
 
@@ -149,10 +162,56 @@ public class Authors extends HttpServlet {
 			return;
 		}
 
-		List<BlogEntry> entries = dao.getBlogEntryForUser(user);
+		if (request.getParameter("blogId") != null) {
+			callEditBlogEntry(request, response);
+			return;
+		}
+
+		List<BlogEntryForm> entries = getList(dao.getBlogEntryForUser(user));
+
 		request.setAttribute("blogEntries", entries);
 
 		request.getRequestDispatcher("/WEB-INF/pages/Edit.jsp").forward(request, response);
+	}
+
+	private void editBlog(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		BlogEntryForm form = new BlogEntryForm();
+		form.popuniIzHttpRequesta(request);
+		form.validateEntry();
+
+		if (form.hasErrors()) {
+			request.setAttribute("form", form);
+			request.getRequestDispatcher("/WEB-INF/pages/EditBlogEntry.jsp").forward(request, response);
+			return;
+		}
+
+		Long id = Long.parseLong(request.getParameter("ID"));
+		
+		DAO dao = DAOProvider.getDAO();
+		BlogEntry entry = dao.getBlogEntry(id);
+		entry.setTitle(form.getTitle());
+		entry.setText(form.getText());
+		
+		dao.persistEntry(entry);
+
+		String nick = getNick(request.getPathInfo());
+		response.sendRedirect(request.getServletContext().getContextPath() + "/servleti/author/" + nick);
+	}
+
+	private void callEditBlogEntry(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String blogId = request.getParameter("blogId");
+
+		DAO dao = DAOProvider.getDAO();
+
+		BlogEntry be = dao.getBlogEntry(Long.parseLong(blogId));
+		BlogEntryForm form = new BlogEntryForm();
+		form.popuniIzRecorda(be);
+		form.setId(be.getId().toString());
+
+		request.setAttribute("form", form);
+
+		request.getRequestDispatcher("/WEB-INF/pages/EditBlogEntry.jsp").forward(request, response);
 	}
 
 	private void newMethod(HttpServletRequest request, HttpServletResponse response)
@@ -205,29 +264,29 @@ public class Authors extends HttpServlet {
 
 		response.sendRedirect(request.getServletContext().getContextPath() + "/servleti/author/" + nick);
 	}
-	
-	private void addComment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+	private void addComment(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		BlogCommentForm form = new BlogCommentForm();
 		form.popuniIzHttpRequesta(request);
 		form.validateComment();
-		System.out.println(form);
 		request.setAttribute("commentForm", form);
-		
+
 		if (form.hasErrors()) {
 			request.getRequestDispatcher("/WEB-INF/pages/BlogEntries.jsp").forward(request, response);
 			return;
 		}
-		
+
 		DAO dao = DAOProvider.getDAO();
-		
 		BlogComment blogComment = new BlogComment();
 		blogComment.setMessage(form.getMessage());
 		blogComment.setPostedOn(new Date());
 		blogComment.setUsersEMail(form.getUsersEMail());
-		blogComment.setBlogEntry((BlogEntry) request.getAttribute("entryComment"));
-			
+		blogComment.setBlogEntry(commentEntry);
+
 		dao.persistComment(blogComment);
-		request.getRequestDispatcher("/WEB-INF/pages/BlogEntries.jsp").forward(request, response);
+		form.setId(blogComment.getId().toString());
+		response.sendRedirect(request.getRequestURL().toString());
 	}
 
 	private String getNick(String pathInfo) {
@@ -242,7 +301,20 @@ public class Authors extends HttpServlet {
 		String nick = pathInfo.substring(1, index);
 		return nick;
 	}
-	
+
+	private List<BlogEntryForm> getList(List<BlogEntry> list) {
+		List<BlogEntryForm> result = new ArrayList<>();
+
+		for (BlogEntry blogEntry : list) {
+			BlogEntryForm form = new BlogEntryForm();
+			form.popuniIzRecorda(blogEntry);
+			form.setId(blogEntry.getId().toString());
+			result.add(form);
+		}
+
+		return result;
+	}
+
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
 	 *      response)
