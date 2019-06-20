@@ -64,7 +64,7 @@ public class BlogUserForm {
 	 * @param errorName Key.
 	 * @param error     Value.
 	 */
-	public void setGreske(String errorName, String error) {
+	public void setErrors(String errorName, String error) {
 		errors.put(errorName, error);
 	}
 
@@ -75,7 +75,7 @@ public class BlogUserForm {
 	 * @return poruku pogreške ili <code>null</code> ako svojstvo nema pridruženu
 	 *         pogrešku
 	 */
-	public String dohvatiPogresku(String ime) {
+	public String getError(String ime) {
 		return errors.get(ime);
 	}
 
@@ -84,7 +84,7 @@ public class BlogUserForm {
 	 * 
 	 * @return <code>true</code> ako ima, <code>false</code> inače.
 	 */
-	public boolean imaPogresaka() {
+	public boolean hasErrors() {
 		return !errors.isEmpty();
 	}
 
@@ -94,7 +94,7 @@ public class BlogUserForm {
 	 * @param ime naziv svojstva za koje se ispituje postojanje pogreške
 	 * @return <code>true</code> ako ima, <code>false</code> inače.
 	 */
-	public boolean imaPogresku(String firstName) {
+	public boolean hasError(String firstName) {
 		return errors.containsKey(firstName);
 	}
 
@@ -112,7 +112,7 @@ public class BlogUserForm {
 	 * 
 	 * @param req HttpRequest.
 	 */
-	public void popuniIzHttpRequesta(HttpServletRequest req) {
+	public void fillFromHttpRequest(HttpServletRequest req) {
 		this.firstName = pripremi(req.getParameter("firstName"));
 		this.lastName = pripremi(req.getParameter("lastName"));
 		this.email = pripremi(req.getParameter("email"));
@@ -173,7 +173,7 @@ public class BlogUserForm {
 	 * 
 	 * @param blogUser Given BloUser.
 	 */
-	public void popuniIzRecorda(BlogUser blogUser) {
+	public void fillFromRecord(BlogUser blogUser) {
 		this.firstName = blogUser.getFirstName();
 		this.lastName = blogUser.getLastName();
 		this.email = blogUser.getEmail();
@@ -186,7 +186,7 @@ public class BlogUserForm {
 	 * 
 	 * @param blogUser Given BlogUser.
 	 */
-	public void popuniURecord(BlogUser blogUser) {
+	public void fillToRecord(BlogUser blogUser) {
 		blogUser.setFirstName(this.firstName);
 		blogUser.setLastName(this.lastName);
 		blogUser.setEmail(this.email);

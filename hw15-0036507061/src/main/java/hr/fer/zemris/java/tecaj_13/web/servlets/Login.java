@@ -37,7 +37,7 @@ public class Login extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		obradi(request, response);
+		process(request, response);
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class Login extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		obradi(request, response);
+		process(request, response);
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class Login extends HttpServlet {
 	 * @throws ServletException When error occurs.
 	 * @throws IOException      When error occurs.
 	 */
-	protected void obradi(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void process(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		req.setCharacterEncoding("UTF-8");
 
 		DAO dao = DAOProvider.getDAO();
@@ -66,11 +66,11 @@ public class Login extends HttpServlet {
 		req.setAttribute("zapisi", users);
 
 		BlogUserForm form = new BlogUserForm();
-		form.popuniIzHttpRequesta(req);
+		form.fillFromHttpRequest(req);
 
 		form.validateLogin();
 
-		if (form.imaPogresaka()) {
+		if (form.hasErrors()) {
 			form.setPasswordHash("");
 			req.setAttribute("zapis", form);
 			req.getRequestDispatcher("/WEB-INF/pages/Login.jsp").forward(req, resp);
@@ -88,7 +88,7 @@ public class Login extends HttpServlet {
 		} else {
 			form.setPasswordHash("");
 			req.setAttribute("zapis", form);
-			form.setGreske("user", "Wrong nick name or password.");
+			form.setErrors("user", "Wrong nick name or password.");
 			req.getRequestDispatcher("/WEB-INF/pages/Login.jsp").forward(req, resp);
 		}
 	}

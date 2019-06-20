@@ -47,7 +47,7 @@ public class BlogCommentForm {
 	 * 
 	 * @param req HttpRequest.
 	 */
-	public void popuniIzHttpRequesta(HttpServletRequest req) {
+	public void fillFromHttpRequest(HttpServletRequest req) {
 		message = prepare(req.getParameter("comment.message"));
 		usersEMail = prepare(req.getParameter("usersEMail"));
 	}
@@ -108,7 +108,7 @@ public class BlogCommentForm {
 	 * 
 	 * @param comment Given BlogComment.
 	 */
-	public void popuniIzRecorda(BlogComment comment) {
+	public void fillFromRecord(BlogComment comment) {
 		this.message = comment.getMessage();
 		this.usersEMail = comment.getUsersEMail();
 	}
@@ -118,7 +118,7 @@ public class BlogCommentForm {
 	 * 
 	 * @param comment Given BlogComment.
 	 */
-	public void popuniURecord(BlogComment comment) {
+	public void fillToRecord(BlogComment comment) {
 		comment.setMessage(message);
 		comment.setUsersEMail(usersEMail);
 	}

@@ -60,9 +60,9 @@
 					name="firstName" value='<c:out value="${zapis.firstName}"/>'
 					size="50">
 			</div>
-			<c:if test="${zapis.imaPogresku('firstName')}">
+			<c:if test="${zapis.hasError('firstName')}">
 				<div class="greska">
-					<c:out value="${zapis.dohvatiPogresku('firstName')}" />
+					<c:out value="${zapis.getError('firstName')}" />
 				</div>
 			</c:if>
 		</div>
@@ -73,9 +73,9 @@
 					name="lastName" value='<c:out value="${zapis.lastName}"/>'
 					size="50">
 			</div>
-			<c:if test="${zapis.imaPogresku('lastName')}">
+			<c:if test="${zapis.hasError('lastName')}">
 				<div class="greska">
-					<c:out value="${zapis.dohvatiPogresku('lastName')}" />
+					<c:out value="${zapis.getError('lastName')}" />
 				</div>
 			</c:if>
 		</div>
@@ -85,9 +85,9 @@
 				<span class="formLabel">Email</span><input type="text" name="email"
 					value='<c:out value="${zapis.email}"/>' size="50">
 			</div>
-			<c:if test="${zapis.imaPogresku('email')}">
+			<c:if test="${zapis.hasError('email')}">
 				<div class="greska">
-					<c:out value="${zapis.dohvatiPogresku('email')}" />
+					<c:out value="${zapis.getError('email')}" />
 				</div>
 			</c:if>
 		</div>
@@ -97,9 +97,9 @@
 				<span class="formLabel">Nick</span><input type="text" name="nick"
 					value='<c:out value="${zapis.nick}"/>' size="50">
 			</div>
-			<c:if test="${zapis.imaPogresku('nick')}">
+			<c:if test="${zapis.hasError('nick')}">
 				<div class="greska">
-					<c:out value="${zapis.dohvatiPogresku('nick')}" />
+					<c:out value="${zapis.getError('nick')}" />
 				</div>
 			</c:if>
 		</div>
@@ -110,17 +110,17 @@
 					name="passwordHash" value='<c:out value="${zapis.passwordHash}"/>'
 					size="50">
 			</div>
-			<c:if test="${zapis.imaPogresku('passwordHash')}">
+			<c:if test="${zapis.hasError('passwordHash')}">
 				<div class="greska">
-					<c:out value="${zapis.dohvatiPogresku('passwordHash')}" />
+					<c:out value="${zapis.getError('passwordHash')}" />
 				</div>
 			</c:if>
 		</div>
 
 		<div>
-			<c:if test="${zapis.imaPogresku('nickAlreadyExists')}">
+			<c:if test="${zapis.hasError('nickAlreadyExists')}">
 				<div class="greska">
-					<c:out value="${zapis.dohvatiPogresku('nickAlreadyExists')}" />
+					<c:out value="${zapis.getError('nickAlreadyExists')}" />
 				</div>
 			</c:if>
 		</div>

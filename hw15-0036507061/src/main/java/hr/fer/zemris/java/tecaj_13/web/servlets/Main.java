@@ -38,7 +38,7 @@ public class Main extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		BlogUser blogUser = new BlogUser();
 		BlogUserForm form = new BlogUserForm();
-		form.popuniIzRecorda(blogUser);
+		form.fillFromRecord(blogUser);
 		
 		request.setAttribute("zapis", form);
 		

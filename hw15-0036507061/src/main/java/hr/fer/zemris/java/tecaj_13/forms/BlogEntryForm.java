@@ -51,7 +51,7 @@ public class BlogEntryForm {
 	 * 
 	 * @param req HttpRequest.
 	 */
-	public void popuniIzHttpRequesta(HttpServletRequest req) {
+	public void fillFromHttpRequest(HttpServletRequest req) {
 		createdAt = prepare(req.getParameter("createdAt"));
 		lastModifiedAt = prepare(req.getParameter("lastModifiedAt"));
 		title = prepare(req.getParameter("title"));
@@ -113,7 +113,7 @@ public class BlogEntryForm {
 	 * 
 	 * @param entry Given BlogEntry.
 	 */
-	public void popuniIzRecorda(BlogEntry entry) {
+	public void fillFromRecord(BlogEntry entry) {
 		title = entry.getTitle();
 		text = entry.getText();
 	}
@@ -123,7 +123,7 @@ public class BlogEntryForm {
 	 * 
 	 * @param entry Given BlogEntry.
 	 */
-	public void popuniURecord(BlogEntry entry) {
+	public void fillToRecord(BlogEntry entry) {
 		entry.setTitle(title);
 		entry.setText(text);
 	}

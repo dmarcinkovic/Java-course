@@ -152,7 +152,7 @@ public class Authors extends HttpServlet {
 		}
 
 		BlogEntryForm form = new BlogEntryForm();
-		form.popuniIzRecorda(entry);
+		form.fillFromRecord(entry);
 
 		request.setAttribute("zapis", entry);
 		List<BlogComment> comments = entry.getComments();
@@ -230,7 +230,7 @@ public class Authors extends HttpServlet {
 	private void editBlog(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		BlogEntryForm form = new BlogEntryForm();
-		form.popuniIzHttpRequesta(request);
+		form.fillFromHttpRequest(request);
 		form.validateEntry();
 
 		if (form.hasErrors()) {
@@ -268,7 +268,7 @@ public class Authors extends HttpServlet {
 
 		BlogEntry be = dao.getBlogEntryForID(Long.parseLong(blogId));
 		BlogEntryForm form = new BlogEntryForm();
-		form.popuniIzRecorda(be);
+		form.fillFromRecord(be);
 		form.setId(be.getId().toString());
 
 		request.setAttribute("form", form);
@@ -301,7 +301,7 @@ public class Authors extends HttpServlet {
 
 		BlogEntry blogEntry = new BlogEntry();
 		BlogEntryForm form = new BlogEntryForm();
-		form.popuniIzRecorda(blogEntry);
+		form.fillFromRecord(blogEntry);
 
 		request.setAttribute("zapis", form);
 
@@ -321,7 +321,7 @@ public class Authors extends HttpServlet {
 	private void addNewBlog(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
 		BlogEntryForm form = new BlogEntryForm();
-		form.popuniIzHttpRequesta(request);
+		form.fillFromHttpRequest(request);
 		form.validateEntry();
 
 		if (form.hasErrors()) {
@@ -331,7 +331,7 @@ public class Authors extends HttpServlet {
 		}
 
 		BlogEntry entry = new BlogEntry();
-		form.popuniURecord(entry);
+		form.fillToRecord(entry);
 
 		DAO dao = DAOProvider.getDAO();
 
@@ -359,7 +359,7 @@ public class Authors extends HttpServlet {
 	private void addComment(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		BlogCommentForm form = new BlogCommentForm();
-		form.popuniIzHttpRequesta(request);
+		form.fillFromHttpRequest(request);
 		form.validateComment();
 		request.setAttribute("commentForm", form);
 
@@ -410,7 +410,7 @@ public class Authors extends HttpServlet {
 
 		for (BlogEntry blogEntry : list) {
 			BlogEntryForm form = new BlogEntryForm();
-			form.popuniIzRecorda(blogEntry);
+			form.fillFromRecord(blogEntry);
 			form.setId(blogEntry.getId().toString());
 			result.add(form);
 		}
