@@ -88,7 +88,9 @@
 			</c:if>
 		</div>
 		
-		<div>
+		<%
+		if (currentUser == null){ %>
+			<div>
 			<div>
 				<span class="formLabel">Email </span><input type="text"
 					name="usersEMail" value='<c:out value="${commentForm.usersEMail}"/>'
@@ -100,12 +102,16 @@
 				</div>
 			</c:if>
 		</div>
+			<% 
+		}
+	%>
+		
+		
 	
 		<div class="formControls">
 			<span class="formLabel">&nbsp;</span> <input type="submit"
 				name="metoda" value="ADD COMMENT">
 		</div>
-
 	</form>
 	
 
