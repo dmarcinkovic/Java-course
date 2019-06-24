@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Radimo malo i sa stilovima... -->
+<!-- Vidi: http://www.w3schools.com/cssref/default.asp -->
+
+<meta charset="UTF-8">
+<title>Gallery</title>
+
+<style>
+h1 {
+	font-style: italic;
+}
+
+h1:HOVER {
+	font-style: italic;
+	color: red;
+}
+
+form input {
+	background-color: gray;
+}
+
+form input:FOCUS {
+	background-color: white;
+	font-family: sans-serif;
+}
+
+#imeLabel {
+	font-family: monospace;
+}
+
+.quoteBox {
+	margin-top: 10px;
+	margin-left: 10px;
+	width: 300px;
+	border: 1px solid #FFAAAA;
+	display: inline-block;
+}
+
+.quoteText {
+	padding-left: 5px;
+	background-color: #FF6666;
+	font-family: cursive;
+	overflow: auto;
+}
+
+.quoteAuthor {
+	padding-right: 5px;
+	padding-top: 5px;
+	background-color: #66FF66;
+	font-weight: bold;
+	font-size: 0.7em;
+	text-align: right;
+	font-variant: small-caps;
+}
+
+.button {
+	background-color: #008CBA;
+	border: none;
+	color: white;
+	padding: 15px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	margin: 4px 2px;
+	cursor: pointer;
+}
+</style>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="js/htmlescaping.js"></script>
+<script type="text/javascript">
+	
+	// Method that loads  buttons from disk and represents each as buttons.
+	$(document).ready(function() {
+		loadButtons();
+	});
+
+	// Method that loads buttons from disk and represents each as button.
+	function loadButtons() {
+		$
+				.ajax({
+					url : "rest/image",
+					data : {
+						dummy : Math.random()
+					},
+					dataType : "json",
+					success : function(data) {
+						var tags = data.name; // već je JSON zbog dataType gore...
+						var html = "";
+						if (tags.length == 0) {
+							html = "Nema rezultata..."
+						} else {
+							for (var i = 0; i < tags.length; i++) {
+								html += "<button class=\"button\" onclick=\"buttonClick('"
+										+ tags[i]
+										+ "')\">"
+										+ tags[i]
+										+ "</button>  ";
+
+							}
+						}
+						$("#citat").html(html);
+					}
+				});
+	}
+
+	// Method called when user clicks on button with tag.
+	function buttonClick(s) {
+		$.ajax({
+			url : "rest/image/" + s,
+			data : {
+				dummy : Math.random()
+			},
+			dataType : "json",
+			success : function(data) {
+				var files = data.name;
+				var html = "";
+				if (files.length == 0) {
+					html = "Nema rezultata...";
+				} else {
+					for (var i = 0; i < files.length; i++) {
+						html += "<a href=\"showImage?img=" + files[i]
+								+ "\"><img src=\"showThumbnail?img=" + files[i]
+								+ "\"/>&nbsp;</a>";
+					}
+				}
+
+				$("#slicice").html(html);
+			}
+		});
+	}
+</script>
+</head>
+<body>
+
+	<h1>List of all tags</h1>
+
+	<div id="citat">&nbsp;</div>
+	<hr>
+	<br>
+	<div id="slicice">&nbsp;</div>
+</body>
+</html>
