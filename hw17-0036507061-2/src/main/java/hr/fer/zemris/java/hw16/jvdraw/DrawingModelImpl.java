@@ -128,11 +128,12 @@ public class DrawingModelImpl implements DrawingModel {
 		
 		modificationFlag = true;
 
-		for (DrawingModelListener l : listeners) {
-			l.objectsRemoved(this, 0, geometricalObjects.size() - 1);
-		}
-
+		int n = geometricalObjects.size();
+		
 		geometricalObjects.clear();
+		for (DrawingModelListener l : listeners) {
+			l.objectsRemoved(this, 0, n - 1);
+		}
 	}
 
 	/**

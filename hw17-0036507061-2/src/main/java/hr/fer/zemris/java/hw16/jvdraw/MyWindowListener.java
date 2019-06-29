@@ -64,9 +64,11 @@ public class MyWindowListener extends WindowAdapter {
 			}
 
 			saveAsAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Save"));
-		}
-		
-		if (!saveAsAction.isCanceled()) {
+			
+			if (!saveAsAction.isCanceled()) {
+				e.getWindow().dispose();
+			}
+		}else {
 			e.getWindow().dispose();
 		}
 	}

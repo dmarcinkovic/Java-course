@@ -93,7 +93,6 @@ public class JDrawingCanvas extends JComponent {
 		 */
 		@Override
 		public void objectsAdded(DrawingModel source, int index0, int index1) {
-			
 			repaint();
 		}
 
@@ -102,6 +101,7 @@ public class JDrawingCanvas extends JComponent {
 		 */
 		@Override
 		public void objectsRemoved(DrawingModel source, int index0, int index1) {
+			currentState = null;
 			repaint();
 		}
 
