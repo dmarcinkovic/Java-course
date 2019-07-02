@@ -47,6 +47,16 @@ public class Vocabulary {
 	private Map<String, List<String>> words;
 
 	/**
+	 * Stores the number of articles.
+	 */
+	private int numberOfArticles;
+
+	/**
+	 * List of all articles.
+	 */
+	private List<String> articles;
+
+	/**
 	 * Constructor. Initializes directory that contains all articles and file with
 	 * stop word.
 	 * 
@@ -61,6 +71,8 @@ public class Vocabulary {
 		frequency = new HashMap<>();
 		words = new HashMap<>();
 
+		articles = new ArrayList<>();
+
 		try {
 			createVocabulary();
 		} catch (IOException e) {
@@ -70,7 +82,7 @@ public class Vocabulary {
 	}
 
 	/**
-	 * Returns how many time given word appears in all articles.
+	 * Returns in how many articles given word appears.
 	 * 
 	 * @param word Word to get frequency.
 	 * @return Number of times given word appears in all articles.
@@ -102,6 +114,24 @@ public class Vocabulary {
 	}
 
 	/**
+	 * Method that returns the number of articles.
+	 * 
+	 * @return Number of articles.
+	 */
+	public int getNumberOfArticles() {
+		return numberOfArticles;
+	}
+
+	/**
+	 * Returns list of all articles.
+	 * 
+	 * @return List of all articles.
+	 */
+	public List<String> getListOfArticles() {
+		return articles;
+	}
+
+	/**
 	 * Returns set of words for particular article.
 	 * 
 	 * @param filename Path to article.
@@ -123,16 +153,19 @@ public class Vocabulary {
 		DirectoryStream<Path> stream = Files.newDirectoryStream(directory);
 
 		for (Path entry : stream) {
+			articles.add(entry.toString());
 			List<String> lines = Files.readAllLines(entry);
 
 			List<String> list = new ArrayList<>();
 			extractWords(lines, stopWords, list);
 			words.put(entry.toString(), list);
-			
+
 			Set<String> set = new HashSet<>(list);
 			for (String s : set) {
 				frequency.merge(s, 1, (k, v) -> v + 1);
 			}
+
+			numberOfArticles++;
 		}
 
 	}
@@ -162,6 +195,11 @@ public class Vocabulary {
 				}
 			}
 
+			String word = sb.toString();
+			if (!word.isEmpty() && !stopWords.contains(word)) {
+				vocabulary.add(word);
+				list.add(word);
+			}
 		}
 	}
 
@@ -171,7 +209,7 @@ public class Vocabulary {
 	 * @return Set of string representing stop words.
 	 * @throws IOException When error while opening the file occurs.
 	 */
-	private Set<String> getStopWords() throws IOException {
+	public Set<String> getStopWords() throws IOException {
 		List<String> lines = Files.readAllLines(file);
 
 		return new HashSet<String>(lines);

@@ -1,8 +1,11 @@
 package hr.fer.zemris.hw17.shell;
 
+import java.util.List;
 import java.util.SortedMap;
 
+import hr.fer.zemris.hw17.article.Article;
 import hr.fer.zemris.hw17.commands.ShellCommand;
+import hr.fer.zemris.hw17.vocabulary.Vocabulary;
 
 /**
  * Interface representing all commands available in console.
@@ -67,4 +70,36 @@ public interface Environment {
 	 *         console will be in more lines.
 	 */
 	Character getMorelinesSymbol();
+
+	/**
+	 * Method used to set the result of previously executed command.
+	 * 
+	 * @param commands List of strings that represents the result of previously
+	 *                 executed command.
+	 */
+	void setResultOfPreviousCommand(List<String> commands);
+
+	/**
+	 * Method that returns the list of strings that represents the result of
+	 * previously executed command.
+	 * 
+	 * @return Result of previously executed command.
+	 */
+	List<String> getResultOfPreviousCommand();
+
+	/**
+	 * Method that returns the article that is stored in given path.
+	 * 
+	 * @param path Path in which the article is stored.
+	 * @return Article that is stored in given path.
+	 */
+	Article getDocument(String path);
+
+	/**
+	 * Returns vocabulary.
+	 * 
+	 * @return vocabulary.
+	 */
+	Vocabulary getVocabulay();
+
 }

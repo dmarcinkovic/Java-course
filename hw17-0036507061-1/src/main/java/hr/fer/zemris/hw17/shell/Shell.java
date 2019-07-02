@@ -1,9 +1,6 @@
 package hr.fer.zemris.hw17.shell;
 
-import java.util.Set;
-
 import hr.fer.zemris.hw17.commands.ShellCommand;
-import hr.fer.zemris.hw17.vocabulary.Vocabulary;
 
 /**
  * Program that represents shell.Available commands are : exit command, results
@@ -25,11 +22,6 @@ public class Shell {
 		Environment env = buildEnvironment();
 
 		ShellStatus status = ShellStatus.CONTINUE;
-
-		Vocabulary vocabulary = new Vocabulary("src/main/resources/clanci",
-				"src/main/resources/hrvatski_stoprijeci.txt");
-		
-		Set<String> set = vocabulary.getVocabulary();
 
 		do {
 			env.write(env.getPromptSymbol() + " ");
@@ -121,6 +113,6 @@ public class Shell {
 	 * @return built environment.
 	 */
 	private static Environment buildEnvironment() {
-		return new EnvironmentImplementation();
+		return new EnvironmentImplementation("src/main/resources/clanci", "src/main/resources/hrvatski_stoprijeci.txt");
 	}
 }
