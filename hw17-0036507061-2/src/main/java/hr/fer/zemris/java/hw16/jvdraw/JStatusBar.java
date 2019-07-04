@@ -68,7 +68,6 @@ public class JStatusBar extends JLabel implements ColorChangeListener {
 	public void newColorSelected(IColorProvider source, Color oldColor, Color newColor) {
 		Color fg = null; 
 		Color bg = null;
-		
 		if (source == fgColorProvider) {
 			fg = newColor;
 			bg = bgColorProvider.getCurrentColor();

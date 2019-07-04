@@ -1,6 +1,7 @@
 package hr.fer.zemris.java.hw16.jvdraw;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -76,7 +77,7 @@ public class AddFilledCircle implements Tool {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		if (secondClick) {
-			addNewFilledCircle(e);
+			canvas.getCurrentState().mouseReleased(e);
 			return;
 		}
 
@@ -87,20 +88,22 @@ public class AddFilledCircle implements Tool {
 			secondClick = true;
 			filledCircle.setSecondPoint(e.getX(), e.getY());
 
+			filledCircle.setFillColor(getCopy(fillColor.getCurrentColor()));
+			filledCircle.setLineColor(getCopy(lineColor.getCurrentColor()));
 			drawingModel.add(filledCircle);
+
+			canvas.setCurrentState(new AddFilledCircle(canvas, lineColor, fillColor, drawingModel));
 		}
 	}
 
 	/**
-	 * Method that creates new Filled Circle when user clicks the mouse.
+	 * Returns copy of original color.
 	 * 
-	 * @param e MouseEvent.
+	 * @param c Original color.
+	 * @return Copy of original color.
 	 */
-	private void addNewFilledCircle(MouseEvent e) {
-		Tool currentState = canvas.getCurrentState();
-		currentState = new AddFilledCircle(canvas, lineColor, fillColor, drawingModel);
-		canvas.setCurrentState(currentState);
-		currentState.mouseReleased(e);
+	private Color getCopy(Color c) {
+		return new Color(c.getRed(), c.getGreen(), c.getBlue());
 	}
 
 	/**
@@ -149,6 +152,7 @@ public class AddFilledCircle implements Tool {
 		g2d.setColor(lineColor.getCurrentColor());
 		g2d.setStroke(new BasicStroke(4));
 		g2d.drawOval(center.x - r, center.y - r, 2 * r, 2 * r);
+
 		g2d.setColor(fillColor.getCurrentColor());
 		g2d.fillOval(center.x - r, center.y - r, 2 * r, 2 * r);
 	}

@@ -96,17 +96,22 @@ public class DrawingModelImpl implements DrawingModel {
 	 */
 	@Override
 	public void changeOrder(GeometricalObject object, int offset) {
-		// TODO Auto-generated method stub
 		int currentPosition = geometricalObjects.indexOf(object);
 		int newPosition = currentPosition + offset;
 
-		if (newPosition >= getSize()) {
-			return; // TODO change this
+		if (newPosition >= getSize() || newPosition < 0) {
+			return;
 		}
-
-		// TODO
+		
+		GeometricalObject temp = geometricalObjects.get(currentPosition);
+		geometricalObjects.set(currentPosition, geometricalObjects.get(newPosition));
+		geometricalObjects.set(newPosition, temp);
 
 		modificationFlag = true;
+
+		for (DrawingModelListener l : listeners) {
+			l.objectsChanged(this, currentPosition, newPosition);
+		}
 	}
 
 	/**
@@ -125,11 +130,11 @@ public class DrawingModelImpl implements DrawingModel {
 		if (geometricalObjects.isEmpty()) {
 			return;
 		}
-		
+
 		modificationFlag = true;
 
 		int n = geometricalObjects.size();
-		
+
 		geometricalObjects.clear();
 		for (DrawingModelListener l : listeners) {
 			l.objectsRemoved(this, 0, n - 1);

@@ -25,11 +25,11 @@ public class HelpCommand implements ShellCommand {
 	public ShellStatus executeCommand(Environment env, String arguments) {
 		String[] allArguments = arguments.trim().split("\\s+");
 		
-		env.setResultOfPreviousCommand(null);
-		
 		if (allArguments.length > 1) {
 			return writeErrorMessage(env, 0);
 		}
+		
+		env.setPreviousCommand("help");
 		
 		if (arguments.trim().isEmpty()) {
 			return printAllCommands(env);

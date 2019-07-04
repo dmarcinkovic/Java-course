@@ -48,9 +48,11 @@ public class TypeCommand implements ShellCommand {
 
 		if (result == null) {
 			return writeErrorMessage(env, 1);
+		}else if (!env.getPreviousCommand().equals("results") && !env.getPreviousCommand().equals("query")) {
+			return writeErrorMessage(env, 1);
 		}
-
-		env.setResultOfPreviousCommand(null);
+		
+		env.setPreviousCommand("type");
 		
 		return printArticle(result.get(index), env);
 	}
@@ -92,7 +94,7 @@ public class TypeCommand implements ShellCommand {
 			if (errorCode == 0) {
 				env.writeln("Invalid number of arguments.");
 			} else if (errorCode == 1) {
-				env.writeln("Previously executed command should be 'query'.");
+				env.writeln("Previously executed command should be 'query' or 'results'.");
 			} else if (errorCode == 2) {
 				env.writeln("Given argument must be integer.");
 			} else if (errorCode == 3) {

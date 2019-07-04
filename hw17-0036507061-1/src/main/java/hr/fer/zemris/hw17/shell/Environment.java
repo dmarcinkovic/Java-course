@@ -102,4 +102,18 @@ public interface Environment {
 	 */
 	Vocabulary getVocabulay();
 
+	/**
+	 * Return s name of the previously executed command.
+	 * 
+	 * @return Name of the previously executed command.
+	 */
+	String getPreviousCommand();
+
+	/**
+	 * Sets the name for the previously executed command.
+	 * 
+	 * @param name Name of the previously executed command.
+	 */
+	void setPreviousCommand(String name);
+
 }

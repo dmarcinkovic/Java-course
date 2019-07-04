@@ -154,8 +154,7 @@ public class Circle extends GeometricalObject {
 	 */
 	@Override
 	public GeometricalObjectEditor createGeometricalObjectEditor() {
-		// TODO Auto-generated method stub
-		return null;
+		return new CircleEditor(this);
 	}
 
 	/**

@@ -62,7 +62,12 @@ public class EnvironmentImplementation implements Environment {
 	 * Scanner used to read user's input.
 	 */
 	private Scanner scan;
-
+	
+	/**
+	 * Name of previously executed command.
+	 */
+	private String name;
+	
 	/**
 	 * Constructor to initialize private members.
 	 */
@@ -206,6 +211,22 @@ public class EnvironmentImplementation implements Environment {
 	@Override
 	public Vocabulary getVocabulay() {
 		return vocabulary;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getPreviousCommand() {
+		return name;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setPreviousCommand(String name) {
+		this.name = name;
 	}
 
 }

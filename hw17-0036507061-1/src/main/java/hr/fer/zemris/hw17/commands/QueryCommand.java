@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 
 import hr.fer.zemris.hw17.shell.Environment;
@@ -42,6 +44,8 @@ public class QueryCommand implements ShellCommand {
 		if (arguments.trim().isEmpty()) {
 			return writeErrorMessage(env, 0);
 		}
+		
+		env.setPreviousCommand("query");
 
 		// TODO ovdje u listu zapisati rezultat te pozbati
 		// env.setPreviouslyExecutedCommand.
@@ -53,17 +57,56 @@ public class QueryCommand implements ShellCommand {
 		double[] vector1 = getVector(words, env);
 
 		List<String> articles = env.getVocabulay().getListOfArticles();
-		List<String> topTen = new ArrayList<String>();
+		Queue<Integer> queue = new PriorityQueue<>();
+		List<String> topTen = new ArrayList<>();
 		
 		for (String path : articles) {
+			topTen.add(path);
+			if (topTen.size() == 10) {
+				break;
+			}
 			double[] vector2 = env.getDocument(path).getVector();
-			
-			
 		}
-		
-		env.setResultOfPreviousCommand(topTen);
+
+		 env.setResultOfPreviousCommand(topTen);
+		 
+		 printResult(env, topTen);
 
 		return ShellStatus.CONTINUE;
+	}
+	
+	private void printResult(Environment env, List<String> topTen) {
+		int index = 0;
+		for (String s : topTen) {
+			env.writeln("[ " + index + " ] (0) " + s);
+			index++;
+		}
+	}
+
+	private double getScalaraProduct(double[] vector1, double[] vector2) {
+		double res = 0; 
+		
+		for (int i = 0, n = Math.min(vector1.length, vector2.length); i<n; i++) {
+			res += vector1[i]*vector2[i];
+		}
+		
+		return res;
+	}
+	
+	/**
+	 * Method that returns the length of given vector.
+	 * 
+	 * @param vector Given vector.
+	 * @return Length of the vector.
+	 */
+	private double getLength(double[] vector) {
+		double res = 0;
+
+		for (int i = 0; i < vector.length; i++) {
+			res += vector[i] * vector[i];
+		}
+
+		return Math.sqrt(res);
 	}
 
 	/**
@@ -80,6 +123,7 @@ public class QueryCommand implements ShellCommand {
 		int index = 0;
 		for (String word : words) {
 			int tf = frequency.get(word);
+
 			int idf = vocabulary.getFrequency(word);
 
 			vector[index] = tf * Math.log10(vocabulary.getNumberOfArticles() / idf);

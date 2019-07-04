@@ -9,7 +9,7 @@ import javax.swing.AbstractListModel;
  * @author David
  *
  */
-public class DrawingObjectListModel extends AbstractListModel<String> implements DrawingModelListener {
+public class DrawingObjectListModel extends AbstractListModel<GeometricalObject> implements DrawingModelListener {
 
 	/**
 	 * Default serial version UID.
@@ -43,10 +43,10 @@ public class DrawingObjectListModel extends AbstractListModel<String> implements
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getElementAt(int index) {
+	public GeometricalObject getElementAt(int index) {
 		GeometricalObject object = drawingModel.getObject(index);
 
-		return object.toString();
+		return object;
 	}
 
 	/**

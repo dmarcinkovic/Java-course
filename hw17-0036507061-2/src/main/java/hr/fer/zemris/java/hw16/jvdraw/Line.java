@@ -133,8 +133,7 @@ public class Line extends GeometricalObject {
 	 */
 	@Override
 	public GeometricalObjectEditor createGeometricalObjectEditor() {
-		// TODO Auto-generated method stub
-		return null;
+		return new LineEditor(this);
 	}
 
 	/**

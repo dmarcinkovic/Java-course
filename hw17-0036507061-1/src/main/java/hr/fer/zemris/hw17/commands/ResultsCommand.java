@@ -24,20 +24,21 @@ public class ResultsCommand implements ShellCommand {
 		if (!arguments.trim().isEmpty()) {
 			return writeErrorMessage(env, 0);
 		}
-
+		
 		List<String> lastCommand = env.getResultOfPreviousCommand();
-
+		
 		if (lastCommand == null) {
 			return writeErrorMessage(env, 1);
 		}
 
+		env.setPreviousCommand("results");
+		
 		for (String s : lastCommand) {
 			if (writeToShell(env, s).equals(ShellStatus.TERMINATE)) {
 				return ShellStatus.TERMINATE;
 			}
 		}
 
-		env.setResultOfPreviousCommand(null);
 		return ShellStatus.CONTINUE;
 	}
 

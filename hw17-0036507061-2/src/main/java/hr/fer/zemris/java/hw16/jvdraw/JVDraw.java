@@ -5,7 +5,10 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.Action;
@@ -16,6 +19,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -109,6 +113,11 @@ public class JVDraw extends JFrame {
 	private final ExitAction exitAction = new ExitAction(this, saveAsAction);
 
 	/**
+	 * List that is presented at left size of window.
+	 */
+	private JList<GeometricalObject> jList;
+
+	/**
 	 * Initializes gui for this application.
 	 */
 	public JVDraw() {
@@ -151,6 +160,33 @@ public class JVDraw extends JFrame {
 		addListOfObjects(splitPane);
 
 		addWindowListener(new MyWindowListener(drawingModel, this, saveAsAction));
+
+		addKeyBoardListener();
+	}
+
+	/**
+	 * Method that registers this window to listen to keyboard events. It is used to
+	 * check if user pressed 'del' or '+' or '-' key. If 'del' key is pressed while
+	 * there is GeometricalObject selected in list, then this object will be
+	 * deleted. If '+' is pressed then this object will go one place in front of
+	 * other GeometricalObjects.
+	 */
+	private void addKeyBoardListener() {
+		jList.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				GeometricalObject focused = jList.getSelectedValue();
+
+				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					drawingModel.remove(focused);
+				} else if (e.getKeyCode() == KeyEvent.VK_ADD) {
+					drawingModel.changeOrder(focused, 1);
+				} else if (e.getKeyCode() == KeyEvent.VK_SUBTRACT) {
+					drawingModel.changeOrder(focused, -1);
+				}
+			}
+		});
 	}
 
 	/**
@@ -162,13 +198,81 @@ public class JVDraw extends JFrame {
 	 */
 	private void addListOfObjects(JSplitPane splitPane) {
 		DrawingObjectListModel drawingObjectModel = new DrawingObjectListModel(drawingModel);
-		JList<String> jList = new JList<>(drawingObjectModel);
+		jList = new JList<>(drawingObjectModel);
+
+		jList.addMouseListener(new DoubleMouseClick(this));
 
 		JPanel panel = new JPanel(new GridLayout(1, 0));
 		panel.add(new JScrollPane(jList));
 
 		splitPane.add(panel, JSplitPane.RIGHT);
 		splitPane.setDividerLocation(500);
+	}
+
+	/**
+	 * Implementation of MouseListener. When user double-click on GeometricalObject
+	 * presented at list, editing dialog is opened.
+	 * 
+	 * @author David
+	 *
+	 */
+	private class DoubleMouseClick extends MouseAdapter {
+
+		/**
+		 * Reference to frame.
+		 */
+		private JFrame frame;
+
+		/**
+		 * Constructor.
+		 * 
+		 * @param frame Reference to frame
+		 */
+		public DoubleMouseClick(JFrame frame) {
+			this.frame = frame;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void mouseClicked(MouseEvent evt) {
+			@SuppressWarnings("unchecked")
+			JList<GeometricalObject> list = (JList<GeometricalObject>) evt.getSource();
+			if (evt.getClickCount() == 2) {
+				GeometricalObject clicked = list.getSelectedValue();
+				GeometricalObjectEditor editor = clicked.createGeometricalObjectEditor();
+
+				showOptionPane(editor);
+			}
+		}
+
+		/**
+		 * Method that shows JOptionPane. It is used to enable editing drawn
+		 * GeometricalObjects.
+		 * 
+		 * @param editor JPanel that is presented at JOptionPane.
+		 */
+		private void showOptionPane(GeometricalObjectEditor editor) {
+			int result = JOptionPane.showConfirmDialog(frame, editor, "Edit", JOptionPane.OK_CANCEL_OPTION);
+
+			while (true) {
+				if (result == JOptionPane.OK_OPTION) {
+					try {
+						editor.checkEditing();
+						editor.acceptEditing();
+						break;
+					} catch (Exception ex) {
+						result = JOptionPane.showConfirmDialog(frame, editor, "Edit", JOptionPane.OK_CANCEL_OPTION);
+					}
+				} else {
+					break;
+				}
+			}
+
+			canvas.repaint();
+		}
+
 	}
 
 	/**
