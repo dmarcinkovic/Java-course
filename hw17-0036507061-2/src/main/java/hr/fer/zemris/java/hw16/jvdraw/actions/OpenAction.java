@@ -13,10 +13,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import hr.fer.zemris.java.hw16.jvdraw.Circle;
-import hr.fer.zemris.java.hw16.jvdraw.DrawingModel;
-import hr.fer.zemris.java.hw16.jvdraw.FilledCircle;
-import hr.fer.zemris.java.hw16.jvdraw.Line;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingModel;
+import hr.fer.zemris.java.hw16.jvdraw.geometric.Circle;
+import hr.fer.zemris.java.hw16.jvdraw.geometric.FilledCircle;
+import hr.fer.zemris.java.hw16.jvdraw.geometric.Line;
 
 /**
  * Action that allows user to choose the .jvd file from which GeometricalObjects

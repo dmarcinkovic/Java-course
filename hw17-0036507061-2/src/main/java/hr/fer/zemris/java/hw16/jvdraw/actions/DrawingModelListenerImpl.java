@@ -2,8 +2,8 @@ package hr.fer.zemris.java.hw16.jvdraw.actions;
 
 import javax.swing.Action;
 
-import hr.fer.zemris.java.hw16.jvdraw.DrawingModel;
-import hr.fer.zemris.java.hw16.jvdraw.DrawingModelListener;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingModel;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingModelListener;
 
 /**
  * Class used to implement all method from DrawingModelListener interface. This

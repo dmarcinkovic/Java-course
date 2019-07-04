@@ -17,10 +17,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import hr.fer.zemris.java.hw16.jvdraw.DrawingModel;
-import hr.fer.zemris.java.hw16.jvdraw.GeometricalObject;
-import hr.fer.zemris.java.hw16.jvdraw.GeometricalObjectBBCalculator;
-import hr.fer.zemris.java.hw16.jvdraw.GeometricalObjectPainter;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingModel;
+import hr.fer.zemris.java.hw16.jvdraw.geometric.GeometricalObject;
+import hr.fer.zemris.java.hw16.jvdraw.visitor.GeometricalObjectBBCalculator;
+import hr.fer.zemris.java.hw16.jvdraw.visitor.GeometricalObjectPainter;
 
 /**
  * Action that allows user to export drawn GeometricalObject in .gif, .jpg and

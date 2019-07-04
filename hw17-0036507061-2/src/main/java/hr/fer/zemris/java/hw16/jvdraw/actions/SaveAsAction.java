@@ -10,10 +10,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import hr.fer.zemris.java.hw16.jvdraw.DrawingModel;
-import hr.fer.zemris.java.hw16.jvdraw.GeometricalObject;
 import hr.fer.zemris.java.hw16.jvdraw.JVDraw;
-import hr.fer.zemris.java.hw16.jvdraw.SaveDrawingModel;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingModel;
+import hr.fer.zemris.java.hw16.jvdraw.geometric.GeometricalObject;
+import hr.fer.zemris.java.hw16.jvdraw.visitor.SaveDrawingModel;
 
 /**
  * Action that allows user to choose the destination of .jvd file he wants to

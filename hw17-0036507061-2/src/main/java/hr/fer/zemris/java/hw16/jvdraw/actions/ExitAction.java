@@ -5,9 +5,9 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.AbstractAction;
 
-import hr.fer.zemris.java.hw16.jvdraw.DrawingModel;
 import hr.fer.zemris.java.hw16.jvdraw.JVDraw;
-import hr.fer.zemris.java.hw16.jvdraw.MyWindowListener;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingModel;
+import hr.fer.zemris.java.hw16.jvdraw.listeners.MyWindowListener;
 
 /**
  * Implementation of Exit action. This action checks if canvas has been modifies

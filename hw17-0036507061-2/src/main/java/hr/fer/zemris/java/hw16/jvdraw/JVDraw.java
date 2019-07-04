@@ -34,6 +34,20 @@ import hr.fer.zemris.java.hw16.jvdraw.actions.ExportAction;
 import hr.fer.zemris.java.hw16.jvdraw.actions.OpenAction;
 import hr.fer.zemris.java.hw16.jvdraw.actions.SaveAction;
 import hr.fer.zemris.java.hw16.jvdraw.actions.SaveAsAction;
+import hr.fer.zemris.java.hw16.jvdraw.components.JColorArea;
+import hr.fer.zemris.java.hw16.jvdraw.components.JDrawingCanvas;
+import hr.fer.zemris.java.hw16.jvdraw.components.JStatusBar;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingModel;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingModelImpl;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingObjectListModel;
+import hr.fer.zemris.java.hw16.jvdraw.editor.GeometricalObjectEditor;
+import hr.fer.zemris.java.hw16.jvdraw.geometric.GeometricalObject;
+import hr.fer.zemris.java.hw16.jvdraw.listeners.MouseListenerImpl;
+import hr.fer.zemris.java.hw16.jvdraw.listeners.MyWindowListener;
+import hr.fer.zemris.java.hw16.jvdraw.state.AddCircle;
+import hr.fer.zemris.java.hw16.jvdraw.state.AddFilledCircle;
+import hr.fer.zemris.java.hw16.jvdraw.state.AddLine;
+import hr.fer.zemris.java.hw16.jvdraw.state.Tool;
 
 /**
  * Program that creates program similar to Paint program presented on Windows

@@ -8,10 +8,10 @@ import java.nio.file.Path;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
-import hr.fer.zemris.java.hw16.jvdraw.DrawingModel;
-import hr.fer.zemris.java.hw16.jvdraw.GeometricalObject;
 import hr.fer.zemris.java.hw16.jvdraw.JVDraw;
-import hr.fer.zemris.java.hw16.jvdraw.SaveDrawingModel;
+import hr.fer.zemris.java.hw16.jvdraw.drawing.DrawingModel;
+import hr.fer.zemris.java.hw16.jvdraw.geometric.GeometricalObject;
+import hr.fer.zemris.java.hw16.jvdraw.visitor.SaveDrawingModel;
 
 /**
  * Action that allows user to save all modifications made from last save.
