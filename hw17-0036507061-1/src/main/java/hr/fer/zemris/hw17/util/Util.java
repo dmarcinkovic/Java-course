@@ -114,15 +114,18 @@ public class Util {
 			map.merge(word, 1, (k, v) -> v + 1);
 		}
 
-		Set<String> setOfWords = map.keySet();
-
-		double[] result = new double[setOfWords.size()];
+		Set<String> set = vocabulary.getWords();
+		double[] result = new double[set.size()];
 
 		int index = 0;
-		for (String word : setOfWords) {
-			double tf = map.get(word);
+		for (String word : set) {
+			Integer tf = map.get(word);
 			double idf = getIdf(word, vocabulary.getArticles());
-
+			
+			if (tf == null) {
+				tf = 0;
+			}
+			
 			result[index++] = tf * idf;
 		}
 
@@ -144,18 +147,9 @@ public class Util {
 			Set<String> words = article.getSetOfWords();
 
 			if (words.contains(word)) {
-				if (word.equals("klase")) {
-					System.out.println(article.toString());
-				}
 				n++;
 			}
 		}
-		
-		if (word.equals("klase")) {
-			System.out.println(n);
-		}
-		
-
 		return Math.log10(vocabulary.size() / n);
 	}
 

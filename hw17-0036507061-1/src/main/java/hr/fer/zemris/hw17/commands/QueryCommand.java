@@ -48,11 +48,6 @@ public class QueryCommand implements ShellCommand {
 		double[] vector1 = null;
 		try {
 			vector1 = Util.createVector(words, env.getVocabulay());
-			System.out.println(Vector.modulo(vector1));
-			for (int i =0 ; i<vector1.length; i++) {
-				System.out.print(vector1[i] + " ");
-			}
-			System.out.println(" ");
 		} catch (ArithmeticException e) {
 			writeMessage(env, "No results");
 			return ShellStatus.CONTINUE;

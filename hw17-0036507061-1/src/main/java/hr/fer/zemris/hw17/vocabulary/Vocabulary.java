@@ -37,6 +37,11 @@ public class Vocabulary {
 	private List<Article> articles;
 
 	/**
+	 * All words presented in all articles.
+	 */
+	private Set<String> words;
+
+	/**
 	 * Constructor used to initialize directory where all articles are stored and
 	 * set of stop words.
 	 * 
@@ -50,6 +55,19 @@ public class Vocabulary {
 		articles = new ArrayList<>();
 
 		getListOfArticles();
+
+		words = new HashSet<>();
+		for (Article a : articles) {
+			words.addAll(a.getSetOfWords());
+		}
+	}
+	
+	/**
+	 * Method that returns all words presented in all articles.
+	 * @return Set of all words.
+	 */
+	public Set<String> getWords(){
+		return words;
 	}
 
 	/**
