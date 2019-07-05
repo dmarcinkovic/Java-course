@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import hr.fer.zemris.hw17.shell.Environment;
+import hr.fer.zemris.hw17.shell.Result;
 import hr.fer.zemris.hw17.shell.ShellIOException;
 import hr.fer.zemris.hw17.shell.ShellStatus;
 
@@ -24,19 +25,21 @@ public class ResultsCommand implements ShellCommand {
 		if (!arguments.trim().isEmpty()) {
 			return writeErrorMessage(env, 0);
 		}
-		
-		List<String> lastCommand = env.getResultOfPreviousCommand();
-		
+
+		List<Result> lastCommand = env.getResultOfPreviousCommand();
+
 		if (lastCommand == null) {
 			return writeErrorMessage(env, 1);
 		}
 
 		env.setPreviousCommand("results");
-		
-		for (String s : lastCommand) {
-			if (writeToShell(env, s).equals(ShellStatus.TERMINATE)) {
+
+		int index = 0;
+		for (Result s : lastCommand) {
+			if (writeToShell(env, "[ " + index + "] " + s.toString()).equals(ShellStatus.TERMINATE)) {
 				return ShellStatus.TERMINATE;
 			}
+			index++;
 		}
 
 		return ShellStatus.CONTINUE;

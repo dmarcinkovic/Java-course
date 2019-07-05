@@ -1,12 +1,12 @@
 package hr.fer.zemris.hw17.article;
 
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import hr.fer.zemris.hw17.vocabulary.Vocabulary;
+import hr.fer.zemris.hw17.util.Util;
 
 /**
  * Class that represents one article. It contains information about the path
@@ -18,91 +18,66 @@ import hr.fer.zemris.hw17.vocabulary.Vocabulary;
 public class Article {
 
 	/**
-	 * Path where this article is stored.
+	 * Path of article.
 	 */
 	private Path path;
 
 	/**
-	 * Vocabulary. This class contains all words presented.
+	 * List of all words presented in this article.
 	 */
-	private Vocabulary vocabulary;
+	private List<String> allWords;
 
 	/**
-	 * Stores calculated value of idf for every word in vocabulary.
+	 * Set of all words presented in this article.
 	 */
-	private double[] vector;
+	private Set<String> words;
 
 	/**
-	 * Total number of documents.
-	 */
-	private int totalNumberOfDocuments;
-
-	/**
-	 * Constructor. Used to initialize path, vocabulary and total number of
-	 * documents.
+	 * Constructor used to initialize path of article and stopWords.
 	 * 
-	 * @param path                   Path where this articles is stored.
-	 * @param vocabulary             Vocabulary.
-	 * @param totalNumberOfDocuments Total number od documents.
+	 * @param filename  Path of article given as String.
+	 * @param stopWords Set of stop words in croatian language.
 	 */
-	public Article(Path path, Vocabulary vocabulary, int totalNumberOfDocuments) {
-		this.path = path;
-		this.vocabulary = vocabulary;
-		this.totalNumberOfDocuments = totalNumberOfDocuments;
+	public Article(String filename, Set<String> stopWords) {
+		path = Paths.get(filename);
+
+		allWords = Util.getWords(filename, stopWords);
+
+		words = new HashSet<>(allWords);
 	}
 
 	/**
-	 * Returns path on which this article is stored.
+	 * Returns path of article.
 	 * 
-	 * @return Path.
+	 * @return Path of article.
 	 */
 	public Path getPath() {
 		return path;
 	}
 
 	/**
-	 * Returns vector.
+	 * Returns set of words.
 	 * 
-	 * @return Vector.
+	 * @return Set of words.
 	 */
-	public double[] getVector() {
-		if (vector == null) {
-			createVector();
-		}
-		return vector;
+	public Set<String> getSetOfWords() {
+		return words;
 	}
 
 	/**
-	 * Method that creates vector. It goes through all words and calculates idf for
-	 * every word. The formula is : log(|D| / |deD: w e d|). This is ration of total
-	 * number of documents presented and number of document that contains particular
-	 * word.
+	 * Returns list of all words presented in this article.
+	 * 
+	 * @return
 	 */
-	private void createVector() {
-		vector = new double[vocabulary.getSize()];
-		
-		List<String> words = vocabulary.getWords(path.toString());
-		Map<String, Integer> map = new HashMap<>();
-
-		for (String word : words) {
-			map.merge(word, 1, (k, v) -> v + 1);
-		}
-
-		Set<String> allWords = vocabulary.getVocabulary();
-		int index = 0;
-		for (String s : allWords) {
-			Integer tf = map.get(s);
-			
-			if (tf == null) {
-				tf = 0;
-			}
-
-			int idf = vocabulary.getFrequency(s);
-
-			vector[index] = tf * Math.log10(totalNumberOfDocuments / idf);
-
-			index++;
-		}
+	public List<String> getListOfWords() {
+		return allWords;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return path.toString();
+	}
 }

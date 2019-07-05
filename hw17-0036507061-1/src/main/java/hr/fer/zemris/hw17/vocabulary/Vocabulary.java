@@ -6,11 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import hr.fer.zemris.hw17.article.Article;
 
 /**
  * Class that represents all words from all articles available. It takes care of
@@ -22,196 +22,86 @@ import java.util.Set;
 public class Vocabulary {
 
 	/**
-	 * Directory that contains all articles.
+	 * Directory where all articles are stored.
 	 */
 	private Path directory;
 
 	/**
-	 * File with stop words.
+	 * Set of stop words. Used to remove those words from out final vocabulary.
 	 */
-	private Path file;
-
-	/**
-	 * Set of all words from all articles available.
-	 */
-	private Set<String> vocabulary;
-
-	/**
-	 * Map that stores the frequency of every word in all articles.
-	 */
-	private Map<String, Integer> frequency;
-
-	/**
-	 * Map that contains set of words for every article.
-	 */
-	private Map<String, List<String>> words;
-
-	/**
-	 * Stores the number of articles.
-	 */
-	private int numberOfArticles;
+	private Set<String> stopWords;
 
 	/**
 	 * List of all articles.
 	 */
-	private List<String> articles;
+	private List<Article> articles;
 
 	/**
-	 * Constructor. Initializes directory that contains all articles and file with
-	 * stop word.
+	 * Constructor used to initialize directory where all articles are stored and
+	 * set of stop words.
 	 * 
-	 * @param dir       Directory that contains all articles.
-	 * @param stopWords File with stop words.
+	 * @param dir  Directory where all articles are stores.
+	 * @param stop Set of stop words.
 	 */
-	public Vocabulary(String dir, String stopWords) {
-		file = Paths.get(stopWords);
+	public Vocabulary(String dir, String stop) {
 		directory = Paths.get(dir);
 
-		vocabulary = new HashSet<>();
-		frequency = new HashMap<>();
-		words = new HashMap<>();
-
+		getStopWords(Paths.get(stop));
 		articles = new ArrayList<>();
 
+		getListOfArticles();
+	}
+
+	/**
+	 * Reads file in which stop words are written. Then it creates set of those
+	 * words.
+	 * 
+	 * @param path Path in which stop words are written.
+	 */
+	private void getStopWords(Path path) {
+		List<String> lines = null;
+
 		try {
-			createVocabulary();
+			lines = Files.readAllLines(path);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
+		stopWords = new HashSet<>(lines);
 	}
 
 	/**
-	 * Returns in how many articles given word appears.
+	 * Returns stop words.
 	 * 
-	 * @param word Word to get frequency.
-	 * @return Number of times given word appears in all articles.
+	 * @return Stop words.
 	 */
-	public Integer getFrequency(String word) {
-		Integer result = frequency.get(word);
-		if (result == null) {
-			return 0;
+	public Set<String> getStopWords() {
+		return stopWords;
+	}
+
+	/**
+	 * MEthod that reads all articles from given directory and stores result in
+	 * articles list.
+	 */
+	private void getListOfArticles() {
+		DirectoryStream<Path> stream = null;
+		try {
+			stream = Files.newDirectoryStream(directory);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return result;
+
+		for (Path p : stream) {
+			articles.add(new Article(p.toString(), stopWords));
+		}
 	}
 
 	/**
-	 * Returns set of all words from all articles.
+	 * Returns list of articles.
 	 * 
-	 * @return Set of all words from all articles.
+	 * @return List of articles.
 	 */
-	public Set<String> getVocabulary() {
-		return vocabulary;
-	}
-
-	/**
-	 * Returns number of words presented in vocabulary.
-	 * 
-	 * @return Number of words presented in vocabulary.
-	 */
-	public int getSize() {
-		return vocabulary.size();
-	}
-
-	/**
-	 * Method that returns the number of articles.
-	 * 
-	 * @return Number of articles.
-	 */
-	public int getNumberOfArticles() {
-		return numberOfArticles;
-	}
-
-	/**
-	 * Returns list of all articles.
-	 * 
-	 * @return List of all articles.
-	 */
-	public List<String> getListOfArticles() {
+	public List<Article> getArticles() {
 		return articles;
-	}
-
-	/**
-	 * Returns set of words for particular article.
-	 * 
-	 * @param filename Path to article.
-	 * @return Set of words for particular article.
-	 */
-	public List<String> getWords(String filename) {
-		return words.get(filename);
-	}
-
-	/**
-	 * Creates vocabulary. It reads file with stop words and all articles and then
-	 * extract words from those articles.
-	 * 
-	 * @throws IOException When error occurs while opening the file.
-	 */
-	private void createVocabulary() throws IOException {
-		Set<String> stopWords = getStopWords();
-
-		DirectoryStream<Path> stream = Files.newDirectoryStream(directory);
-
-		for (Path entry : stream) {
-			articles.add(entry.toString());
-			List<String> lines = Files.readAllLines(entry);
-
-			List<String> list = new ArrayList<>();
-			extractWords(lines, stopWords, list);
-			words.put(entry.toString(), list);
-
-			Set<String> set = new HashSet<>(list);
-			for (String s : set) {
-				frequency.merge(s, 1, (k, v) -> v + 1);
-			}
-
-			numberOfArticles++;
-		}
-
-	}
-
-	/**
-	 * Extracts words from given list of strings.
-	 * 
-	 * @param lines     List of string from which words are extracted.
-	 * @param stopWords Set of all stop words.
-	 * @param set       Set of words for every particular article.
-	 */
-	private void extractWords(List<String> lines, Set<String> stopWords, List<String> list) {
-		for (String line : lines) {
-			StringBuilder sb = new StringBuilder();
-			char[] array = line.toCharArray();
-
-			for (Character c : array) {
-				if (Character.isAlphabetic(c)) {
-					sb.append(c);
-				} else {
-					String word = sb.toString();
-					if (!word.isEmpty() && !stopWords.contains(word)) {
-						vocabulary.add(word);
-						list.add(word);
-					}
-					sb = new StringBuilder();
-				}
-			}
-
-			String word = sb.toString();
-			if (!word.isEmpty() && !stopWords.contains(word)) {
-				vocabulary.add(word);
-				list.add(word);
-			}
-		}
-	}
-
-	/**
-	 * Reads all stop words from file.s
-	 * 
-	 * @return Set of string representing stop words.
-	 * @throws IOException When error while opening the file occurs.
-	 */
-	public Set<String> getStopWords() throws IOException {
-		List<String> lines = Files.readAllLines(file);
-
-		return new HashSet<String>(lines);
 	}
 }

@@ -1,6 +1,5 @@
 package hr.fer.zemris.hw17.shell;
 
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +15,7 @@ import hr.fer.zemris.hw17.commands.QueryCommand;
 import hr.fer.zemris.hw17.commands.ResultsCommand;
 import hr.fer.zemris.hw17.commands.ShellCommand;
 import hr.fer.zemris.hw17.commands.TypeCommand;
+import hr.fer.zemris.hw17.vector.Vector;
 import hr.fer.zemris.hw17.vocabulary.Vocabulary;
 
 /**
@@ -32,14 +32,9 @@ public class EnvironmentImplementation implements Environment {
 	private Vocabulary vocabulary;
 
 	/**
-	 * Map that associates path name of article with the Article object.
-	 */
-	private Map<String, Article> articles;
-
-	/**
 	 * List that represents the result of previously executed command.
 	 */
-	private List<String> commands;
+	private List<Result> result;
 
 	/**
 	 * Multiline symbol. It is shown when user write command in two or more lines.
@@ -62,12 +57,17 @@ public class EnvironmentImplementation implements Environment {
 	 * Scanner used to read user's input.
 	 */
 	private Scanner scan;
-	
+
 	/**
 	 * Name of previously executed command.
 	 */
 	private String name;
-	
+
+	/**
+	 * Map that contains vector representations of articles.
+	 */
+	private Map<String, Vector> vectors;
+
 	/**
 	 * Constructor to initialize private members.
 	 */
@@ -76,8 +76,21 @@ public class EnvironmentImplementation implements Environment {
 		promptSymbol = '>';
 		morelineSymbol = '\\';
 		scan = new Scanner(System.in);
-		articles = new HashMap<>();
 		vocabulary = new Vocabulary(articlesPath, stopWordsPath);
+		vectors = new HashMap<>();
+
+		initializeVectors();
+	}
+
+	/**
+	 * Method that initialized vectors.
+	 */
+	private void initializeVectors() {
+		List<Article> articles = vocabulary.getArticles();
+
+		for (Article article : articles) {
+			vectors.put(article.getPath().toString(), new Vector(article, vocabulary));
+		}
 	}
 
 	/**
@@ -178,34 +191,6 @@ public class EnvironmentImplementation implements Environment {
 	}
 
 	/**
-	 * {@index}
-	 */
-	@Override
-	public void setResultOfPreviousCommand(List<String> commands) {
-		this.commands = commands;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<String> getResultOfPreviousCommand() {
-		return commands;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Article getDocument(String path) {
-		if (articles.get(path) == null) {
-			articles.put(path, new Article(Paths.get(path), vocabulary, vocabulary.getNumberOfArticles()));
-		}
-
-		return articles.get(path);
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -227,6 +212,30 @@ public class EnvironmentImplementation implements Environment {
 	@Override
 	public void setPreviousCommand(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Vector getVector(String filename) {
+		return vectors.get(filename);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setResultOfPreviousCommand(List<Result> result) {
+		this.result = result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<Result> getResultOfPreviousCommand() {
+		return result;
 	}
 
 }

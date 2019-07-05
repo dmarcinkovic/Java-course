@@ -1,20 +1,18 @@
 package hr.fer.zemris.hw17.commands;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Set;
 
+import hr.fer.zemris.hw17.article.Article;
 import hr.fer.zemris.hw17.shell.Environment;
+import hr.fer.zemris.hw17.shell.Result;
 import hr.fer.zemris.hw17.shell.ShellIOException;
 import hr.fer.zemris.hw17.shell.ShellStatus;
-import hr.fer.zemris.hw17.vocabulary.Vocabulary;
+import hr.fer.zemris.hw17.util.Util;
+import hr.fer.zemris.hw17.vector.Vector;
 
 /**
  * Prints ten best results for given query. Expects at least one argument.
@@ -25,15 +23,9 @@ import hr.fer.zemris.hw17.vocabulary.Vocabulary;
 public class QueryCommand implements ShellCommand {
 
 	/**
-	 * Map that contains frequency for every word.
-	 */
-	private Map<String, Integer> frequency;
-
-	/**
 	 * Constructor.
 	 */
 	public QueryCommand() {
-		frequency = new HashMap<>();
 	}
 
 	/**
@@ -44,94 +36,84 @@ public class QueryCommand implements ShellCommand {
 		if (arguments.trim().isEmpty()) {
 			return writeErrorMessage(env, 0);
 		}
-		
+
 		env.setPreviousCommand("query");
 
-		// TODO ovdje u listu zapisati rezultat te pozbati
-		// env.setPreviouslyExecutedCommand.
-		Set<String> words = getWordsFromInput(arguments, env);
+		List<String> words = new ArrayList<>();
+		List<String> lines = new ArrayList<>();
+		lines.add(arguments);
+
+		Util.getWords(lines, env.getVocabulay().getStopWords(), words);
+
+		double[] vector1 = null;
+		try {
+			vector1 = Util.createVector(words, env.getVocabulay());
+			System.out.println(Vector.modulo(vector1));
+			for (int i =0 ; i<vector1.length; i++) {
+				System.out.print(vector1[i] + " ");
+			}
+			System.out.println(" ");
+		} catch (ArithmeticException e) {
+			writeMessage(env, "No results");
+			return ShellStatus.CONTINUE;
+		}
+
+		List<Result> res = getResult(env, vector1);
+
+		printResult(res, env, words);
+		env.setResultOfPreviousCommand(res);
+		return ShellStatus.CONTINUE;
+	}
+
+	/**
+	 * Method that returns result of query as List of Result objects.
+	 * 
+	 * @param env     Shell environment.
+	 * @param vector1 Vector1.
+	 * @return List of Result objects.
+	 */
+	private List<Result> getResult(Environment env, double[] vector1) {
+		List<Article> articles = env.getVocabulay().getArticles();
+		Queue<Result> queue = new PriorityQueue<>();
+
+		for (Article article : articles) {
+			Vector v = env.getVector(article.getPath().toString());
+
+			double modulo1 = Vector.modulo(vector1);
+			double modulo2 = Vector.modulo(v);
+			double scalar = Vector.scalarProduct(vector1, v.getVector());
+
+			queue.add(new Result(scalar / (modulo1 * modulo2), article.toString()));
+
+			if (queue.size() > 10) {
+				queue.poll();
+			}
+		}
+
+		List<Result> result = new ArrayList<>(queue);
+		Collections.sort(result, (v1, v2) -> v2.compareTo(v1));
+		return result;
+	}
+
+	/**
+	 * Method used to print result to Shell. It prints top ten results in descending
+	 * order.
+	 * 
+	 * @param result List of Result objects.
+	 * @param env    Shell environment.
+	 * @param words  List of words.
+	 */
+	private void printResult(List<Result> result, Environment env, List<String> words) {
+		List<Result> list = new ArrayList<>(result);
 
 		writeMessage(env, "Query is: " + words.toString());
 		writeMessage(env, "Top 10 results: ");
 
-		double[] vector1 = getVector(words, env);
-
-		List<String> articles = env.getVocabulay().getListOfArticles();
-		Queue<Integer> queue = new PriorityQueue<>();
-		List<String> topTen = new ArrayList<>();
-		
-		for (String path : articles) {
-			topTen.add(path);
-			if (topTen.size() == 10) {
-				break;
-			}
-			double[] vector2 = env.getDocument(path).getVector();
-		}
-
-		 env.setResultOfPreviousCommand(topTen);
-		 
-		 printResult(env, topTen);
-
-		return ShellStatus.CONTINUE;
-	}
-	
-	private void printResult(Environment env, List<String> topTen) {
 		int index = 0;
-		for (String s : topTen) {
-			env.writeln("[ " + index + " ] (0) " + s);
+		for (Result res : list) {
+			writeMessage(env, "[ " + index + "] " + res.toString());
 			index++;
 		}
-	}
-
-	private double getScalaraProduct(double[] vector1, double[] vector2) {
-		double res = 0; 
-		
-		for (int i = 0, n = Math.min(vector1.length, vector2.length); i<n; i++) {
-			res += vector1[i]*vector2[i];
-		}
-		
-		return res;
-	}
-	
-	/**
-	 * Method that returns the length of given vector.
-	 * 
-	 * @param vector Given vector.
-	 * @return Length of the vector.
-	 */
-	private double getLength(double[] vector) {
-		double res = 0;
-
-		for (int i = 0; i < vector.length; i++) {
-			res += vector[i] * vector[i];
-		}
-
-		return Math.sqrt(res);
-	}
-
-	/**
-	 * Method that creates vector for given query.
-	 * 
-	 * @param words Set of words given as arguments in query.
-	 * @param env   Shell environment.
-	 * @return Vector for given query.
-	 */
-	private double[] getVector(Set<String> words, Environment env) {
-		double[] vector = new double[words.size()];
-		Vocabulary vocabulary = env.getVocabulay();
-
-		int index = 0;
-		for (String word : words) {
-			int tf = frequency.get(word);
-
-			int idf = vocabulary.getFrequency(word);
-
-			vector[index] = tf * Math.log10(vocabulary.getNumberOfArticles() / idf);
-
-			index++;
-		}
-
-		return vector;
 	}
 
 	/**
@@ -142,65 +124,6 @@ public class QueryCommand implements ShellCommand {
 	 */
 	private void writeMessage(Environment env, String message) {
 		env.writeln(message);
-	}
-
-	/**
-	 * Returns Set of words given as arguments in query. Stop words are not
-	 * considered.
-	 * 
-	 * @param arguments Shell arguments.
-	 * @param env       Shell environments.
-	 * @return Set of words given as arguments in query.
-	 */
-	private Set<String> getWordsFromInput(String arguments, Environment env) {
-		Set<String> stopWords = null;
-		try {
-			stopWords = env.getVocabulay().getStopWords();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		List<String> words = getWords(arguments, stopWords);
-
-		for (String word : words) {
-			frequency.merge(word, 1, (k, v) -> v + 1);
-		}
-
-		return new LinkedHashSet<String>(words);
-	}
-
-	/**
-	 * Returns list of words given as arguments in query. Stop words are not
-	 * considered.
-	 * 
-	 * @param arguments Shell arguments.
-	 * @param stopWords Set of stop words in Croatian language.
-	 * @return List of words given as shell arguments in query.
-	 */
-	private List<String> getWords(String arguments, Set<String> stopWords) {
-		List<String> words = new ArrayList<String>();
-		StringBuilder sb = new StringBuilder();
-		char[] array = arguments.toCharArray();
-
-		for (Character c : array) {
-			if (Character.isAlphabetic(c)) {
-				sb.append(c);
-			} else {
-				String word = sb.toString();
-				if (!word.isEmpty() && !stopWords.contains(word)) {
-					words.add(word);
-				}
-				sb = new StringBuilder();
-			}
-		}
-
-		String word = sb.toString();
-
-		if (!word.isEmpty() && !stopWords.contains(word)) {
-			words.add(word);
-		}
-
-		return words;
 	}
 
 	/**

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 import hr.fer.zemris.hw17.shell.Environment;
+import hr.fer.zemris.hw17.shell.Result;
 import hr.fer.zemris.hw17.shell.ShellIOException;
 import hr.fer.zemris.hw17.shell.ShellStatus;
 
@@ -44,7 +45,7 @@ public class TypeCommand implements ShellCommand {
 			return writeErrorMessage(env, 3);
 		}
 
-		List<String> result = env.getResultOfPreviousCommand();
+		List<Result> result = env.getResultOfPreviousCommand();
 
 		if (result == null) {
 			return writeErrorMessage(env, 1);
@@ -54,7 +55,13 @@ public class TypeCommand implements ShellCommand {
 		
 		env.setPreviousCommand("type");
 		
-		return printArticle(result.get(index), env);
+		Result res = result.get(index);
+		
+		String s = "Document: " + res.getArticleName();
+		env.writeln(s);
+		env.writeln("-".repeat(50));
+		
+		return printArticle(result.get(index).getArticleName(), env);
 	}
 
 	/**
@@ -65,10 +72,10 @@ public class TypeCommand implements ShellCommand {
 	 * @return ShellStatus.CONTINUE if writing to the shell executes successfully,
 	 *         otherwise returns false.
 	 */
-	private ShellStatus printArticle(String path, Environment env) {
+	private ShellStatus printArticle(String article, Environment env) {
 		List<String> lines = null;
 
-		Path file = Paths.get(path);
+		Path file = Paths.get(article);
 		try {
 			lines = Files.readAllLines(file);
 		} catch (IOException e) {
@@ -83,6 +90,7 @@ public class TypeCommand implements ShellCommand {
 			return ShellStatus.TERMINATE;
 		}
 
+		env.writeln("-".repeat(50));
 		return ShellStatus.CONTINUE;
 	}
 
