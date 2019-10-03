@@ -1,3 +1,0 @@
-This is some text.
-I will know escape opening tag, \\ so it will be text.
-\{$ FOr var_name 1 2 3 $}
